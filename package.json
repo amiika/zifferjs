@@ -1,0 +1,20 @@
+{
+  "name": "zifferjs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "compile-peggy": "peggy --plugin ./node_modules/ts-pegjs/dist/tspegjs -o src/parser/parser.ts --cache src/parser/ziffers.pegjs",
+    "test": "vitest --ui"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^0.34.1",
+    "peggy": "^3.0.2",
+    "ts-pegjs": "^4.2.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vitest": "^0.34.1"
+  }
+}
