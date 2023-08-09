@@ -2,6 +2,9 @@ import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import {DEFAULT_DURS, DEFAULT_OPTIONS, OPERATORS, isScale} from './defaults.ts';
 import { noteFromPc, midiToFreq } from './scale.ts';
+import {LRUCache} from 'lru-cache';
+
+const cache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
 interface Options {
     nodeOptions?: NodeOptions;
@@ -13,6 +16,7 @@ interface NodeOptions {
     key?: string;
     scale?: string|number[];
     duration?: number;
+    index: number;
 }
 
 interface Node {
@@ -55,7 +59,7 @@ export class Ziffers {
     options: Options;
 
     constructor(input: string, options: NodeOptions = {}) {
-        console.log("Parsing:", input);
+        
         // Merge options with default options
         options = {...DEFAULT_OPTIONS, ...options};
 
@@ -90,6 +94,21 @@ export class Ziffers {
         });
     }
 
+}
+
+const generateCacheKey = (...args) => {
+    return args.map(arg => JSON.stringify(arg)).join(',');
+  }
+
+const cachedCall = (a: string, b: NodeOptions) => {
+    const cacheKey = generateCacheKey(a, b);
+    if (cache.has(cacheKey)) {
+        return cache.get(cacheKey);
+    } else {
+        const result = new Ziffers(a, b);
+        cache.set(cacheKey, result);
+        return result;
+    }
 }
 
 const evaluateNodes = (nodes: Node[]) => {
@@ -127,8 +146,12 @@ export const transform = (node: Node) => {
         node.freq = midiToFreq(note);
         if(bend) node.bend = bend;
     }
-} 
+}
 
-export const zparse = (input: string, options: NodeOptions = {} ) => {
+export const zparse = (input: string, options: NodeOptions = {}) => {
     return new Ziffers(input, options);
+}
+
+export const z = (input: string, options: NodeOptions = {}) => {
+    return cachedCall(input, options);
 }
