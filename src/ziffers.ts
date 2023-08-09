@@ -4,7 +4,7 @@ import {DEFAULT_DURS, DEFAULT_OPTIONS, OPERATORS, isScale} from './defaults.ts';
 import { noteFromPc, midiToFreq } from './scale.ts';
 import {LRUCache} from 'lru-cache';
 
-const cache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
+const zcache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
 interface Options {
     nodeOptions?: NodeOptions;
@@ -109,11 +109,11 @@ const generateCacheKey = (...args) => {
 
 const cachedCall = (a: string, b: NodeOptions): Ziffers => {
     const cacheKey = generateCacheKey(a, b);
-    if (cache.has(cacheKey)) {
-        return cache.get(cacheKey) as Ziffers;
+    if (zcache.has(cacheKey)) {
+        return zcache.get(cacheKey) as Ziffers;
     } else {
         const result = new Ziffers(a, b);
-        cache.set(cacheKey, result);
+        zcache.set(cacheKey, result);
         return result;
     }
 }
@@ -155,11 +155,11 @@ export const transform = (node: Node) => {
     }
 }
 
-export const zparse = (input: string, options: NodeOptions = {}) => {
+export const parse = (input: string, options: NodeOptions = {}) => {
     return new Ziffers(input, options);
 }
 
-export const zcache = (input: string, options: NodeOptions = {}) => {
+export const cache = (input: string, options: NodeOptions = {}) => {
     return cachedCall(input, options);
 }
 
@@ -194,5 +194,5 @@ export const freq = (input: string, options: NodeOptions = {}): number => {
 }
 
 export const clearCache = (): void => {
-    cache.clear();
+    zcache.clear();
 }
