@@ -1,1 +1,1 @@
-export {Ziffers, parse, cache, get, next, note, freq, pitch} from './ziffers.ts';
+export {Ziffers, pattern, cache, get, next, note, freq, pitch} from './ziffers.ts';

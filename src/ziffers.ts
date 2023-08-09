@@ -155,7 +155,7 @@ export const transform = (node: Node) => {
     }
 }
 
-export const parse = (input: string, options: NodeOptions = {}) => {
+export const pattern = (input: string, options: NodeOptions = {}) => {
     return new Ziffers(input, options);
 }
 

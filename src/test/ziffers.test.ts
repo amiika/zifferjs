@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { parse, next, get, pitch, freq, clearCache } from '../ziffers.ts'
+import { pattern, next, get, pitch, freq, clearCache } from '../ziffers.ts'
 
 describe('main-tests', () => {
   it('parse', () => {
-    expect(parse('1',{scale: "minor"}).values.length).toEqual(1);
-    expect(parse('12 3 4 5').values.length).toEqual(4);
+    expect(pattern('1',{scale: "minor"}).values.length).toEqual(1);
+    expect(pattern('12 3 4 5').values.length).toEqual(4);
     expect(1 + 1).toEqual(2);
     expect(true).to.be.true;
   })
 
   it('durations', () => {
-    expect(parse('e 1').values[0].duration).toEqual(0.125);
+    expect(pattern('e 1').values[0].duration).toEqual(0.125);
   })
 
   it('cache', () => {
