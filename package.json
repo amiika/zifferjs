@@ -2,8 +2,12 @@
   "name": "zifferjs",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "main": "src/index.ts",
+  "type": "module",
+  "publishConfig": {
+    "main": "dist/index.js",
+    "module": "dist/index.ts"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
