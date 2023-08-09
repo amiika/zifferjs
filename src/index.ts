@@ -1,1 +1,1 @@
-export {Ziffers, zparse} from './ziffers.ts';
+export {Ziffers, zparse, z} from './ziffers.ts';
