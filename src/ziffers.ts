@@ -16,7 +16,7 @@ interface NodeOptions {
     key?: string;
     scale?: string|number[];
     duration?: number;
-    index: number;
+    index?: number;
 }
 
 interface Node {
@@ -57,9 +57,10 @@ export class Ziffers {
     values: (Node|RepeatNode)[];
     evaluated: Node[];
     options: Options;
+    index: number;
 
     constructor(input: string, options: NodeOptions = {}) {
-        
+        this.index = 0;
         // Merge options with default options
         options = {...DEFAULT_OPTIONS, ...options};
 
@@ -94,16 +95,22 @@ export class Ziffers {
         });
     }
 
+    next() {
+        const value = this.evaluated[this.index%this.evaluated.length];
+        this.index++;
+        return value;
+    }
+
 }
 
 const generateCacheKey = (...args) => {
     return args.map(arg => JSON.stringify(arg)).join(',');
   }
 
-const cachedCall = (a: string, b: NodeOptions) => {
+const cachedCall = (a: string, b: NodeOptions): Ziffers => {
     const cacheKey = generateCacheKey(a, b);
     if (cache.has(cacheKey)) {
-        return cache.get(cacheKey);
+        return cache.get(cacheKey) as Ziffers;
     } else {
         const result = new Ziffers(a, b);
         cache.set(cacheKey, result);
@@ -152,6 +159,40 @@ export const zparse = (input: string, options: NodeOptions = {}) => {
     return new Ziffers(input, options);
 }
 
-export const z = (input: string, options: NodeOptions = {}) => {
+export const zcache = (input: string, options: NodeOptions = {}) => {
     return cachedCall(input, options);
+}
+
+export const next = (input: string, options: NodeOptions = {}) => {
+    const fromCache = cachedCall(input, options);
+    return fromCache.next();
+}
+
+export const get = (input: string, options: NodeOptions = {}): Node => {   
+    if(options.index) {
+        let index = options.index;
+        delete options.index;
+        let fromCache = cachedCall(input, options);
+        index = index%fromCache.evaluated.length;
+        fromCache.index = index+1;
+        return fromCache.evaluated[index];
+    }
+    const fromCache = cachedCall(input, options);
+    return fromCache.next();
+}
+
+export const note = (input: string, options: NodeOptions = {}): number => {
+    return get(input, options).note!;
+}
+
+export const pitch = (input: string, options: NodeOptions = {}): number => {
+    return get(input, options).pitch!;
+}
+
+export const freq = (input: string, options: NodeOptions = {}): number => {
+    return get(input, options).freq!;
+}
+
+export const clearCache = (): void => {
+    cache.clear();
 }
