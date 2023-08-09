@@ -1,7 +1,7 @@
 import { Ziffers } from './ziffers';
 import { SCALES } from './defaults';
 
-const input = '0.3 ((1):2):2 q4:5 q1 (1 2(3 4)):2';
+const input = '(1 2 3)+(1 3)';
 try {
   const result = new Ziffers(input);
   console.log('Parsed result:', result);

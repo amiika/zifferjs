@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "compile-peggy": "peggy --plugin ./node_modules/ts-pegjs/dist/tspegjs -o src/parser/parser.ts --cache src/parser/ziffers.pegjs",
-    "test": "vitest --ui"
+    "compile-ziffers-pegjs": "peggy --plugin ./node_modules/ts-pegjs/dist/tspegjs --extra-options-file src/parser/zconfig.json -o src/parser/ziffersParser.ts --cache src/parser/ziffers.pegjs",
+    "compile-scala-pegjs": "peggy --plugin ./node_modules/ts-pegjs/dist/tspegjs --extra-options-file src/parser/sconfig.json -o src/parser/scalaParser.ts --cache src/parser/scala.pegjs",
+    "test": "vitest --ui",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@vitest/ui": "^0.34.1",

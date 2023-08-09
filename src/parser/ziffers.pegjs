@@ -1,7 +1,9 @@
 {
+  // See imports from zconfig.json
+  // imports transform from ziffers.ts
+  // imports DEFAULT_DURS from defaults.ts
+
   var nodeOptions = options.nodeOptions || {};
-  var transform = options.transform || function(value) {};
-  var DEFAULT_DURATIONS = options.defaultDurs;
 
   var Node = function(values) { 
     // Merge all values properties to this
@@ -29,33 +31,44 @@
   
 }
 
-start = s:statement { return s.filter(a => a) }
+start = s:statement 
+{ return s.filter(a => a) }
 
 // ----- Numbers -----
 
-float = ("-"? [0-9]* "." [0-9]+ / "." [0-9]+) { return parseFloat(text()) }
+float = ("-"? [0-9]* "." [0-9]+ / "." [0-9]+) 
+{ return parseFloat(text()) }
 
-int = "-"? [0-9]+ { return parseInt(text()); }
+int = "-"? [0-9]+ 
+{ return parseInt(text()); }
 
 // ------------------ delimiters ---------------------------
 
-ws "whitespace" = [ \n\r\t] { return undefined }
+ws "whitespace" = [ \n\r\t] 
+{ return undefined }
+
 comma = ws "," ws
 pipe = ws "|" ws
 quote = '"' / "'"
 
 
-durchar = [a-z] { return DEFAULT_DURATIONS[text()]; }
+durchar = [a-z] 
+{ return DEFAULT_DURS[text()]; }
 
 duration = durchar / float
 
 statement = items
 
-items = n:(repeat / list / item)+
+items = n:(repeat / list_operation / list / item)+
 { return n }
 
 list = "(" l:(items) ")"
 { return l.filter(a => a) }
+
+list_operation = a:list b:operation c:list
+{ return new Node({type: 'list_operation', left: a, operation: b, right: c}) }
+
+operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
 item = v:(chord / pitch / ws / duration_change / list)
 { return v }
@@ -63,13 +76,15 @@ item = v:(chord / pitch / ws / duration_change / list)
 repeat = n:item ":" i:int
 { return new Node({type: 'repeat', value: n, times: i}) }
 
-duration_change = dur:duration { 
+duration_change = dur:duration 
+{ 
   options.nodeOptions.duration = dur;
   return new Node({type: 'duration_change', duration: dur}) 
-  }
+}
 
 pitch = dur:duration? i:int 
 { return new Node({type: 'pitch', duration: dur, value: i, pitch: parseInt(i)}) }
 
 chord = left:pitch right:pitch+
 { return new Node({type: 'chord', pitches:[left].concat(right)}) }
+

@@ -1,5 +1,6 @@
-import { parse } from './parser/parser.ts';
-import {DEFAULT_DURS, DEFAULT_OPTIONS} from './defaults.ts';
+import { parse as parseZiffers } from './parser/ziffersParser.ts';
+import { parse as parseScala } from './parser/scalaParser.ts';
+import {DEFAULT_DURS, DEFAULT_OPTIONS, OPERATORS, isScale} from './defaults.ts';
 import { noteFromPc, midiToFreq } from './scale.ts';
 
 interface Options {
@@ -10,7 +11,7 @@ interface Options {
 
 interface NodeOptions {
     key?: string;
-    scale?: string;
+    scale?: string|number[];
     duration?: number;
 }
 
@@ -27,6 +28,9 @@ interface Node {
     note?: number;
     octave?: number;
     bend?: number;
+    left: Node;
+    right: Node;
+    operation: string;
 }
 
 interface RepeatNode extends Node {
@@ -54,12 +58,16 @@ export class Ziffers {
         console.log("Parsing:", input);
         // Merge options with default options
         options = {...DEFAULT_OPTIONS, ...options};
-        this.options = {nodeOptions: options, transform: transform, defaultDurs: DEFAULT_DURS};
 
-        // TODO: Parse scala workshop format
+        // Parse scala format if scale is not a scale name
+        if(options.scale && typeof options.scale === 'string' && !isScale(options.scale)) {
+            options.scale = parseScala(options.scale);
+        }
+
+        this.options = {nodeOptions: options};
 
         try {
-           this.values = parse(input, this.options);
+           this.values = parseZiffers(input, this.options);
            // TODO: Evaluate
            this.evaluate();
         } catch (ex: any) {
@@ -91,13 +99,28 @@ const evaluateNodes = (nodes: Node[]) => {
             // Duplicate values given times
             const repeated = [...Array(times)].map(() => node.value).flat(Infinity);
             return evaluateNodes(repeated);
+        } if(node.type === 'list_operation') {
+            const left = node.left as unknown as [];
+            const right = node.right as unknown as [];
+
+            // Parse operator from string to javascript operator
+            const operator = OPERATORS[node.operation as string];
+            
+            // Do cartesian product of left and right with the given operator
+            const pairs = right.flatMap(r => left.map(l => [r.pitch, l.pitch]));
+              
+            // Apply operator to pairs of elements
+            const result = pairs.map(p => operator(p[0], p[1]));
+
+            return result;
+
         }
         return node;
     }).flat(Infinity);
 }
 
 // Function to transform the AST node on parse time
-const transform = (node: Node) => {
+export const transform = (node: Node) => {
     if(node.type === 'pitch') {
         const [note, bend] = noteFromPc(node.key!, node.pitch!, node.scale!);
         node.note = note;
@@ -106,6 +129,6 @@ const transform = (node: Node) => {
     }
 } 
 
-export const zparse = (input: string, options: NodeOptions ) => {
+export const zparse = (input: string, options: NodeOptions = {} ) => {
     return new Ziffers(input, options);
 }

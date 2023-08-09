@@ -1,3 +1,17 @@
+
+export const OPERATORS: {[key: string]: Function} =  {
+  "+": (a: number, b: number) => a + b,
+  "-": (a: number, b: number) => a - b,
+  "*": (a: number, b: number) => a * b,
+  "/": (a: number, b: number) => a / b,
+  "%": (a: number, b: number) => a % b,
+  "^": (a: number, b: number) => a ** b,
+  "<<": (a: number, b: number) => a << b,
+  ">>": (a: number, b: number) => a >> b,
+  "&": (a: number, b: number) => a & b,
+  "|": (a: number, b: number) => a | b
+}
+
 export const DEFAULT_OPTIONS = {
     octave: 0,
     duration: 0.25,
@@ -1653,4 +1667,8 @@ export const SCALES = scales();
 
 export const getScale = (scale: string): number[] => {
     return SCALES[scale.toUpperCase()];
+}
+
+export const isScale = (scale: string): boolean => {
+    return scale.toUpperCase() in SCALES;
 }

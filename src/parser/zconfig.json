@@ -1,0 +1,5 @@
+{
+    "tspegjs": {
+        "customHeader": "import { transform } from '../ziffers';\nimport { DEFAULT_DURS } from '../defaults';"
+    }
+}
