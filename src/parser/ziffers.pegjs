@@ -66,7 +66,7 @@ list = "(" l:(items) ")"
 { return l.filter(a => a) }
 
 list_operation = a:list b:operation c:list
-{ return new Node({type: 'list_operation', left: a, operation: b, right: c}) }
+{ return new Node({type: 'list_operation', left: a, operation: b, right: c});  }
 
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
@@ -82,8 +82,8 @@ duration_change = dur:duration
   return new Node({type: 'duration_change', duration: dur}) 
 }
 
-pitch = dur:duration? i:int 
-{ return new Node({type: 'pitch', duration: dur, value: i, pitch: parseInt(i)}) }
+pitch = dur:duration? val:int 
+{ return new Node({type: 'pitch', duration: dur, pitch: val}) }
 
 chord = left:pitch right:pitch+
 { return new Node({type: 'chord', pitches:[left].concat(right)}) }

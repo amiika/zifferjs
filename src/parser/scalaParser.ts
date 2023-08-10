@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 // import libs
-import { ratioToCents, monzoToCents } from '../scale';
+import { ratioToCents, monzoToCents, centsToSemitones } from '../scale';
 
 
 
@@ -348,11 +348,7 @@ function peg$parse(input, options) {
 
   var peg$f0 = function(l) {
 // @ts-ignore
-    return l.filter(a => a).map((item) => {
-        // If item is integer it must be ratio
-// @ts-ignore
-        return Number.isInteger(item) ? ratioToCents(item) : item; 
-    });
+    return centsToSemitones(l.filter(a => a));
 };// @ts-ignore
 
   var peg$f1 = function() {// @ts-ignore
@@ -370,30 +366,32 @@ function peg$parse(input, options) {
   var peg$f5 = function() {// @ts-ignore
  return parseInt(text()); };// @ts-ignore
 
-  var peg$f6 = function(a, b) {// @ts-ignore
- return ratioToCents(a/b) };// @ts-ignore
+  var peg$f6 = function(v) {// @ts-ignore
+ return ratioToCents(v) };// @ts-ignore
 
   var peg$f7 = function(a, b) {// @ts-ignore
- return ratioToCents(Math.pow(2,a/b)) };// @ts-ignore
+ return a/b };// @ts-ignore
 
-  var peg$f8 = function(a, b, c, d) { 
-    // TODO: Test
+  var peg$f8 = function(a, b) {// @ts-ignore
+ return Math.pow(2,a/b) };// @ts-ignore
+
+  var peg$f9 = function(a, b, c, d) { 
 // @ts-ignore
     var power = d ? c/d : c 
 // @ts-ignore
-    return ratioToCents(Math.pow(power, a/b))
+    return Math.pow(power, a/b)
 };// @ts-ignore
 
-  var peg$f9 = function(a, b) {// @ts-ignore
+  var peg$f10 = function(a, b) {// @ts-ignore
  return parseFloat(a.toString()+"."+b.toString())};// @ts-ignore
 
-  var peg$f10 = function(l) {// @ts-ignore
+  var peg$f11 = function(l) {// @ts-ignore
  return l.filter(a => a); };// @ts-ignore
 
-  var peg$f11 = function(l) {// @ts-ignore
+  var peg$f12 = function(l) {// @ts-ignore
  return monzoToCents(l) };// @ts-ignore
 
-  var peg$f12 = function() {// @ts-ignore
+  var peg$f13 = function() {// @ts-ignore
  return eval(text()) };
 // @ts-ignore
   var peg$currPos = 0;
@@ -1446,7 +1444,7 @@ peg$parseint() {
   function // @ts-ignore
 peg$parseratio() {
 // @ts-ignore
-    var s0;
+    var s0, s1;
 
 // @ts-ignore
     var key = peg$currPos * 17 + 7;
@@ -1463,22 +1461,33 @@ peg$parseratio() {
     }
 
 // @ts-ignore
-    s0 = peg$parseedji_ratio();
+    s0 = peg$currPos;
 // @ts-ignore
-    if (s0 === peg$FAILED) {
+    s1 = peg$parseedji_ratio();
 // @ts-ignore
-      s0 = peg$parseedo_ratio();
+    if (s1 === peg$FAILED) {
 // @ts-ignore
-      if (s0 === peg$FAILED) {
+      s1 = peg$parseedo_ratio();
 // @ts-ignore
-        s0 = peg$parsefrac_ratio();
+      if (s1 === peg$FAILED) {
 // @ts-ignore
-        if (s0 === peg$FAILED) {
+        s1 = peg$parsefrac_ratio();
 // @ts-ignore
-          s0 = peg$parsedecimal_ratio();
+        if (s1 === peg$FAILED) {
+// @ts-ignore
+          s1 = peg$parsedecimal_ratio();
         }
       }
     }
+// @ts-ignore
+    if (s1 !== peg$FAILED) {
+// @ts-ignore
+      peg$savedPos = s0;
+// @ts-ignore
+      s1 = peg$f6(s1);
+    }
+// @ts-ignore
+    s0 = s1;
 
 // @ts-ignore
     peg$resultsCache[key] = { nextPos: peg$currPos, result: s0 };
@@ -1545,7 +1554,7 @@ peg$parsefrac_ratio() {
 // @ts-ignore
           peg$savedPos = s0;
 // @ts-ignore
-          s0 = peg$f6(s1, s3);
+          s0 = peg$f7(s1, s3);
 // @ts-ignore
         } else {
 // @ts-ignore
@@ -1633,7 +1642,7 @@ peg$parseedo_ratio() {
 // @ts-ignore
           peg$savedPos = s0;
 // @ts-ignore
-          s0 = peg$f7(s1, s3);
+          s0 = peg$f8(s1, s3);
 // @ts-ignore
         } else {
 // @ts-ignore
@@ -1790,7 +1799,7 @@ peg$parseedji_ratio() {
 // @ts-ignore
                 peg$savedPos = s0;
 // @ts-ignore
-                s0 = peg$f8(s1, s3, s5, s7);
+                s0 = peg$f9(s1, s3, s5, s7);
 // @ts-ignore
               } else {
 // @ts-ignore
@@ -1889,7 +1898,7 @@ peg$parsedecimal_ratio() {
 // @ts-ignore
           peg$savedPos = s0;
 // @ts-ignore
-          s0 = peg$f9(s1, s3);
+          s0 = peg$f10(s1, s3);
 // @ts-ignore
         } else {
 // @ts-ignore
@@ -1974,7 +1983,7 @@ peg$parseints() {
 // @ts-ignore
       peg$savedPos = s0;
 // @ts-ignore
-      s1 = peg$f10(s1);
+      s1 = peg$f11(s1);
     }
 // @ts-ignore
     s0 = s1;
@@ -2045,7 +2054,7 @@ peg$parsemonzo() {
 // @ts-ignore
           peg$savedPos = s0;
 // @ts-ignore
-          s0 = peg$f11(s2);
+          s0 = peg$f12(s2);
 // @ts-ignore
         } else {
 // @ts-ignore
@@ -2268,7 +2277,7 @@ peg$parseoperation() {
 // @ts-ignore
         peg$savedPos = s0;
 // @ts-ignore
-        s0 = peg$f12();
+        s0 = peg$f13();
 // @ts-ignore
       } else {
 // @ts-ignore
@@ -2535,7 +2544,7 @@ peg$parsesub_operations() {
 
 
     // See imports from sconfig.json
-    // import { ratioToCents, monzoToCents } from '../scale';
+    // import { ratioToCents, monzoToCents, centsToSemitones } from '../scale';
 
 // @ts-ignore
   peg$result = peg$startRuleFunction();
@@ -2664,17 +2673,17 @@ export const PeggySyntaxError = peggyParser.SyntaxError as typeof _PeggySyntaxEr
 export type PeggySyntaxError = _PeggySyntaxError;
 
 // These types were autogenerated by ts-pegjs
-export type Lines = any[];
+export type Lines = any;
 export type Sep = undefined;
 export type Value = Float | Int | RandomInt | RandomFloat;
 export type RandomInt = number;
 export type RandomFloat = number;
 export type Float = number;
 export type Int = number;
-export type Ratio = EdjiRatio | EdoRatio | FracRatio | DecimalRatio;
-export type FracRatio = any;
-export type EdoRatio = any;
-export type EdjiRatio = any;
+export type Ratio = any;
+export type FracRatio = number;
+export type EdoRatio = number;
+export type EdjiRatio = number;
 export type DecimalRatio = number;
 export type Ints = any[];
 export type Monzo = any;

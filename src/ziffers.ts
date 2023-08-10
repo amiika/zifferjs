@@ -3,6 +3,7 @@ import { parse as parseScala } from './parser/scalaParser.ts';
 import {DEFAULT_DURS, DEFAULT_OPTIONS, OPERATORS, isScale} from './defaults.ts';
 import { noteFromPc, midiToFreq } from './scale.ts';
 import {LRUCache} from 'lru-cache';
+import { f } from 'vitest/dist/types-3c7dbfa5.js';
 
 const zcache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
@@ -17,6 +18,9 @@ interface NodeOptions {
     scale?: string|number[];
     duration?: number;
     index?: number;
+    port?: string;
+    channel: number;
+    velocity: number;
 }
 
 interface Node {
@@ -91,7 +95,13 @@ export class Ziffers {
 
     pitches() {
         return this.evaluated.map((item: Node) => {
-            return values.pitch;
+            return item.pitch;
+        });
+    }
+
+    notes() {
+        return this.evaluated.map((item: Node) => {
+            return item.note;
         });
     }
 
@@ -110,7 +120,8 @@ const generateCacheKey = (...args) => {
 const cachedCall = (a: string, b: NodeOptions): Ziffers => {
     const cacheKey = generateCacheKey(a, b);
     if (zcache.has(cacheKey)) {
-        return zcache.get(cacheKey) as Ziffers;
+        const cached = zcache.get(cacheKey) as Ziffers;
+        return cached;
     } else {
         const result = new Ziffers(a, b);
         zcache.set(cacheKey, result);
@@ -120,29 +131,40 @@ const cachedCall = (a: string, b: NodeOptions): Ziffers => {
 
 const evaluateNodes = (nodes: Node[]) => {
     return nodes.map((node) => {
-        if(node.type === 'repeat') {
+        if(node.type === 'pitch') {
+            return node;
+        } else if(node.type === 'repeat') {
             const times = node.times;
             // Duplicate values given times
             const repeated = [...Array(times)].map(() => node.value).flat(Infinity);
             return evaluateNodes(repeated);
-        } if(node.type === 'list_operation') {
+        } else if(node.type === 'list_operation') {
             const left = node.left as unknown as [];
             const right = node.right as unknown as [];
-
             // Parse operator from string to javascript operator
             const operator = OPERATORS[node.operation as string];
-            
-            // Do cartesian product of left and right with the given operator
-            const pairs = right.flatMap(r => left.map(l => [r.pitch, l.pitch]));
-              
-            // Apply operator to pairs of elements
-            const result = pairs.map(p => operator(p[0], p[1]));
-
+            // Create pairs of elements
+            const pairs = right.flatMap(r => left.map(l => [{...r as object}, {...l as object}]));
+            // Apply operator pairwise
+            const result = pairs.map(p => {
+                p[0].pitch = operator(p[0].pitch, p[1].pitch);
+                return updateNode(p[0]);
+            });
             return result;
 
         }
-        return node;
-    }).flat(Infinity);
+        return undefined;
+    }).flat(Infinity).filter((node) => node !== undefined);
+}
+
+const updateNode = (node: Node, options?: NodeOptions) => {
+    if(options) {
+        // Merge options to node, overwrite values from node
+        node = {...node, ...options};
+    }
+     node.note = noteFromPc(node.key!, node.pitch!, node.scale!)[0];
+    node.freq = midiToFreq(node.note);
+    return node;
 }
 
 // Function to transform the AST node on parse time
@@ -193,6 +215,7 @@ export const freq = (input: string, options: NodeOptions = {}): number => {
     return get(input, options).freq!;
 }
 
-export const clearCache = (): void => {
-    zcache.clear();
+export const clear = (input: string, options: NodeOptions = {}): void => {
+    const cacheKey = generateCacheKey(input, options);
+    zcache.delete(cacheKey);
 }

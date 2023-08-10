@@ -108,8 +108,8 @@ export function monzoToCents(monzo: number[]): number {
 }
 
 export function centsToSemitones(cents: number[]): number[] {
-  if (cents[0] !== 0.0) {
-      cents = [0.0, ...cents];
+  if (cents[0] !== 0) {
+      cents = [0, ...cents];
   }
   const semitoneScale: number[] = [];
   for (let i = 0; i < cents.length - 1; i++) {

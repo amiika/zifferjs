@@ -1,14 +1,11 @@
 {
     // See imports from sconfig.json
-    // import { ratioToCents, monzoToCents } from '../scale';
+    // import { ratioToCents, monzoToCents, centsToSemitones } from '../scale';
 }
 
 lines = l:(ratio / value / monzo / operation / sep)+ 
 {
-    return l.filter(a => a).map((item) => {
-        // If item is integer it must be ratio
-        return Number.isInteger(item) ? ratioToCents(item) : item; 
-    });
+    return centsToSemitones(l.filter(a => a));
 }
 
 sep = [' '\t\r\n] { return undefined }
@@ -25,19 +22,19 @@ float = ("-"? [0-9]* "." [0-9]+ / "." [0-9]+) { return parseFloat(text()) }
 
 int = "-"? [0-9]+ { return parseInt(text()); }
 
-ratio = edji_ratio / edo_ratio / frac_ratio / decimal_ratio
+ratio = v:(edji_ratio / edo_ratio / frac_ratio / decimal_ratio)
+{ return ratioToCents(v) }
 
 frac_ratio = a:(int / random_int) "/" b:(int / random_int)
-{ return ratioToCents(a/b) }
+{ return a/b }
 
 edo_ratio = a:(int / random_int) "\\" b:(int / random_int)
-{ return ratioToCents(Math.pow(2,a/b)) }
+{ return Math.pow(2,a/b) }
 
 edji_ratio = a:(int / random_int) "\\" b:(int / random_int) "<" c:(int / random_int) "/"? d:(int / random_int)? ">"
 { 
-    // TODO: Test
     var power = d ? c/d : c 
-    return ratioToCents(Math.pow(power, a/b))
+    return Math.pow(power, a/b)
 }
 
 decimal_ratio = a:int "," b:int

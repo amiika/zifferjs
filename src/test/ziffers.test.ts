@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pattern, next, get, pitch, freq, clearCache } from '../ziffers.ts'
+import { pattern, next, get, pitch, freq, clear } from '../ziffers.ts'
 
 describe('main-tests', () => {
   it('parse', () => {
@@ -13,8 +13,17 @@ describe('main-tests', () => {
     expect(pattern('e 1').values[0].duration).toEqual(0.125);
   })
 
+  it('lists', () => {
+    expect(pattern('(0 4 3 5)+(e0 3)').pitches()).toEqual([0, 4, 3, 5, 3, 7, 6, 8]);
+  })
+
   it('cache', () => {
-    clearCache();
+    // Clear earlier tests
+    clear('1 2');
+    clear('2 4 1',{key: "C"});
+    clear('0');
+    clear('1 4');
+
     expect(next('1 2').pitch).toEqual(1);
     expect(next('1 2').pitch).toEqual(2);
     expect(next('1 2').pitch).toEqual(1);

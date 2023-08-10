@@ -371,7 +371,7 @@ function peg$parse(input, options) {
  return l.filter(a => a) };// @ts-ignore
 
   var peg$f7 = function(a, b, c) {// @ts-ignore
- return new Node({type: 'list_operation', left: a, operation: b, right: c}) };// @ts-ignore
+ return new Node({type: 'list_operation', left: a, operation: b, right: c});  };// @ts-ignore
 
   var peg$f8 = function(v) {// @ts-ignore
  return v };// @ts-ignore
@@ -386,8 +386,8 @@ function peg$parse(input, options) {
   return new Node({type: 'duration_change', duration: dur}) 
 };// @ts-ignore
 
-  var peg$f11 = function(dur, i) {// @ts-ignore
- return new Node({type: 'pitch', duration: dur, value: i, pitch: parseInt(i)}) };// @ts-ignore
+  var peg$f11 = function(dur, val) {// @ts-ignore
+ return new Node({type: 'pitch', duration: dur, pitch: val}) };// @ts-ignore
 
   var peg$f12 = function(left, right) {// @ts-ignore
  return new Node({type: 'chord', pitches:[left].concat(right)}) };
