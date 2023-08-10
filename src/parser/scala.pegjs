@@ -18,7 +18,7 @@ random_int = "(" min:int "," max:int ")"
 random_float = "(" min:float "," max:float ")"
 { return (Math.random() * (max - min) + min) }
 
-float = ("-"? [0-9]* "." [0-9]+ / "." [0-9]+) { return parseFloat(text()) }
+float = ([0-9]+ "." / "-"? [0-9]* "." [0-9]+ / "." [0-9]+) { return parseFloat(text()) }
 
 int = "-"? [0-9]+ { return parseInt(text()); }
 

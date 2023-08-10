@@ -2171,6 +2171,10 @@ peg$parsechord() {
       // Transform the node
 // @ts-ignore
       transform(this);
+// @ts-ignore
+      this.sleep = lastSleep;
+// @ts-ignore
+      lastSleep = this.duration;
     }
   }
 
@@ -2178,6 +2182,9 @@ peg$parsechord() {
   var seed = 0;
 
    // console.log("OPTIONS:", options);
+
+// @ts-ignore
+   var lastSleep = 0;
   
 
 // @ts-ignore

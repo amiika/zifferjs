@@ -4,7 +4,7 @@ import { parse as parseScale } from './parser/scalaParser.ts'
 
 const input = '(1 2 3)+(1 3)';
 try {
-  const result = pattern('s (0 4 3 5)+(0 3)', {scale: '9/8 32/27 4/3 3/2 5/3 16/9 2/1'})
+  const result = pattern('s (0 4 3 5)+(0 3)', {scale: '187. 356. 526. 672. 856. 985. 1222.'})
   console.log('Parsed result:', result);
   //console.log(result.evaluate());
 } catch (error) {
