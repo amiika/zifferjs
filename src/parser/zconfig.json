@@ -1,5 +1,5 @@
 {
     "tspegjs": {
-        "customHeader": "import { transform, Cycle } from '../ziffers';\nimport { DEFAULT_DURS } from '../defaults';"
+        "customHeader": "import { transform, Cycle as CycleNode } from '../ziffers';\nimport { DEFAULT_DURS } from '../defaults';"
     }
 }

@@ -87,7 +87,7 @@ item = v:(chord / pitch / octave_change / ws / duration_change / random / random
 { return v }
 
 cycle = "<" l:items ">" 
-{ return new Node({type: 'cycle', cycle: new Cycle(l)}) }
+{ return new Node({type: 'cycle', cycle: new CycleNode(l)}) }
 
 octave_change = octave:octave
 { 

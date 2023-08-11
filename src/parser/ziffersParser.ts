@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { transform, Cycle } from '../ziffers';
+import { transform, Cycle as CycleNode } from '../ziffers';
 import { DEFAULT_DURS } from '../defaults';
 
 
@@ -385,7 +385,7 @@ function peg$parse(input, options) {
  return v };// @ts-ignore
 
   var peg$f9 = function(l) {// @ts-ignore
- return new Node({type: 'cycle', cycle: new Cycle(l)}) };// @ts-ignore
+ return new Node({type: 'cycle', cycle: new CycleNode(l)}) };// @ts-ignore
 
   var peg$f10 = function(octave) { 
 // @ts-ignore
