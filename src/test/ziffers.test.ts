@@ -17,6 +17,27 @@ describe('main-tests', () => {
     expect(pattern('(0 4 3 5)+(e0 3)').pitches()).toEqual([0, 4, 3, 5, 3, 7, 6, 8]);
   })
 
+  it('notes', () => {
+    expect(pattern('1 2 3 4').notes()).toEqual([62, 64, 65, 67]);
+    expect(pattern('1 2 3 4',{octave: 1}).notes()).toEqual([74,76,77,79]);
+    expect(pattern('^ 1 2 3 4').notes()).toEqual([74,76,77,79]);
+    expect(pattern('_ 1 _2 ^3 4').notes()).toEqual([50,40,65,55]);
+  })
+
+  it('cycles', () => {
+    expect(next('<1 <2 3>>').pitch).toEqual(1);
+    expect(next('<1 <2 3>>').pitch).toEqual(2);
+    expect(next('<1 <2 3>>').pitch).toEqual(1);
+    expect(next('<1 <2 3>>').pitch).toEqual(3);
+  })
+
+  it('randoms', () => {
+    expect(pattern('? ? ? ?').pitches()).to.satisfy((pitches: number[]) => pitches.every(pitch => pitch >= 0 && pitch <= 7));
+    expect(pattern('(1,4) (0,4) (2,4)').pitches()).to.satisfy((pitches: number[]) => pitches.every(pitch => pitch >= 0 && pitch <= 4));
+    expect(pattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([4]);
+    expect(pattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "bar"}).pitches()).toEqual([3]);
+  })
+
   it('cache', () => {
     // Clear earlier tests
     clear('1 2');

@@ -119,6 +119,10 @@ export function centsToSemitones(cents: number[]): number[] {
   return semitoneScale;
 }
 
+export function scaleLength(scale: string|number[]): number {
+  return typeof scale === 'string' ? getScale(scale).length : scale.length;
+}
+
 
 
 
