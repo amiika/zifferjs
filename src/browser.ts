@@ -5,7 +5,8 @@ import { parse as parseScale } from './parser/scalaParser.ts'
 import * as seedrandom from 'seedrandom';
 
 try {
-  const result = pattern('q (1,5)', {scale: '87. 256. 126. 672. 856. 985. 1222.'})
+  next('q (1,5)',{redo:0})
+  next('q (1,5)',{redo:0})
 
   console.log('Parsed result:', result);
   //console.log(result.evaluate());

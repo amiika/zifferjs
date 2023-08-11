@@ -23,6 +23,7 @@ interface NodeOptions {
     velocity?: number;
     seed?: string;
     degrees?: boolean;
+    redo?: number;
 }
 
 interface Node extends NodeOptions {
@@ -90,6 +91,7 @@ export class Ziffers {
     options: Options;
     index: number;
     random: Function;
+    rerun: number;
 
     constructor(input: string, options: NodeOptions = {}) {
         this.index = 0;
@@ -105,6 +107,14 @@ export class Ziffers {
             this.random = seedrandom(options.seed);
         } else {
             this.random = Math.random;
+        }
+
+        console.log("OPTIONS", options)
+        
+        if(options.redo !== undefined) {
+            this.rerun = options.redo;
+        } else {
+            this.rerun = 1;
         }
 
         this.options = {nodeOptions: options};
@@ -140,7 +150,9 @@ export class Ziffers {
     next() {
         const value = this.evaluated[this.index%this.evaluated.length];
         this.index++;
-        if(this.index >= this.evaluated.length) {
+         if(this.rerun > 0 && this.index >= this.evaluated.length*this.rerun) {
+            console.log(this.rerun);
+            this.index = 0;
             this.evaluate();
         }
         return value;
@@ -148,6 +160,7 @@ export class Ziffers {
 
     evaluateNodes(nodes: Node[]): Node[] {
         return nodes.map((node: Node) => {
+            node = {...node} as Node;
             if(node.type === 'pitch') {
                 return node;
             } else if(node.type === 'repeat') {
