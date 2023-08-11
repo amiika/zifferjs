@@ -377,7 +377,7 @@ function peg$parse(input, options) {
  return v };// @ts-ignore
 
   var peg$f9 = function(n, i) {// @ts-ignore
- return new Node({type: 'repeat', value: n, times: i}) };// @ts-ignore
+ return new Node({type: 'repeat', item: n, times: i}) };// @ts-ignore
 
   var peg$f10 = function(dur) { 
 // @ts-ignore
@@ -2158,6 +2158,8 @@ peg$parsechord() {
 // @ts-ignore
     this.location = location();
 // @ts-ignore
+    this.text = text();
+// @ts-ignore
     if(this.type === 'pitch') {
       // Merge all default options to the node if value is not set, null or undefined
 // @ts-ignore
@@ -2171,10 +2173,6 @@ peg$parsechord() {
       // Transform the node
 // @ts-ignore
       transform(this);
-// @ts-ignore
-      this.sleep = lastSleep;
-// @ts-ignore
-      lastSleep = this.duration;
     }
   }
 
@@ -2182,9 +2180,6 @@ peg$parsechord() {
   var seed = 0;
 
    // console.log("OPTIONS:", options);
-
-// @ts-ignore
-   var lastSleep = 0;
   
 
 // @ts-ignore

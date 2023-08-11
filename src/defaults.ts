@@ -1658,14 +1658,14 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
         "IONATIC": [1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1] as const,
         "AEOLATIC": [1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1] as const,
         "THYDATIC": [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1] as const,
-        "CHROMATIC": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        "CHROMATIC": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] as const
     }
     return all_scales
 }
 
-export const SCALES = scales();
+export const SCALES: {[key: string]: readonly number[]} = scales();
 
-export const getScale = (scale: string): number[] => {
+export const getScale = (scale: string): readonly number[] => {
     return SCALES[scale.toUpperCase()];
 }
 

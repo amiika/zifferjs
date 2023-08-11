@@ -89,8 +89,8 @@ export function* primeSieve() {
   }
 }
 
-export function getPrimes(n: number) {
-  const primeGenerator = primeSieve();
+export function getPrimes(n: number): number[] {
+  const primeGenerator: Generator<number> = primeSieve();
   return Array.from({ length: n }, () => primeGenerator.next().value);
 }
 

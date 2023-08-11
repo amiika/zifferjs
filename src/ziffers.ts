@@ -1,9 +1,8 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
-import {DEFAULT_DURS, DEFAULT_OPTIONS, OPERATORS, isScale} from './defaults.ts';
+import {DEFAULT_OPTIONS, OPERATORS, isScale} from './defaults.ts';
 import { noteFromPc, midiToFreq } from './scale.ts';
 import {LRUCache} from 'lru-cache';
-import { f } from 'vitest/dist/types-3c7dbfa5.js';
 
 const zcache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
@@ -19,13 +18,13 @@ interface NodeOptions {
     duration?: number;
     index?: number;
     port?: string;
-    channel: number;
-    velocity: number;
+    channel?: number;
+    velocity?: number;
 }
 
 interface Node {
     type: string;
-    value: string;
+    text: string;
     location: Location;
     duration?: number;
     pitch?: number;
@@ -36,14 +35,11 @@ interface Node {
     note?: number;
     octave?: number;
     bend?: number;
-    left: Node;
-    right: Node;
-    operation: string;
-}
-
-interface RepeatNode extends Node {
-    value: Node;
-    times: number;
+    item?: Node;
+    left?: Node[];
+    right?: Node[];
+    operation?: string;
+    times?: number;
 }
 
 interface Location {
@@ -58,7 +54,7 @@ interface Position {
 }
 
 export class Ziffers {
-    values: (Node|RepeatNode)[];
+    values: Node[];
     evaluated: Node[];
     options: Options;
     index: number;
@@ -77,8 +73,7 @@ export class Ziffers {
 
         try {
            this.values = parseZiffers(input, this.options);
-           // TODO: Evaluate
-           this.evaluate();
+           this.evaluated = evaluateNodes(this.values);
         } catch (ex: any) {
             console.log(ex);
             // Handle parsing error
@@ -89,7 +84,6 @@ export class Ziffers {
     }
 
     evaluate() {
-        // Evaluate
         this.evaluated = evaluateNodes(this.values);
     }
 
@@ -113,7 +107,7 @@ export class Ziffers {
 
 }
 
-const generateCacheKey = (...args) => {
+const generateCacheKey = (...args: any[]) => {
     return args.map(arg => JSON.stringify(arg)).join(',');
   }
 
@@ -129,38 +123,41 @@ const cachedCall = (a: string, b: NodeOptions): Ziffers => {
     }
 }
 
-const evaluateNodes = (nodes: Node[]) => {
-    return nodes.map((node) => {
+const evaluateNodes = (nodes: Node[]): Node[] => {
+    return nodes.map((node: Node) => {
         if(node.type === 'pitch') {
             return node;
         } else if(node.type === 'repeat') {
             const times = node.times;
             // Duplicate values given times
-            const repeated = [...Array(times)].map(() => node.value).flat(Infinity);
+            const repeated = [...Array(times)].map(() => node.item).flat(Infinity) as Node[];
             return evaluateNodes(repeated);
         } else if(node.type === 'list_operation') {
-            const left = node.left as unknown as [];
-            const right = node.right as unknown as [];
+            const left = node.left!;
+            const right = node.right!;
             // Parse operator from string to javascript operator
             const operator = OPERATORS[node.operation as string];
             // Create pairs of elements
-            const pairs = right.flatMap(r => left.map(l => [{...r as object}, {...l as object}]));
-            // Apply operator pairwise
-            const result = pairs.map(p => {
+            const pairs: [Node, Node][] = right.flatMap((r: Node) => {
+                return left.map((l: Node) => {
+                    return [{...r} as Node, {...l} as Node] as [Node,Node]
+                })
+            });
+            // Do pairwise operations
+            const result: Node[] = pairs.map((p: [Node, Node]) => {
                 p[0].pitch = operator(p[0].pitch, p[1].pitch);
                 return updateNode(p[0]);
             });
             return result;
-
         }
         return undefined;
-    }).flat(Infinity).filter((node) => node !== undefined);
+    }).flat(Infinity).filter((node) => node !== undefined) as Node[];
 }
 
 const updateNode = (node: Node, options?: NodeOptions) => {
     if(options) {
         // Merge options to node, overwrite values from node
-        node = {...node, ...options};
+        node = {...node, ...options} as Node;
     }
      node.note = noteFromPc(node.key!, node.pitch!, node.scale!)[0];
     node.freq = midiToFreq(node.note);
@@ -177,7 +174,7 @@ export const transform = (node: Node) => {
     }
 }
 
-export const pattern = (input: string, options: NodeOptions = {}) => {
+export const pattern = (input: string, options: object = {}) => {
     return new Ziffers(input, options);
 }
 

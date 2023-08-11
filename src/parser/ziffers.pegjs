@@ -13,6 +13,7 @@
       }
     }
     this.location = location();
+    this.text = text();
     if(this.type === 'pitch') {
       // Merge all default options to the node if value is not set, null or undefined
       for (var key in nodeOptions) {
@@ -74,7 +75,7 @@ item = v:(chord / pitch / ws / duration_change / list)
 { return v }
 
 repeat = n:item ":" i:int
-{ return new Node({type: 'repeat', value: n, times: i}) }
+{ return new Node({type: 'repeat', item: n, times: i}) }
 
 duration_change = dur:duration 
 { 
