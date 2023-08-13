@@ -6,53 +6,32 @@
   var nodeOptions = options.nodeOptions || {};
 
   function build(ClassReference, values) {
-    let instance = new ClassReference(values);
-    instance.text = text();
-    instance.location = location();
-    // Merge all default options to the instance
+    values.text = text();
+    values.location = location();
+    // Merge all default options to values if value is not set, null or undefined
     for (var key in nodeOptions) {
-      if (instance[key] === undefined || instance[key] === null) {
-        instance[key] = nodeOptions[key];
+      if (values[key] === undefined || values[key] === null) {
+        values[key] = nodeOptions[key];
       }
     }
+    return new ClassReference(values);
   }
-
-  var Node = function(values) { 
-    // Merge all values properties to this
-    for (var key in values) {
-      if(values[key] !== null) {
-        this[key] = values[key];
-      }
-    }
-    this.location = location();
-    this.text = text();
-    if(this.type === 'pitch' || this.type === 'random_pitch') {
-      // Merge all default options to the node if value is not set, null or undefined
-      for (var key in nodeOptions) {
-        if (this[key] === undefined || this[key] === null) {
-          this[key] = nodeOptions[key];
-        }
-      }
-      // Transform the node
-      transform(this);
-    }
-  }
-
-  var seed = 0;
-
-   // console.log("OPTIONS:", options);
+  
+  // console.log("OPTIONS:", options);
   
 }
 
 start = s:statement 
-{ return s.filter(a => a) }
+{ 
+  return s.filter(a => a);
+}
 
 // ----- Numbers -----
 
 float = ("-"? [0-9]* "." [0-9]+ / "." [0-9]+) 
 { return parseFloat(text()) }
 
-int = "-"? [0-9]+ 
+int = "-"? [0-9]
 { return parseInt(text()); }
 
 // ------------------ delimiters ---------------------------
@@ -76,10 +55,10 @@ items = n:(repeat / list_operation / list / item / cycle)+
 { return n.filter(a => a) }
 
 list = "(" l:(items) ")"
-{ return l.filter(a => a) }
+{ return build(types.List,{items: l}) }
 
 list_operation = a:list b:operation c:list
-{ return new Node({type: 'list_operation', left: a, operation: b, right: c});  }
+{ return build(types.ListOperation,{left: a, operation: b, right: c});  }
 
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
@@ -87,12 +66,12 @@ item = v:(chord / pitch / octave_change / ws / duration_change / random / random
 { return v }
 
 cycle = "<" l:items ">" 
-{ return new Node({type: 'cycle', list: new CycleNode(l)}) }
+{ return build(types.Cycle,{items: l}) }
 
 octave_change = octave:octave
 { 
   options.nodeOptions.octave = octave;
-  return new Node({type: 'octave_change', octave: octave}) 
+  return build(types.OctaveChange,{octave: octave}); 
 }
 
 octave = ("^" / "_")+
@@ -101,26 +80,26 @@ octave = ("^" / "_")+
 }
 
 random = "?"
-{ return new Node({type: 'random_pitch' }) }
+{ return build(types.RandomPitch,{}) }
 
 random_between = "(" a:int "," b:int ")"
-{ return new Node({type: 'random_pitch', min: a, max: b }) }
+{ return build(types.RandomPitch,{min: a, max: b }) }
 
 repeat = n:item ":" i:int
-{ return new Node({type: 'repeat', item: n, times: i}) }
+{ return build(types.Repeat,{item: n, times: i}) }
 
 duration_change = dur:duration 
 { 
   options.nodeOptions.duration = dur;
-  return new Node({type: 'duration_change', duration: dur}) 
+  return build(types.DurationChange,{duration: dur}) 
 }
 
 pitch = oct:octave? dur:duration? val:int 
 { 
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave
-  return new Node({type: 'pitch', duration: dur, pitch: val, octave: octave}) 
+  return build(types.Pitch, {duration: dur, pitch: val, octave: octave})
 }
 
 chord = left:pitch right:pitch+
-{ return new Node({type: 'chord', pitches:[left].concat(right)}) }
+{ return build(types.Chord, {pitches:[left].concat(right)}) }
 

@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { transform, Cycle as CycleNode } from '../ziffers';
+import * as types from '../types';
 import { DEFAULT_DURS } from '../defaults';
 
 
@@ -357,8 +357,10 @@ function peg$parse(input, options) {
   var peg$e24 = peg$literalExpectation(":", false);
 // @ts-ignore
 
-  var peg$f0 = function(s) {// @ts-ignore
- return s.filter(a => a) };// @ts-ignore
+  var peg$f0 = function(s) { 
+// @ts-ignore
+  return s.filter(a => a);
+};// @ts-ignore
 
   var peg$f1 = function() {// @ts-ignore
  return parseFloat(text()) };// @ts-ignore
@@ -376,22 +378,22 @@ function peg$parse(input, options) {
  return n.filter(a => a) };// @ts-ignore
 
   var peg$f6 = function(l) {// @ts-ignore
- return l.filter(a => a) };// @ts-ignore
+ return build(types.List,{items: l}) };// @ts-ignore
 
   var peg$f7 = function(a, b, c) {// @ts-ignore
- return new Node({type: 'list_operation', left: a, operation: b, right: c});  };// @ts-ignore
+ return build(types.ListOperation,{left: a, operation: b, right: c});  };// @ts-ignore
 
   var peg$f8 = function(v) {// @ts-ignore
  return v };// @ts-ignore
 
   var peg$f9 = function(l) {// @ts-ignore
- return new Node({type: 'cycle', cycle: new CycleNode(l)}) };// @ts-ignore
+ return build(types.Cycle,{items: l}) };// @ts-ignore
 
   var peg$f10 = function(octave) { 
 // @ts-ignore
   options.nodeOptions.octave = octave;
 // @ts-ignore
-  return new Node({type: 'octave_change', octave: octave}) 
+  return build(types.OctaveChange,{octave: octave}); 
 };// @ts-ignore
 
   var peg$f11 = function() { 
@@ -400,30 +402,30 @@ function peg$parse(input, options) {
 };// @ts-ignore
 
   var peg$f12 = function() {// @ts-ignore
- return new Node({type: 'random_pitch' }) };// @ts-ignore
+ return build(types.RandomPitch,{}) };// @ts-ignore
 
   var peg$f13 = function(a, b) {// @ts-ignore
- return new Node({type: 'random_pitch', min: a, max: b }) };// @ts-ignore
+ return build(types.RandomPitch,{min: a, max: b }) };// @ts-ignore
 
   var peg$f14 = function(n, i) {// @ts-ignore
- return new Node({type: 'repeat', item: n, times: i}) };// @ts-ignore
+ return build(types.Repeat,{item: n, times: i}) };// @ts-ignore
 
   var peg$f15 = function(dur) { 
 // @ts-ignore
   options.nodeOptions.duration = dur;
 // @ts-ignore
-  return new Node({type: 'duration_change', duration: dur}) 
+  return build(types.DurationChange,{duration: dur}) 
 };// @ts-ignore
 
   var peg$f16 = function(oct, dur, val) { 
 // @ts-ignore
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave
 // @ts-ignore
-  return new Node({type: 'pitch', duration: dur, pitch: val, octave: octave}) 
+  return build(types.Pitch, {duration: dur, pitch: val, octave: octave})
 };// @ts-ignore
 
   var peg$f17 = function(left, right) {// @ts-ignore
- return new Node({type: 'chord', pitches:[left].concat(right)}) };
+ return build(types.Chord, {pitches:[left].concat(right)}) };
 // @ts-ignore
   var peg$currPos = 0;
 // @ts-ignore
@@ -977,7 +979,7 @@ peg$parsefloat() {
   function // @ts-ignore
 peg$parseint() {
 // @ts-ignore
-    var s0, s1, s2, s3;
+    var s0, s1, s2;
 
 // @ts-ignore
     var key = peg$currPos * 23 + 2;
@@ -1014,44 +1016,17 @@ peg$parseint() {
       s1 = null;
     }
 // @ts-ignore
-    s2 = [];
-// @ts-ignore
     if (peg$r0.test(input.charAt(peg$currPos))) {
 // @ts-ignore
-      s3 = input.charAt(peg$currPos);
+      s2 = input.charAt(peg$currPos);
 // @ts-ignore
       peg$currPos++;
 // @ts-ignore
     } else {
 // @ts-ignore
-      s3 = peg$FAILED;
+      s2 = peg$FAILED;
 // @ts-ignore
       if (peg$silentFails === 0) { peg$fail(peg$e1); }
-    }
-// @ts-ignore
-    if (s3 !== peg$FAILED) {
-// @ts-ignore
-      while (s3 !== peg$FAILED) {
-// @ts-ignore
-        s2.push(s3);
-// @ts-ignore
-        if (peg$r0.test(input.charAt(peg$currPos))) {
-// @ts-ignore
-          s3 = input.charAt(peg$currPos);
-// @ts-ignore
-          peg$currPos++;
-// @ts-ignore
-        } else {
-// @ts-ignore
-          s3 = peg$FAILED;
-// @ts-ignore
-          if (peg$silentFails === 0) { peg$fail(peg$e1); }
-        }
-      }
-// @ts-ignore
-    } else {
-// @ts-ignore
-      s2 = peg$FAILED;
     }
 // @ts-ignore
     if (s2 !== peg$FAILED) {
@@ -2627,58 +2602,23 @@ peg$parsechord() {
 // @ts-ignore
   function build(ClassReference, values) {
 // @ts-ignore
-    let instance = new ClassReference(values);
+    values.text = text();
 // @ts-ignore
-    instance.text = text();
-// @ts-ignore
-    instance.location = location();
-    // Merge all default options to the instance
+    values.location = location();
+    // Merge all default options to values if value is not set, null or undefined
 // @ts-ignore
     for (var key in nodeOptions) {
 // @ts-ignore
-      if (instance[key] === undefined || instance[key] === null) {
+      if (values[key] === undefined || values[key] === null) {
 // @ts-ignore
-        instance[key] = nodeOptions[key];
+        values[key] = nodeOptions[key];
       }
     }
+// @ts-ignore
+    return new ClassReference(values);
   }
-
-// @ts-ignore
-  var Node = function(values) { 
-    // Merge all values properties to this
-// @ts-ignore
-    for (var key in values) {
-// @ts-ignore
-      if(values[key] !== null) {
-// @ts-ignore
-        this[key] = values[key];
-      }
-    }
-// @ts-ignore
-    this.location = location();
-// @ts-ignore
-    this.text = text();
-// @ts-ignore
-    if(this.type === 'pitch' || this.type === 'random_pitch') {
-      // Merge all default options to the node if value is not set, null or undefined
-// @ts-ignore
-      for (var key in nodeOptions) {
-// @ts-ignore
-        if (this[key] === undefined || this[key] === null) {
-// @ts-ignore
-          this[key] = nodeOptions[key];
-        }
-      }
-      // Transform the node
-// @ts-ignore
-      transform(this);
-    }
-  }
-
-// @ts-ignore
-  var seed = 0;
-
-   // console.log("OPTIONS:", options);
+  
+  // console.log("OPTIONS:", options);
   
 
 // @ts-ignore

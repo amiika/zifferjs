@@ -10,7 +10,7 @@ describe('main-tests', () => {
   })
 
   it('durations', () => {
-    expect(pattern('e 1').values[0].duration).toEqual(0.125);
+    expect(pattern('e 1').durations()[0]).toEqual(0.125);
   })
 
   it('lists', () => {
@@ -24,11 +24,15 @@ describe('main-tests', () => {
     expect(pattern('_ 1 _2 ^3 4').notes()).toEqual([50,40,65,55]);
   })
 
+  it('chords', () => {
+    expect(pattern('123 234').pitches()).toEqual([1,2,3,2,3,4]);
+  })
+
   it('cycles', () => {
-    expect(next('<1 <2 3>>').pitch).toEqual(1);
-    expect(next('<1 <2 3>>').pitch).toEqual(2);
-    expect(next('<1 <2 3>>').pitch).toEqual(1);
-    expect(next('<1 <2 3>>').pitch).toEqual(3);
+    expect(next('<1 <2 3>>').collect('pitch')).toEqual(1);
+    expect(next('<1 <2 3>>').collect('pitch')).toEqual(2);
+    expect(next('<1 <2 3>>').collect('pitch')).toEqual(1);
+    expect(next('<1 <2 3>>').collect('pitch')).toEqual(3);
   })
 
   it('randoms', () => {
@@ -45,15 +49,15 @@ describe('main-tests', () => {
     clear('0');
     clear('1 4');
 
-    expect(next('1 2').pitch).toEqual(1);
-    expect(next('1 2').pitch).toEqual(2);
-    expect(next('1 2').pitch).toEqual(1);
-    expect(get('2 4 1',{key: "C"}).pitch).toEqual(2);
-    expect(get('2 4 1',{key: "C"}).pitch).toEqual(4);
-    expect(get('2 4 1',{key: "C"}).pitch).toEqual(1);
-    expect(get('2 4 1',{key: "C"}).pitch).toEqual(2);
-    expect(get('2 4 1',{key: "C", index: 2}).pitch).toEqual(1);
-    expect(next('2 4 1',{key: "C"}).pitch).toEqual(2);
+    expect(next('1 2').collect('pitch')).toEqual(1);
+    expect(next('1 2').collect('pitch')).toEqual(2);
+    expect(next('1 2').collect('pitch')).toEqual(1);
+    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
+    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(4);
+    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(1);
+    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
+    expect(get('2 4 1',{key: "C", index: 2}).collect('pitch')).toEqual(1);
+    expect(next('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
     expect(freq('0')).toEqual(261.6255653005986);
     expect(pitch('1 4')).toEqual(1);
     expect(pitch('1 4')).toEqual(4);
