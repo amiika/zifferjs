@@ -81,9 +81,23 @@ export class Base {
 
 export class Event extends Base {
     duration!: number;
+    nextEvent!: Event;
+    prevEvent!: Event;
+    modifiedEvent!: Event|undefined;
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
+    }
+    next(): Event {
+        return this.nextEvent;
+    }
+    previous(): Event {
+        return this.prevEvent;
+    }
+    collect(name: string): any {
+        // Overwrite in subclasses
+        // @ts-ignore
+        return this[name];
     }
     // @ts-ignore
     scale(scale: name): void {
@@ -91,7 +105,7 @@ export class Event extends Base {
     }
     sometimesBy(probability: number, func: Function): Event {
         if(Math.random() < probability) {
-            return func(this.clone());
+            return this.modify(func);
         }
         return this;
     }
@@ -104,20 +118,25 @@ export class Event extends Base {
     often(func: Function): Event {
         return this.sometimesBy(0.9, func);
     }
-    update(values: object): Event {
-        Object.assign(this, values);
+    update(func: Function): Event {
+        func(this);
+        this.refresh();
         return this;
     }
-    add(values: object): Event {
-        // Add to existing values using +
-        console.log("Before", this);
-        Object.entries(values).forEach(([key, value]) => {
-            // @ts-ignore
-            this[key] = this[key] + value;
-        });
-        this.refresh();
-        console.log("After", this);
+    modify(func: Function): Event {
+        this.modifiedEvent = this.clone();
+        func(this.modifiedEvent);
+        this.modifiedEvent!.refresh();
+        return this.modifiedEvent!;
+    }
+    skip(): Event {
         return this;
+    }
+}
+
+export class Start extends Event {
+    constructor() {
+        super({});
     }
 }
 
@@ -302,7 +321,7 @@ export class ListOperation extends Base {
     }
 }
 
-export class Cycle extends Base {
+export class Cycle extends Event {
     items!: Base[];
     index: number;
     constructor(data: Partial<Node>) {

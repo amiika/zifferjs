@@ -1,15 +1,15 @@
 // @ts-nocheck
-import { pattern,next,note } from './ziffers';
+import { get,pattern,cachedIterator,note } from './ziffers';
 import { SCALES } from './defaults';
 import { parse as parseScale } from './parser/scalaParser.ts'
 import * as seedrandom from 'seedrandom';
 
 
 try {
-  const result = pattern('1 2 3',{seed: "foo"});
-  console.log(result);
- result.values[0].pitch = 10;
-
+ console.log(cachedIterator('1 2'));
+ console.log(cachedIterator('1 2'));
+ console.log(get('2 4 1',{key: "C"}).collect('pitch'));
+ console.log(get('2 4 1',{key: "C"}).collect('pitch'));
   //console.log('Parsed result:', result);
   //const test = next('1 2 3').scale('minor');
  //console.log(test);

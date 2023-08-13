@@ -1,17 +1,18 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
-import { Base, Pitch, Chord, Options, NodeOptions} from './types.ts';
+import { Base, Pitch, Chord, Rest, Event, Start, Options, NodeOptions} from './types.ts';
 import {LRUCache} from 'lru-cache';
 
 const zcache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
 export class Ziffers {
     values: Base[];
-    evaluated: (Pitch|Chord)[];
+    evaluated: (Pitch|Chord|Rest)[];
     options: Options;
     index: number;
     redo: number;
+    current: Event;
 
     constructor(input: string, options: NodeOptions = {}) {
         this.index = 0;
@@ -43,12 +44,15 @@ export class Ziffers {
         try {
            this.values = parseZiffers(input, this.options);
            this.evaluated = this.evaluate();
+           this.current = new Start();
+           this.current.nextEvent = this.evaluated[0];
         } catch (ex: any) {
             console.log(ex);
             // Handle parsing error
             // [...]
             this.values = [];
             this.evaluated = [];
+            this.current = new Start();
         }
     }
 
@@ -57,44 +61,55 @@ export class Ziffers {
     }
 
     pitches(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord) => {
+        return this.evaluated.map((item: Pitch|Chord|Rest) => {
             return item.collect("pitch");
         })
     }
 
     notes(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord) => {
+        return this.evaluated.map((item: Pitch|Chord|Rest) => {
             return item.collect("note");
         });  
     }
 
     freqs(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord) => {
+        return this.evaluated.map((item: Pitch|Chord|Rest) => {
             return item.collect("freq");
         });
     }
 
     durations(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord) => {
+        return this.evaluated.map((item: Pitch|Chord|Rest) => {
             return item.collect("duration");
         });
     }
             
-    
     next() {
-        const value = this.evaluated[this.index%this.evaluated.length];
+        /*const value = this.evaluated[this.index%this.evaluated.length];
         this.index++;
          if(this.redo > 0 && this.index >= this.evaluated.length*this.redo) {
             this.index = 0;
             this.update();
-        }
-        return value;
+        }*/
+        this.index++;
+        const nextEvent = this.current;
+        this.current = this.current.nextEvent;
+        return nextEvent;
     }
 
-    evaluate(): (Pitch|Chord)[] {
-         return this.values.map((node: Base) => {
-          return node.evaluate();
-        }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord)[];
+    peek() {
+        return this.current;
+    }
+
+    evaluate(): (Pitch|Chord|Rest)[] {
+        const items = this.values.map((node: Base) => {
+            return node.evaluate();
+        }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest)[];
+        items.forEach((item: Event, index) => {
+            item.nextEvent = index < items.length-1 ? items[index+1] : items[0];
+            item.prevEvent = index > 0 ? items[index-1] : items[items.length-1];
+        });
+        return items;
     }
 
 }
@@ -123,12 +138,17 @@ export const cache = (input: string, options: NodeOptions = {}) => {
     return cachedCall(input, options);
 }
 
-export const next = (input: string, options: NodeOptions = {}) => {
+export const cachedStart = (input: string, options: NodeOptions = {}) => {
     const fromCache = cachedCall(input, options);
     return fromCache.next();
 }
 
-export const get = (input: string, options: NodeOptions = {}): Pitch|Chord => {   
+export const cachedIterator = (input: string, options: NodeOptions = {}) => {
+    const fromCache = cachedCall(input, options).next();
+    return fromCache.next();
+}
+
+export const get = (input: string, options: NodeOptions = {}): Pitch|Chord|Rest => {   
     if(options.index) {
         let index = options.index;
         delete options.index;
@@ -138,19 +158,20 @@ export const get = (input: string, options: NodeOptions = {}): Pitch|Chord => {
         return fromCache.evaluated[index];
     }
     const fromCache = cachedCall(input, options);
-    return fromCache.next();
+    if(fromCache.current instanceof Start) fromCache.next();
+    return fromCache.peek();
 }
 
 export const note = (input: string, options: NodeOptions = {}): number|undefined => {
-    return get(input, options).collect("note");
+    return cachedIterator(input, options).collect("note");
 }
 
 export const pitch = (input: string, options: NodeOptions = {}): number|undefined => {
-    return get(input, options).collect("pitch");
+    return cachedIterator(input, options).collect("pitch");
 }
 
 export const freq = (input: string, options: NodeOptions = {}): number|undefined => {
-    return get(input, options).collect("freq");
+    return cachedIterator(input, options).collect("freq");
 }
 
 export const clear = (input: string, options: NodeOptions = {}): void => {

@@ -13,9 +13,9 @@
     "build": "vite build",
     "compile-ziffers": "peggy --plugin ./node_modules/ts-pegjs/dist/tspegjs --extra-options-file src/parser/zconfig.json -o src/parser/ziffersParser.ts --cache src/parser/ziffers.pegjs",
     "compile-scala": "peggy --plugin ./node_modules/ts-pegjs/dist/tspegjs --extra-options-file src/parser/sconfig.json -o src/parser/scalaParser.ts --cache src/parser/scala.pegjs",
-    "compile-parsers": "npm run compile-ziffers && npm run compile-scala",
+    "compile-parsers": "yarn run compile-ziffers && yarn run compile-scala",
     "test": "vitest --ui",
-    "prepare": "npm run build"
+    "prepare": "yarn run build"
   },
   "devDependencies": {
     "@vitest/ui": "^0.34.1",

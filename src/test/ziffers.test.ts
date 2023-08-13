@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pattern, next, get, pitch, freq, clear } from '../ziffers.ts'
+import { pattern, cachedIterator, get, pitch, freq, clear } from '../ziffers.ts'
 
 describe('main-tests', () => {
   it('parse', () => {
@@ -29,10 +29,10 @@ describe('main-tests', () => {
   })
 
   it('cycles', () => {
-    expect(next('<1 <2 3>>').collect('pitch')).toEqual(1);
-    expect(next('<1 <2 3>>').collect('pitch')).toEqual(2);
-    expect(next('<1 <2 3>>').collect('pitch')).toEqual(1);
-    expect(next('<1 <2 3>>').collect('pitch')).toEqual(3);
+    expect(cachedIterator('<1 <2 3>>').collect('pitch')).toEqual(1);
+    expect(cachedIterator('<1 <2 3>>').collect('pitch')).toEqual(2);
+    expect(cachedIterator('<1 <2 3>>').collect('pitch')).toEqual(1);
+    expect(cachedIterator('<1 <2 3>>').collect('pitch')).toEqual(3);
   })
 
   it('randoms', () => {
@@ -49,15 +49,13 @@ describe('main-tests', () => {
     clear('0');
     clear('1 4');
 
-    expect(next('1 2').collect('pitch')).toEqual(1);
-    expect(next('1 2').collect('pitch')).toEqual(2);
-    expect(next('1 2').collect('pitch')).toEqual(1);
+    expect(cachedIterator('1 2').collect('pitch')).toEqual(1);
+    expect(cachedIterator('1 2').collect('pitch')).toEqual(2);
+    expect(cachedIterator('1 2').collect('pitch')).toEqual(1);
     expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
-    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(4);
-    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(1);
     expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
     expect(get('2 4 1',{key: "C", index: 2}).collect('pitch')).toEqual(1);
-    expect(next('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
+    expect(cachedIterator('2 4 1', {key: "C"}).collect('pitch')).toEqual(4);
     expect(freq('0')).toEqual(261.6255653005986);
     expect(pitch('1 4')).toEqual(1);
     expect(pitch('1 4')).toEqual(4);
