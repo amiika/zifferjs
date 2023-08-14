@@ -1,7 +1,15 @@
 {
   "name": "zifferjs",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "keywords": [
+    "ziffers",
+    "pattern",
+    "livecoding",
+    "algorave"
+  ],
+  "author": "Miika Alonen <amiika@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/amiika/zifferjs",
   "main": "src/index.ts",
   "type": "module",
   "publishConfig": {
