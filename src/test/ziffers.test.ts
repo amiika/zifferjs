@@ -9,6 +9,10 @@ describe('main-tests', () => {
     expect(true).to.be.true;
   })
 
+  it('repeats', () => {
+    expect(pattern('1 2:2 3:3 4').pitches()).toEqual([1,2,2,3,3,3,4]);
+  })
+
   it('durations', () => {
     expect(pattern('e 1').durations()[0]).toEqual(0.125);
   })
@@ -60,4 +64,7 @@ describe('main-tests', () => {
     expect(pitch('1 4')).toEqual(1);
     expect(pitch('1 4')).toEqual(4);
   })
+
+
+
 })
