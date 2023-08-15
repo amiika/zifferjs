@@ -14,6 +14,7 @@ export interface NodeOptions {
     parsedScale?: number[]|undefined;
     scaleName?: string;
     duration?: number;
+    octave?: number;
     index?: number;
     port?: string;
     channel?: number;
@@ -21,6 +22,11 @@ export interface NodeOptions {
     seed?: string;
     degrees?: boolean;
     redo?: number;
+}
+
+export type ChangingOptions = {
+    octave?: number;
+    duration?: number;
 }
 
 export interface Node extends NodeOptions {
@@ -32,7 +38,6 @@ export interface Node extends NodeOptions {
     pitch?: number;
     freq?: number;
     note?: number;
-    octave?: number;
     bend?: number;
     // Chord
     pitches?: Node[];
@@ -65,8 +70,21 @@ export class Base {
     constructor(data: Partial<Node>) {
         Object.assign(this, data);
     }
-    clone() {
-        return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+    public clone(): any {
+        function deepCopy<T, U = T extends Array<infer V> ? V : never>(source: T ): T {
+            if (Array.isArray(source)) {
+              return source.map(item => (deepCopy(item))) as T & U[]
+            }
+            if (source && typeof source === 'object') {
+              return (Object.getOwnPropertyNames(source) as (keyof T)[]).reduce<T>((o, prop) => {
+                Object.defineProperty(o, prop, Object.getOwnPropertyDescriptor(source, prop)!)
+                o[prop] = deepCopy(source[prop])
+                return o
+              }, Object.create(Object.getPrototypeOf(source)))
+            }
+            return source
+          }
+          return deepCopy(this);
     }
     collect<K extends keyof Base>(name: K): Base[K] {
         return this[name];
@@ -74,25 +92,27 @@ export class Base {
     refresh(): void {
         // Overwrite in subclasses
     }
-    evaluate(): Base|Base[]|undefined {
+    // @ts-ignore
+    evaluate(options: ChangingOptions = {}): Base|Base[]|undefined {
         return undefined;
     }
 }
 
 export class Event extends Base {
     duration!: number;
-    nextEvent!: Event;
-    prevEvent!: Event;
-    modifiedEvent!: Event|undefined;
+    _next!: Event;
+    _prev!: Event;
+    modifiedEvent: Event|undefined = undefined;
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
     }
     next(): Event {
-        return this.nextEvent;
+        // TODO: Call modified event next instead?
+        return this._next;
     }
     previous(): Event {
-        return this.prevEvent;
+        return this._prev;
     }
     collect(name: string): any {
         // Overwrite in subclasses
@@ -134,12 +154,6 @@ export class Event extends Base {
     }
 }
 
-export class Start extends Event {
-    constructor() {
-        super({});
-    }
-}
-
 export class Pitch extends Event {
     pitch!: number;
     freq?: number;
@@ -176,7 +190,10 @@ export class Pitch extends Event {
     refresh(): void {
         this.evaluate();
     }
-    evaluate(): Pitch {
+
+    evaluate(options: ChangingOptions = {}): Pitch {
+        if(options.octave) this.octave = options.octave + (this.octave || 0);
+        if(options.duration) this.duration = options.duration;
         const [note,bend] = noteFromPc(this.key!, this.pitch!, this.parsedScale!, this.octave!);
         this.note = note;
         this.freq = midiToFreq(this.note);
@@ -205,8 +222,8 @@ export class Chord extends Event {
         Object.assign(this, data);
         this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
     }
-    evaluate(): Pitch[] {
-        return this.pitches.map((pitch) => pitch.evaluate());
+    evaluate(options: ChangingOptions = {}): Pitch[] {
+        return this.pitches.map((pitch) => pitch.evaluate(options));
     }
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
         const collect = this.pitches.map((pitch: Pitch) => pitch.collect(name)) as unknown as Pitch[K];
@@ -221,6 +238,10 @@ export class Chord extends Event {
 export class Rest extends Event {
     constructor(data: Partial<Node>) {
         super(data);
+    }
+    evaluate(options: ChangingOptions = {}): Rest {
+        if(options.duration) this.duration = options.duration;
+        return this;
     }
 }
 
@@ -241,9 +262,9 @@ export class RandomPitch extends Pitch {
             this.random = Math.random;
         }
     }
-    evaluate(): Pitch {
+    evaluate(options: ChangingOptions = {}): Pitch {
         this.pitch = Math.floor(this.random() * (this.max - this.min + 1)) + this.min;
-        return super.evaluate();
+        return super.evaluate(options);
     }
 }
 
@@ -253,7 +274,8 @@ export class OctaveChange extends Base {
         super(data);
         Object.assign(this, data);
     }
-    evaluate() {
+    evaluate(options: ChangingOptions = {}) {
+        options.octave = this.octave;
         return undefined;  
     }
 }
@@ -264,7 +286,8 @@ export class DurationChange extends Base {
         super(data);
         Object.assign(this, data);
     }
-    evaluate() {
+    evaluate(options: ChangingOptions = {}) {
+        options.duration = this.duration;
         return undefined;
     }
 }
@@ -276,9 +299,9 @@ export class Repeat extends Base {
         super(data);
         Object.assign(this, data);
     }
-    evaluate(): Pitch[] {
+    evaluate(options: ChangingOptions = {}): Pitch[] {
         const repeated = [...Array(this.times)].map(() => this.item).flat(Infinity) as Base[];
-        return repeated.map((item) => { return item.evaluate() }) as Pitch[];
+        return repeated.map((item) => { return item.evaluate(options) }) as Pitch[];
     }
 }
 
@@ -288,8 +311,8 @@ export class List extends Base {
         super(data);
         Object.assign(this, data);
     }
-    evaluate(): Pitch[] {
-        return this.items.map((item: Base) => { return item.evaluate(); }) as unknown as Pitch[];
+    evaluate(options: ChangingOptions = {}): Pitch[] {
+        return this.items.map((item: Base) => { return item.evaluate(options); }) as unknown as Pitch[];
     }
 }
 
@@ -301,7 +324,7 @@ export class ListOperation extends Base {
         super(data);
         Object.assign(this, data);
     }
-    evaluate(): Pitch[] {
+    evaluate(options: ChangingOptions = {}): Pitch[] {
         this.left.evaluate();
         this.right.evaluate();
         // Parse operator from string to javascript operator
@@ -315,7 +338,7 @@ export class ListOperation extends Base {
         // Do pairwise operations
         const result: Pitch[] = pairs.map((p: [Pitch, Pitch]) => {
             p[0].pitch = operator(p[0].pitch, p[1].pitch);
-            return p[0].evaluate();
+            return p[0].evaluate(options);
         });
         return result;
     }
@@ -329,25 +352,20 @@ export class Cycle extends Event {
         Object.assign(this, data);
         this.index = 0;
     }
-    next(): Pitch|Chord|Rest {
-        let value = this.items[this.index%this.items.length] as Pitch|Chord|Rest;
+    nextItem(options: ChangingOptions = {}): Base | Base[] | undefined {
+        let value = this.items[this.index%this.items.length] as Base|Base[]|undefined;
         while(value instanceof Cycle) {
-            value = value.next();
+            value = value.nextItem(options);
         }
         this.index = this.index+1;
-        // If index is out of bounds, evaluate
-        if(this.index >= this.items.length) {
-            this.index = 0;
-            this.refresh();
+        if(value instanceof Base) {
+            return value.evaluate(options);
         }
+        return value; 
+    }
+    evaluate(options: ChangingOptions = {}): Base | Base[] | undefined {
+        const value = this.nextItem(options);
         return value;
-    }
-    refresh(): void {
-        this.items = this.items.map((item: Base) => item.evaluate()) as Base[];
-    }
-    evaluate(): Base {
-        this.refresh();
-        return this;
     }
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
         const item = this.next();

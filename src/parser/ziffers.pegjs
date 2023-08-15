@@ -70,6 +70,7 @@ cycle = "<" l:items ">"
 
 octave_change = octave:octave
 { 
+  // TODO: Remove these?
   options.nodeOptions.octave = octave;
   return build(types.OctaveChange,{octave: octave}); 
 }
@@ -90,6 +91,7 @@ repeat = n:item ":" i:int
 
 duration_change = dur:duration 
 { 
+  // TODO: Remove these?
   options.nodeOptions.duration = dur;
   return build(types.DurationChange,{duration: dur}) 
 }

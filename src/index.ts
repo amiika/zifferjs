@@ -1,2 +1,2 @@
-export { Ziffers, pattern, cache, get, cachedIterator, cachedStart, note, freq, pitch } from './ziffers.ts';
-export { Pitch, Chord, Rest, Event, Start } from './types.ts';
+export { Ziffers, pattern, get, cachedPattern, cachedEvent, note, freq, pitch } from './ziffers.ts';
+export { Pitch, Chord, Rest, Event } from './types.ts';

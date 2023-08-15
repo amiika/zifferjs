@@ -390,6 +390,7 @@ function peg$parse(input, options) {
  return build(types.Cycle,{items: l}) };// @ts-ignore
 
   var peg$f10 = function(octave) { 
+  // TODO: Remove these?
 // @ts-ignore
   options.nodeOptions.octave = octave;
 // @ts-ignore
@@ -411,6 +412,7 @@ function peg$parse(input, options) {
  return build(types.Repeat,{item: n, times: i}) };// @ts-ignore
 
   var peg$f15 = function(dur) { 
+  // TODO: Remove these?
 // @ts-ignore
   options.nodeOptions.duration = dur;
 // @ts-ignore
