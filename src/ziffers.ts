@@ -13,7 +13,7 @@ export class Ziffers {
     options: Options;
     index: number = 0;
     redo: number;
-    _current: Event | undefined = undefined;
+    _current: number | undefined = undefined;
 
     constructor(input: string, options: NodeOptions = {}) {
         // Merge options with default options. TODO: Ignore some common options like degrees?
@@ -90,19 +90,26 @@ export class Ziffers {
         });
     }
             
-    current() {
+    next() {
+        
         if(this.redo > 0 && this.index >= this.evaluated.length*this.redo) {
-            this.index = 0;
             this.update();
             this._current = undefined;
         }
-        if(this._current) {
-            this._current = this._current._next;
+
+        if(this._current !== undefined) {
+            const currentEvent = this.evaluated[this._current % this.evaluated.length];
+            if(currentEvent.modifiedEvent) currentEvent.modifiedEvent == undefined;
+            this._current = this._current + 1 < this.evaluated.length ? this._current + 1 : 0;
         } else {
-            this._current = this.evaluated[0];
+            this._current = 0;
         }
+
+        const nextEvent = this.evaluated[this._current % this.evaluated.length];
+       
         this.index++;
-        return this._current;
+
+        return nextEvent;
     }
 
     notStarted() {
@@ -110,18 +117,24 @@ export class Ziffers {
     }
 
     peek() {
-        return this._current;
+        return this.evaluated[this._current || 0];
+    }
+
+    hasStarted(): boolean {
+        return this._current !== undefined;
     }
 
     evaluate(): (Pitch|Chord|Rest)[] {
+
         const items = this.values.map((node: Base) => {
             return node.evaluate();
         }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest)[];
         
         items.forEach((item: Event, index) => {
-            item._next = index < items.length-1 ? items[index+1] : items[0];
-            item._prev = index > 0 ? items[index-1] : items[items.length-1];
+            item._next = index < items.length-1 ? index+1 : 0;
+            item._prev = index > 0 ? index-1 : items.length-1;
         });
+
         return items;
     }
 
@@ -153,7 +166,7 @@ export const cachedPattern = (input: string, options: NodeOptions = {}) => {
 
 export const cachedEvent = (input: string, options: NodeOptions = {}): Pitch|Chord|Rest => {
     const fromCache = cachedCall(input, options);
-    return fromCache.current() as Pitch|Chord|Rest;
+    return fromCache.next() as Pitch|Chord|Rest;
 }
 
 export const get = (input: string, options: NodeOptions = {}): Event => {
@@ -165,7 +178,7 @@ export const get = (input: string, options: NodeOptions = {}): Event => {
         return fromCache.evaluated[index];
     }
     const fromCache = cachedCall(input, options);
-    if(fromCache.notStarted()) fromCache.current();
+    if(fromCache.notStarted()) fromCache.next();
     return fromCache.peek()!;
 }
 

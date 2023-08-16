@@ -6,10 +6,13 @@ import * as seedrandom from 'seedrandom';
 
 
 try {
-//console.log(cachedEvent('<1 <2 3>>'));
- //console.log(cachedEvent('<1 <2 3>>'));
- //console.log(cachedEvent('<1 <2 3>>'));
-  //console.log('Parsed result:', result);
+console.log(cachedEvent('<1 <2 3>>'));
+console.log(cachedEvent('<1 <2 3>>'));
+console.log(cachedEvent('<1 <2 3>>'));
+console.log(cachedEvent('<1 <2 3>>'));
+console.log(cachedEvent('<1 <2 3>>'));
+console.log(cachedEvent('<1 <2 3>>'));  
+//console.log('Parsed result:', result);
   //const test = next('1 2 3').scale('minor');
  //console.log(test);
   //console.log(result.evaluate());

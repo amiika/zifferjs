@@ -88,18 +88,18 @@ export abstract class Base {
 
 export abstract class Event extends Base {
     duration!: number;
-    _next!: Event;
-    _prev!: Event;
+    _next!: number;
+    _prev!: number;
     modifiedEvent: Event|undefined = undefined;
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
     }
-    next(): Event {
+    next(): number {
         // TODO: Call modified event next instead?
         return this._next;
     }
-    previous(): Event {
+    previous(): number {
         return this._prev;
     }
     collect(name: string): any {
@@ -370,8 +370,5 @@ export class Cycle extends Event {
         const value = this.nextItem(options);
         return value;
     }
-    collect<K extends keyof Pitch>(name: K): Pitch[K] {
-        const item = this.next();
-        return (item as Pitch|Chord).collect(name);
-    }
+
 }
