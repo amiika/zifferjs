@@ -1,6 +1,6 @@
 {
   "name": "zifferjs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "keywords": [
     "ziffers",
     "pattern",
@@ -26,7 +26,6 @@
     "prepare": "yarn run build"
   },
   "devDependencies": {
-    "@types/seedrandom": "^3.0.5",
     "@vitest/ui": "^0.34.1",
     "peggy": "^3.0.2",
     "ts-pegjs": "^4.2.1",
@@ -35,7 +34,6 @@
     "vitest": "^0.34.1"
   },
   "dependencies": {
-    "lru-cache": "^10.0.0",
-    "seedrandom": "^3.0.5"
+    "lru-cache": "^10.0.0"
   }
 }
