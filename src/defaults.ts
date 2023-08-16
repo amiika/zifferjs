@@ -1676,9 +1676,15 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
     return all_scales
 }
 
-export const SCALES: {[key: string]: readonly number[]} = scales();
+export const SCALES: {[key: string]: number[]} = scales();
 
-export const getScale = (scale: string): readonly number[] => {
+export const getRandomScale = (): number[] => {
+    const keys = Object.keys(SCALES);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return SCALES[randomKey];
+}
+
+export const getScale = (scale: string): number[] => {
     return SCALES[scale.toUpperCase()];
 }
 

@@ -1,11 +1,10 @@
 import { noteFromPc, midiToFreq, scaleLength } from './scale.ts';
-import { OPERATORS, getScale } from './defaults.ts';
-import seedrandom from 'seedrandom';
+import { OPERATORS, getScale, getRandomScale } from './defaults.ts';
+import { deepClone, seededRandom } from './utils.ts';
 
 export interface Options {
     nodeOptions?: NodeOptions;
-    transform?: Function
-    defaultDurs?: {[key: string]: number}
+    defaultDurs?: {[key: string]: number};
 }
 
 export interface NodeOptions {
@@ -19,9 +18,11 @@ export interface NodeOptions {
     port?: string;
     channel?: number;
     velocity?: number;
-    seed?: string;
     degrees?: boolean;
     redo?: number;
+    seed?: string;
+    randomSeed?: string;
+    seededRandom?: Function;
 }
 
 export type ChangingOptions = {
@@ -64,27 +65,14 @@ interface Position {
     column: number;
 }
 
-export class Base {
+export abstract class Base {
     text!: string;
     location!: Location;
     constructor(data: Partial<Node>) {
         Object.assign(this, data);
     }
     public clone(): any {
-        function deepCopy<T, U = T extends Array<infer V> ? V : never>(source: T ): T {
-            if (Array.isArray(source)) {
-              return source.map(item => (deepCopy(item))) as T & U[]
-            }
-            if (source && typeof source === 'object') {
-              return (Object.getOwnPropertyNames(source) as (keyof T)[]).reduce<T>((o, prop) => {
-                Object.defineProperty(o, prop, Object.getOwnPropertyDescriptor(source, prop)!)
-                o[prop] = deepCopy(source[prop])
-                return o
-              }, Object.create(Object.getPrototypeOf(source)))
-            }
-            return source
-          }
-          return deepCopy(this);
+          return deepClone(this);
     }
     collect<K extends keyof Base>(name: K): Base[K] {
         return this[name];
@@ -98,7 +86,7 @@ export class Base {
     }
 }
 
-export class Event extends Base {
+export abstract class Event extends Base {
     duration!: number;
     _next!: Event;
     _prev!: Event;
@@ -118,10 +106,6 @@ export class Event extends Base {
         // Overwrite in subclasses
         // @ts-ignore
         return this[name];
-    }
-    // @ts-ignore
-    scale(scale: name): void {
-        // Overwrite in subclasses
     }
     sometimesBy(probability: number, func: Function): Event {
         if(Math.random() < probability) {
@@ -152,6 +136,13 @@ export class Event extends Base {
     skip(): Event {
         return this;
     }
+
+    scale(_scale: string|number[]): void {};
+
+    randomScale(): void {};
+    
+    seed(_seed: string): void {};
+
 }
 
 export class Pitch extends Event {
@@ -213,6 +204,10 @@ export class Pitch extends Event {
         }
         return this;
     }
+    randomScale(): Pitch {
+        this.parsedScale = getRandomScale();
+        return this.evaluate();
+    }
 }
 
 export class Chord extends Event {
@@ -248,7 +243,8 @@ export class Rest extends Event {
 export class RandomPitch extends Pitch {
     min!: number;
     max!: number;
-    seed?: string;
+    randomSeed?: string;
+    seededRandom?: Function;
     random: Function;
 
     constructor(data: Partial<Node>) {
@@ -256,15 +252,22 @@ export class RandomPitch extends Pitch {
         Object.assign(this, data);
         if(!data.min) this.min = 0;
         if(!data.max) this.max = scaleLength(this.parsedScale!);
-        if(this.seed) {
-             this.random = seedrandom(this.seed);
+        if(this.seededRandom) {
+            console.log("SEEDED RANDOM GEN!");
+             this.random = this.seededRandom;
         } else {
             this.random = Math.random;
         }
     }
     evaluate(options: ChangingOptions = {}): Pitch {
-        this.pitch = Math.floor(this.random() * (this.max - this.min + 1)) + this.min;
+        const randomValue = this.random();
+        console.log(randomValue);
+        this.pitch = Math.floor(randomValue * (this.max - this.min + 1)) + this.min;
         return super.evaluate(options);
+    }
+    seed(seed: string) {
+        this.randomSeed = seed;
+        this.seededRandom = seededRandom(seed);
     }
 }
 

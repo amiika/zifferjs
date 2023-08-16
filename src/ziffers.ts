@@ -3,6 +3,7 @@ import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions} from './types.ts';
 import {LRUCache} from 'lru-cache';
+import { seededRandom } from './utils.ts';
 
 const zcache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
@@ -31,14 +32,23 @@ export class Ziffers {
             options.parsedScale = options.scale as number[];
             delete options.scale;
         }
-        
+
         if(options.redo !== undefined) {
             this.redo = options.redo;
         } else {
             this.redo = 1;
         }
 
+        if(options && options.seed) {
+            options.randomSeed = options.seed;
+            options.seededRandom = seededRandom(options.seed);
+        }
+
         this.options = {nodeOptions: options};
+
+        // Common options
+
+
 
         try {
            this.values = parseZiffers(input, this.options);
@@ -141,9 +151,9 @@ export const cachedPattern = (input: string, options: NodeOptions = {}) => {
     return cachedCall(input, options);
 }
 
-export const cachedEvent = (input: string, options: NodeOptions = {}) => {
+export const cachedEvent = (input: string, options: NodeOptions = {}): Pitch|Chord|Rest => {
     const fromCache = cachedCall(input, options);
-    return fromCache.current();
+    return fromCache.current() as Pitch|Chord|Rest;
 }
 
 export const get = (input: string, options: NodeOptions = {}): Event => {

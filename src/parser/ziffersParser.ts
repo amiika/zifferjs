@@ -403,10 +403,10 @@ function peg$parse(input, options) {
 };// @ts-ignore
 
   var peg$f12 = function() {// @ts-ignore
- return build(types.RandomPitch,{}) };// @ts-ignore
+ return build(types.RandomPitch,{seededRandom: options.seededRandom}) };// @ts-ignore
 
   var peg$f13 = function(a, b) {// @ts-ignore
- return build(types.RandomPitch,{min: a, max: b }) };// @ts-ignore
+ return build(types.RandomPitch,{min: a, max: b, seededRandom: options.seededRandom }) };// @ts-ignore
 
   var peg$f14 = function(n, i) {// @ts-ignore
  return build(types.Repeat,{item: n, times: i}) };// @ts-ignore

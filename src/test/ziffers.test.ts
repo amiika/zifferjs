@@ -42,8 +42,11 @@ describe('main-tests', () => {
   it('randoms', () => {
     expect(pattern('? ? ? ?').pitches()).to.satisfy((pitches: number[]) => pitches.every(pitch => pitch >= 0 && pitch <= 7));
     expect(pattern('(1,4) (0,4) (2,4)').pitches()).to.satisfy((pitches: number[]) => pitches.every(pitch => pitch >= 0 && pitch <= 4));
-    expect(pattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([4]);
-    expect(pattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "bar"}).pitches()).toEqual([3]);
+    expect(pattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([2]);
+    expect(pattern('(1,7) (1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([2,3]);
+    expect(pattern('(1,7) (1,7) (1,7) (1,7) (1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([2,3,3,2,5]);
+    expect(cachedEvent('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).collect("pitch")).toEqual(2);
+    expect(cachedEvent('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).collect("pitch")).toEqual(3);
   })
 
   it('cache', () => {

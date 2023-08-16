@@ -81,10 +81,10 @@ octave = ("^" / "_")+
 }
 
 random = "?"
-{ return build(types.RandomPitch,{}) }
+{ return build(types.RandomPitch,{seededRandom: options.seededRandom}) }
 
 random_between = "(" a:int "," b:int ")"
-{ return build(types.RandomPitch,{min: a, max: b }) }
+{ return build(types.RandomPitch,{min: a, max: b, seededRandom: options.seededRandom }) }
 
 repeat = n:item ":" i:int
 { return build(types.Repeat,{item: n, times: i}) }
