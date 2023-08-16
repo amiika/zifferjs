@@ -91,7 +91,6 @@ export class Ziffers {
     }
             
     next() {
-        
         if(this.redo > 0 && this.index >= this.evaluated.length*this.redo) {
             this.update();
             this._current = undefined;

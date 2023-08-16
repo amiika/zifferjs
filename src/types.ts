@@ -253,7 +253,6 @@ export class RandomPitch extends Pitch {
         if(!data.min) this.min = 0;
         if(!data.max) this.max = scaleLength(this.parsedScale!);
         if(this.seededRandom) {
-            console.log("SEEDED RANDOM GEN!");
              this.random = this.seededRandom;
         } else {
             this.random = Math.random;
@@ -261,9 +260,9 @@ export class RandomPitch extends Pitch {
     }
     evaluate(options: ChangingOptions = {}): Pitch {
         const randomValue = this.random();
-        console.log(randomValue);
         this.pitch = Math.floor(randomValue * (this.max - this.min + 1)) + this.min;
-        return super.evaluate(options);
+        const pitch = new Pitch(this as object).evaluate(options);
+        return pitch;
     }
     seed(seed: string) {
         this.randomSeed = seed;
