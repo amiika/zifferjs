@@ -38,3 +38,11 @@ export function deepClone<T, U = T extends Array<infer V> ? V : never>(source: T
 export function choose<T>(arr: Array<T>): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+export function safeEval(expression: string): number {
+  try {
+    return new Function(`"use strict";return (${expression})`)();
+  } catch (error) {
+    throw new Error(`Error in eval: ${error}`);
+  }
+}

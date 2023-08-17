@@ -46,8 +46,8 @@ ints = l:(int / sep)+
 monzo = "[" l:ints ">"
 { return monzoToCents(l) }
 
-operation = (value / ratio / monzo / sep*) (operator (value / ratio / monzo / sub_operations / operation / sep*))+
-{ return eval(text()) }
+operation = (value / ratio / monzo / sep*) (operator sep* (value / ratio / monzo / sub_operations / operation / sep*))+
+{ return safeEval(text()) }
 
 operator = "+" / "-" / "*" / "%" / "&" / "|" / "<<" / ">>"
 sub_operations = "(" operation ")"

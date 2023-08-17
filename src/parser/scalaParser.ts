@@ -2,6 +2,7 @@
 
 // import libs
 import { ratioToCents, monzoToCents, centsToSemitones } from '../scale';
+import { safeEval } from '../utils';
 
 
 
@@ -392,7 +393,7 @@ function peg$parse(input, options) {
  return monzoToCents(l) };// @ts-ignore
 
   var peg$f13 = function() {// @ts-ignore
- return eval(text()) };
+ return safeEval(text()) };
 // @ts-ignore
   var peg$currPos = 0;
 // @ts-ignore
@@ -2168,7 +2169,7 @@ peg$parsemonzo() {
   function // @ts-ignore
 peg$parseoperation() {
 // @ts-ignore
-    var s0, s1, s2, s3, s4, s5, s6;
+    var s0, s1, s2, s3, s4, s5, s6, s7;
 
 // @ts-ignore
     var key = peg$currPos * 17 + 14;
@@ -2223,35 +2224,46 @@ peg$parseoperation() {
 // @ts-ignore
       if (s4 !== peg$FAILED) {
 // @ts-ignore
-        s5 = peg$parsevalue();
+        s5 = [];
 // @ts-ignore
-        if (s5 === peg$FAILED) {
+        s6 = peg$parsesep();
 // @ts-ignore
-          s5 = peg$parseratio();
+        while (s6 !== peg$FAILED) {
 // @ts-ignore
-          if (s5 === peg$FAILED) {
+          s5.push(s6);
 // @ts-ignore
-            s5 = peg$parsemonzo();
+          s6 = peg$parsesep();
+        }
 // @ts-ignore
-            if (s5 === peg$FAILED) {
+        s6 = peg$parsevalue();
 // @ts-ignore
-              s5 = peg$parsesub_operations();
+        if (s6 === peg$FAILED) {
 // @ts-ignore
-              if (s5 === peg$FAILED) {
+          s6 = peg$parseratio();
 // @ts-ignore
-                s5 = peg$parseoperation();
+          if (s6 === peg$FAILED) {
 // @ts-ignore
-                if (s5 === peg$FAILED) {
+            s6 = peg$parsemonzo();
 // @ts-ignore
-                  s5 = [];
+            if (s6 === peg$FAILED) {
 // @ts-ignore
-                  s6 = peg$parsesep();
+              s6 = peg$parsesub_operations();
 // @ts-ignore
-                  while (s6 !== peg$FAILED) {
+              if (s6 === peg$FAILED) {
 // @ts-ignore
-                    s5.push(s6);
+                s6 = peg$parseoperation();
 // @ts-ignore
-                    s6 = peg$parsesep();
+                if (s6 === peg$FAILED) {
+// @ts-ignore
+                  s6 = [];
+// @ts-ignore
+                  s7 = peg$parsesep();
+// @ts-ignore
+                  while (s7 !== peg$FAILED) {
+// @ts-ignore
+                    s6.push(s7);
+// @ts-ignore
+                    s7 = peg$parsesep();
                   }
                 }
               }
@@ -2259,9 +2271,9 @@ peg$parseoperation() {
           }
         }
 // @ts-ignore
-        if (s5 !== peg$FAILED) {
+        if (s6 !== peg$FAILED) {
 // @ts-ignore
-          s4 = [s4, s5];
+          s4 = [s4, s5, s6];
 // @ts-ignore
           s3 = s4;
 // @ts-ignore
@@ -2291,35 +2303,46 @@ peg$parseoperation() {
 // @ts-ignore
           if (s4 !== peg$FAILED) {
 // @ts-ignore
-            s5 = peg$parsevalue();
+            s5 = [];
 // @ts-ignore
-            if (s5 === peg$FAILED) {
+            s6 = peg$parsesep();
 // @ts-ignore
-              s5 = peg$parseratio();
+            while (s6 !== peg$FAILED) {
 // @ts-ignore
-              if (s5 === peg$FAILED) {
+              s5.push(s6);
 // @ts-ignore
-                s5 = peg$parsemonzo();
+              s6 = peg$parsesep();
+            }
 // @ts-ignore
-                if (s5 === peg$FAILED) {
+            s6 = peg$parsevalue();
 // @ts-ignore
-                  s5 = peg$parsesub_operations();
+            if (s6 === peg$FAILED) {
 // @ts-ignore
-                  if (s5 === peg$FAILED) {
+              s6 = peg$parseratio();
 // @ts-ignore
-                    s5 = peg$parseoperation();
+              if (s6 === peg$FAILED) {
 // @ts-ignore
-                    if (s5 === peg$FAILED) {
+                s6 = peg$parsemonzo();
 // @ts-ignore
-                      s5 = [];
+                if (s6 === peg$FAILED) {
 // @ts-ignore
-                      s6 = peg$parsesep();
+                  s6 = peg$parsesub_operations();
 // @ts-ignore
-                      while (s6 !== peg$FAILED) {
+                  if (s6 === peg$FAILED) {
 // @ts-ignore
-                        s5.push(s6);
+                    s6 = peg$parseoperation();
 // @ts-ignore
-                        s6 = peg$parsesep();
+                    if (s6 === peg$FAILED) {
+// @ts-ignore
+                      s6 = [];
+// @ts-ignore
+                      s7 = peg$parsesep();
+// @ts-ignore
+                      while (s7 !== peg$FAILED) {
+// @ts-ignore
+                        s6.push(s7);
+// @ts-ignore
+                        s7 = peg$parsesep();
                       }
                     }
                   }
@@ -2327,9 +2350,9 @@ peg$parseoperation() {
               }
             }
 // @ts-ignore
-            if (s5 !== peg$FAILED) {
+            if (s6 !== peg$FAILED) {
 // @ts-ignore
-              s4 = [s4, s5];
+              s4 = [s4, s5, s6];
 // @ts-ignore
               s3 = s4;
 // @ts-ignore
