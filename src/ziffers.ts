@@ -48,8 +48,6 @@ export class Ziffers {
 
         // Common options
 
-
-
         try {
            this.values = parseZiffers(input, this.options);
            this.evaluated = this.evaluate();
@@ -91,10 +89,12 @@ export class Ziffers {
     }
             
     next() {
+        
         if(this.redo > 0 && this.index >= this.evaluated.length*this.redo) {
             this.update();
             this._current = undefined;
-        }
+            this.index = 0;
+        } 
 
         if(this._current !== undefined) {
             const currentEvent = this.evaluated[this._current % this.evaluated.length];

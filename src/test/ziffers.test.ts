@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pattern, cachedEvent, get, pitch, freq, clear } from '../ziffers.ts'
+import { pattern, cachedPattern, cachedEvent, get, pitch, freq, clear } from '../ziffers.ts'
 
 describe('main-tests', () => {
   it('parse', () => {
@@ -47,6 +47,7 @@ describe('main-tests', () => {
     expect(pattern('(1,7) (1,7) (1,7) (1,7) (1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([2,3,3,2,5]);
     expect(cachedEvent('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).collect("pitch")).toEqual(2);
     expect(cachedEvent('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).collect("pitch")).toEqual(3);
+    expect(cachedPattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).evaluated[0].collect("pitch")).toEqual(3);
   })
 
   it('cache', () => {
