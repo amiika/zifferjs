@@ -44,7 +44,7 @@ pipe = ws "|" ws
 quote = '"' / "'"
 
 
-durchar = [a-z] 
+durchar = [mklpdcwyhnqaefsxtgujzo]
 { return DEFAULT_DURS[text()]; }
 
 duration = durchar / float
@@ -62,7 +62,7 @@ list_operation = a:list b:operation c:list
 
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
-item = v:(chord / pitch / octave_change / ws / duration_change / random / random_between / list)
+item = v:(rest / chord / pitch / octave_change / ws / duration_change / random / random_between / list)
 { return v }
 
 cycle = "<" l:items ">" 
@@ -94,6 +94,11 @@ duration_change = dur:duration
   // TODO: Remove these?
   options.nodeOptions.duration = dur;
   return build(types.DurationChange,{duration: dur}) 
+}
+
+rest = d:duration? "r"
+{
+  return build(types.Rest, {duration: d})
 }
 
 pitch = oct:octave? dur:duration? val:int 

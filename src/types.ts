@@ -1,13 +1,20 @@
 import { noteFromPc, midiToFreq, scaleLength } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale } from './defaults.ts';
-import { deepClone, seededRandom } from './utils.ts';
+import { deepClone } from './utils.ts';
 
-export interface Options {
-    nodeOptions?: NodeOptions;
-    defaultDurs?: {[key: string]: number};
+export const globalOptionKeys: string[] = ["retrograde"];
+
+export type GlobalOptions = {
+    retrograde?: boolean;
 }
 
-export interface NodeOptions {
+export type Options = {
+    nodeOptions?: NodeOptions;
+    defaultDurs?: {[key: string]: number};
+    
+}
+
+export type NodeOptions = {
     key?: string;
     scale?: string|number[];
     parsedScale?: number[]|undefined;
@@ -23,6 +30,8 @@ export interface NodeOptions {
     seed?: string;
     randomSeed?: string;
     seededRandom?: Function;
+    globalOptions?: GlobalOptions;
+    retrograde?: boolean;
 }
 
 export type ChangingOptions = {
@@ -30,7 +39,7 @@ export type ChangingOptions = {
     duration?: number;
 }
 
-export interface Node extends NodeOptions {
+export type Node = NodeOptions & {
     // Common
     type: string;
     text: string;
@@ -54,21 +63,23 @@ export interface Node extends NodeOptions {
     max?: number;
 }
 
-interface Location {
+type Location = {
     end: Position;
     start: Position;
 }
 
-interface Position {
+type Position = {
     offset: number;
     line: number;
     column: number;
 }
 
 export abstract class Base {
+    type!: string;
     text!: string;
     location!: Location;
     constructor(data: Partial<Node>) {
+        this.type = this.constructor.name;
         Object.assign(this, data);
     }
     public clone(): any {
@@ -91,6 +102,8 @@ export abstract class Event extends Base {
     _next!: number;
     _prev!: number;
     modifiedEvent: Event|undefined = undefined;
+    globalOptions!: GlobalOptions;
+
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
@@ -133,16 +146,27 @@ export abstract class Event extends Base {
         this.modifiedEvent!.refresh();
         return this.modifiedEvent!;
     }
-    skip(): Event {
+
+    skip(): Event { return this }
+
+    scale(_scale: string|number[]): Event { return this }
+
+    randomScale(): Event { return this }
+
+    retrograde(): Event { return this }
+
+}
+
+export class Start extends Event {
+    duration: number = 0;
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data, {duration: 0});
+    }
+    retrograde(): Event {
+        this.globalOptions.retrograde = true;
         return this;
     }
-
-    scale(_scale: string|number[]): void {};
-
-    randomScale(): void {};
-    
-    seed(_seed: string): void {};
-
 }
 
 export class Pitch extends Event {
@@ -263,10 +287,6 @@ export class RandomPitch extends Pitch {
         this.pitch = Math.floor(randomValue * (this.max - this.min + 1)) + this.min;
         const pitch = new Pitch(this as object).evaluate(options);
         return pitch;
-    }
-    seed(seed: string) {
-        this.randomSeed = seed;
-        this.seededRandom = seededRandom(seed);
     }
 }
 
