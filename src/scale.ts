@@ -66,6 +66,10 @@ export function midiToFreq(note: number): number {
   return (freq / 32) * (2 ** ((note - 9) / 12))
 }
 
+export function freqToMidi(freq: number): number {
+  return (12 / Math.log(2)) * Math.log(freq / 440) + 69
+}
+
 export function ratioToCents(ratio: number): number {
   return 1200.0 * Math.log2(ratio);
 }
