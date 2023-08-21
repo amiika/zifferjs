@@ -6,7 +6,7 @@ import { parse as parseScale } from './parser/scalaParser.ts'
 
 try {
 
-  console.log(cachedEventTest('1 2 3 4',{retrograde: true}));
+  console.log(cachedEventTest('1').sound('bd'));
  
   // This should output: 4// This should output: 4
 //console.log('Parsed result:', result);

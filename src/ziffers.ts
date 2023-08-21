@@ -1,13 +1,14 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
-import { Base, Pitch, Chord, Rest, Event, Start, Options, NodeOptions, GlobalOptions, globalOptionKeys } from './types.ts';
+import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys } from './types.ts';
 import { LRUCache} from 'lru-cache';
-import { seededRandom } from './utils.ts';
+import { deepClone, seededRandom } from './utils.ts';
 
 const zcache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
 export class Ziffers {
+    input: string;
     values: Base[];
     evaluated: (Pitch|Chord|Rest)[];
     options: Options;
@@ -15,9 +16,9 @@ export class Ziffers {
     redo: number;
     index: number = -1;
     globalOptions : GlobalOptions;
-    globalModifiers: Map<string, boolean> = new Map();
 
     constructor(input: string, options: NodeOptions = {}, globalOptions: GlobalOptions = {}) {
+        this.input = input;
         // Merge options with default options. TODO: Ignore some common options like degrees?
         options = {...DEFAULT_OPTIONS, ...options};
         this.globalOptions = globalOptions;
@@ -46,24 +47,17 @@ export class Ziffers {
             options.seededRandom = seededRandom(options.seed);
         }
 
-        // TODO: Not needed?
-        globalOptionKeys.forEach((key: string) => {
-            if(options[key as keyof GlobalOptions] !== undefined) {
-                const val = options[key as keyof GlobalOptions];
-                globalOptions[key as keyof GlobalOptions] = val;
-                delete options[key as keyof GlobalOptions];
-            }
-        });
-
-        options.globalOptions = globalOptions;
+        // Check if globalOpions is empty
+        if(Object.keys(globalOptions).length === 0) {
+            this.globalOptions = getGlobalOption(options);
+        }
 
         this.options = {nodeOptions: options};
-
-        // Common options
 
         try {
            this.values = parseZiffers(input, this.options);
            this.evaluated = this.evaluate();
+           this.applyTransformations();
         } catch (ex: any) {
             console.log(ex);
             // Handle parsing error
@@ -75,7 +69,7 @@ export class Ziffers {
 
     update() {
         this.evaluated = this.evaluate();
-        
+        this.applyTransformations();
     }
 
     pitches(): (number|undefined|number[])[] {
@@ -108,24 +102,17 @@ export class Ziffers {
     }
             
     next(): Event {
-        
         if(this.redo > 0 && this.index >= this.evaluated.length*this.redo) {
             this.update();
             this.index = 0;
         }
         
         if(this.index < 0) {
-            // Start event handles global modifier in the chain
-            this.index++;
-            return new Start(this.options.nodeOptions!);
-        }
-
-        if(this.index === 0) {
-            this.applyTransformations();
+            // Starting first time
+            this.index = 0;
         }
 
         const nextEvent = this.evaluated[this.index % this.evaluated.length];
-        if(nextEvent.modifiedEvent) nextEvent.modifiedEvent == undefined;
  
         this.index++;
         this.counter++;
@@ -135,9 +122,13 @@ export class Ziffers {
 
     applyTransformations() {
         // TODO: Make more generic
-        if(this.options.nodeOptions?.globalOptions?.retrograde) {
-            this.evaluated.reverse();
+        if(this.globalOptions?.retrograde) {
+            this.evaluated = this.evaluated.reverse();
         }
+    }
+
+    clone(): Ziffers {
+        return deepClone(this);
     }
 
     notStarted() {
@@ -145,7 +136,7 @@ export class Ziffers {
     }
 
     peek() {
-        return this.evaluated[this.index || 0];
+        return this.evaluated[this.index-1 || 0];
     }
 
     hasStarted(): boolean {
@@ -168,52 +159,66 @@ export class Ziffers {
 
 }
 
+const getGlobalOption = (options: NodeOptions): GlobalOptions => {
+    let globalOptions: GlobalOptions = {};
+    globalOptionKeys.forEach((key: string) => {
+        if(options[key as keyof GlobalOptions] !== undefined) {
+            const val = options[key as keyof GlobalOptions];
+            globalOptions[key as keyof GlobalOptions] = val;
+            delete options[key as keyof GlobalOptions];
+        }
+    });
+    return globalOptions;
+}
+
 const generateCacheKey = (...args: any[]) => {
     return args.map(arg => JSON.stringify(arg)).join(',');
   }
 
-const cachedCall = (a: string, b: NodeOptions, c: GlobalOptions): Ziffers => {
+const cachedCall = (a: string, b: NodeOptions): Ziffers => {
+    
     const cacheKey = generateCacheKey(a, b);
+
     if (zcache.has(cacheKey)) {
         const cached = zcache.get(cacheKey) as Ziffers;
         return cached;
     } else {
-        const result = new Ziffers(a, b, c);
+        const result = new Ziffers(a, b);
         zcache.set(cacheKey, result);
         return result;
     }
 }
 
-export const pattern = (input: string, options: object = {}, globalOptions: object = {}) => {
-    return new Ziffers(input, options, globalOptions);
+export const pattern = (input: string, options: object = {}): Ziffers => {
+    return new Ziffers(input, options);
 }
 
-export const cachedPattern = (input: string, options: NodeOptions = {}, global: GlobalOptions = {}) => {
-    return cachedCall(input, options, global);
+export const cachedPattern = (input: string, options: NodeOptions = {}): Ziffers => {
+    return cachedCall(input, options);
 }
 
-export const cachedEvent = (input: string, options: NodeOptions = {}, global: GlobalOptions = {}): Pitch|Chord|Rest|Start => {
-    const fromCache = cachedCall(input, options, global);
+export const cachedEvent = (input: string, options: NodeOptions = {}): Event => {
+    const fromCache = cachedCall(input, options);
     let next = fromCache.next();
     return next;
 }
 
-export const cachedEventTest = (input: string, options: NodeOptions = {}, global: GlobalOptions = {}): Pitch|Chord|Rest|Start => {
-    const next = cachedEvent(input, options, global); 
-    if(next.type === "Start") return cachedEvent(input, options, global);
+export const cachedEventTest = (input: string, options: NodeOptions = {}): Event => {
+    const next = cachedEvent(input, options); 
+    if(next.type === "Start") return cachedEvent(input, options);
     return next;
 }
 
-export const get = (input: string, options: NodeOptions = {}, global: GlobalOptions = {}): Event => {
+export const get = (input: string, options: NodeOptions = {}): Event => {
     if(options.index) {
         let index = options.index;
         delete options.index;
-        let fromCache = cachedCall(input, options, global);
+        let fromCache = cachedCall(input, options);
         if(fromCache.notStarted()) fromCache.next();
         index = index%fromCache.evaluated.length;
         return fromCache.evaluated[index];
     }
-    const fromCache = cachedCall(input, options, global);
+    const fromCache = cachedCall(input, options);
     if(fromCache.notStarted()) fromCache.next();
     return fromCache.peek()!;
 }
