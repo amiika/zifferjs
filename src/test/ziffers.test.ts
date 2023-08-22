@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pattern, cachedPattern, cachedEventTest, get, pitch, freq, clear } from '../ziffers.ts'
+import { pattern } from '../ziffers.ts'
 
 describe('main-tests', () => {
   it('parse', () => {
@@ -33,10 +33,8 @@ describe('main-tests', () => {
   })
 
   it('cycles', () => {
-    expect(cachedEventTest('<1 <2 3>>').collect('pitch')).toEqual(1);
-    expect(cachedEventTest('<1 <2 3>>').collect('pitch')).toEqual(2);
-    expect(cachedEventTest('<1 <2 3>>').collect('pitch')).toEqual(1);
-    expect(cachedEventTest('<1 <2 3>>').collect('pitch')).toEqual(3);
+    // Rewrite
+    //expect(cachedEventTest('<1 <2 3>>').collect('pitch')).toEqual(1);
   })
 
   it('randoms', () => {
@@ -45,29 +43,7 @@ describe('main-tests', () => {
     expect(pattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([2]);
     expect(pattern('(1,7) (1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([2,3]);
     expect(pattern('(1,7) (1,7) (1,7) (1,7) (1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).pitches()).toEqual([2,3,3,2,5]);
-    expect(cachedEventTest('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).collect("pitch")).toEqual(2);
-    expect(cachedEventTest('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).collect("pitch")).toEqual(3);
-    expect(cachedPattern('(1,7)',{scale: '187. 356. 526. 672. 856. 985. 1222.', seed: "foo"}).evaluated[0].collect("pitch")).toEqual(3);
-  })
-
-  it('cache', () => {
-    // Clear earlier tests
-    clear('1 2');
-    clear('2 4 1',{key: "C"});
-    clear('0');
-    clear('1 4');
-
-    expect(cachedEventTest('1 2').collect('pitch')).toEqual(1);
-    expect(cachedEventTest('1 2').collect('pitch')).toEqual(2);
-    expect(cachedEventTest('1 2').collect('pitch')).toEqual(1);
-    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
-    expect(get('2 4 1',{key: "C"}).collect('pitch')).toEqual(2);
-    expect(get('2 4 1',{key: "C", index: 2}).collect('pitch')).toEqual(1);
-    expect(cachedEventTest('2 4 1', {key: "C"}).collect('pitch')).toEqual(2);
-    expect(freq('0')).toEqual(261.6255653005986);
-    expect(pitch('1 4')).toEqual(1);
-    expect(pitch('1 4')).toEqual(4);
-  })
+})
 
   it('rests', () => {
     expect(pattern('er qr').durations()).toEqual([0.125,0.25]);

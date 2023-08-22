@@ -2,10 +2,7 @@ import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys } from './types.ts';
-import { LRUCache} from 'lru-cache';
 import { deepClone, seededRandom } from './utils.ts';
-
-const zcache = new LRUCache({max: 1000, ttl: 1000 * 60 * 5});
 
 export class Ziffers {
     input: string;
@@ -113,7 +110,7 @@ export class Ziffers {
         }
 
         const nextEvent = this.evaluated[this.index % this.evaluated.length];
- 
+
         this.index++;
         this.counter++;
 
@@ -171,71 +168,6 @@ const getGlobalOption = (options: NodeOptions): GlobalOptions => {
     return globalOptions;
 }
 
-const generateCacheKey = (...args: any[]) => {
-    return args.map(arg => JSON.stringify(arg)).join(',');
-  }
-
-const cachedCall = (a: string, b: NodeOptions): Ziffers => {
-    
-    const cacheKey = generateCacheKey(a, b);
-
-    if (zcache.has(cacheKey)) {
-        const cached = zcache.get(cacheKey) as Ziffers;
-        return cached;
-    } else {
-        const result = new Ziffers(a, b);
-        zcache.set(cacheKey, result);
-        return result;
-    }
-}
-
 export const pattern = (input: string, options: object = {}): Ziffers => {
     return new Ziffers(input, options);
-}
-
-export const cachedPattern = (input: string, options: NodeOptions = {}): Ziffers => {
-    return cachedCall(input, options);
-}
-
-export const cachedEvent = (input: string, options: NodeOptions = {}): Event => {
-    const fromCache = cachedCall(input, options);
-    let next = fromCache.next();
-    return next;
-}
-
-export const cachedEventTest = (input: string, options: NodeOptions = {}): Event => {
-    const next = cachedEvent(input, options); 
-    if(next.type === "Start") return cachedEvent(input, options);
-    return next;
-}
-
-export const get = (input: string, options: NodeOptions = {}): Event => {
-    if(options.index) {
-        let index = options.index;
-        delete options.index;
-        let fromCache = cachedCall(input, options);
-        if(fromCache.notStarted()) fromCache.next();
-        index = index%fromCache.evaluated.length;
-        return fromCache.evaluated[index];
-    }
-    const fromCache = cachedCall(input, options);
-    if(fromCache.notStarted()) fromCache.next();
-    return fromCache.peek()!;
-}
-
-export const note = (input: string, options: NodeOptions = {}): number|undefined => {
-    return cachedEventTest(input, options).collect("note");
-}
-
-export const pitch = (input: string, options: NodeOptions = {}): number|undefined => {
-    return cachedEventTest(input, options).collect("pitch");
-}
-
-export const freq = (input: string, options: NodeOptions = {}): number|undefined => {
-    return cachedEventTest(input, options).collect("freq");
-}
-
-export const clear = (input: string, options: NodeOptions = {}): void => {
-    const cacheKey = generateCacheKey(input, options);
-    zcache.delete(cacheKey);
 }

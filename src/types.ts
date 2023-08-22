@@ -155,18 +155,16 @@ export abstract class Event extends Base {
 
     retrograde(): Event { return this }
 
-}
+    asObject(): object {
+        const attributes: Record<keyof this, any> = {} as Record<keyof this, any>;
+        for (const key in this) {
+            if (Object.prototype.hasOwnProperty.call(this, key)) {
+                attributes[key as keyof this] = this[key as keyof this];
+            }
+        }
+        return attributes;
+    }
 
-export class Start extends Event {
-    duration: number = 0;
-    constructor(data: Partial<Node>) {
-        super(data);
-        Object.assign(this, data, {duration: 0});
-    }
-    retrograde(): Event {
-        this.globalOptions.retrograde = true;
-        return this;
-    }
 }
 
 export class Pitch extends Event {
@@ -217,9 +215,11 @@ export class Pitch extends Event {
         }
         return this;
     }
+
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
         return this[name];
     }
+
     scale(name: string): Pitch {
         if(this.scaleName!==name) {
             this.scaleName = name;
@@ -228,6 +228,7 @@ export class Pitch extends Event {
         }
         return this;
     }
+
     randomScale(): Pitch {
         this.parsedScale = getRandomScale();
         return this.evaluate();

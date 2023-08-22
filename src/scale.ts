@@ -1,13 +1,13 @@
 import { MODIFIERS, NOTES_TO_INTERVALS, getScale } from "./defaults";
 
-export function noteFromPc(
+export const noteFromPc = (
     root: number | string,
     pitch_class: number,
     scale: string | Array<number>,
     octave: number = 0,
     modifier: number = 0,
     degrees: boolean = false
-  ): [number, number | undefined] {
+  ): [number, number | undefined] => {
     // Initialization
     pitch_class = degrees && pitch_class > 0 ? pitch_class - 1 : pitch_class;
     root = typeof root === 'string' ? noteNameToMidi(root) : root;
@@ -36,7 +36,7 @@ export function noteFromPc(
     
 }
 
-export function noteNameToMidi(name: string): number {
+export const noteNameToMidi = (name: string): number => {
   const items = name.match(/^([a-gA-G])([#bs])?([1-9])?$/);
   if (items === null) {
     return 60; // Default MIDI note C4 if the input is invalid
@@ -48,7 +48,7 @@ export function noteNameToMidi(name: string): number {
   return 12 + octave * 12 + interval + modifier;
 }
 
-export function resolvePitchBend(note_value: number, semitones: number = 1): [number, number] {
+export const resolvePitchBend = (note_value: number, semitones: number = 1): [number, number] => {
   let midi_bend_value = 8192;
   if (note_value % 1 !== 0) {
     const start_value = note_value > Math.round(note_value) ? note_value : Math.round(note_value);
@@ -61,16 +61,16 @@ export function resolvePitchBend(note_value: number, semitones: number = 1): [nu
   return [note_value, midi_bend_value];
 }
 
-export function midiToFreq(note: number): number {
+export const midiToFreq = (note: number): number => {
   const freq = 440  // Frequency of A
   return (freq / 32) * (2 ** ((note - 9) / 12))
 }
 
-export function freqToMidi(freq: number): number {
+export const freqToMidi = (freq: number): number => {
   return (12 / Math.log(2)) * Math.log(freq / 440) + 69
 }
 
-export function ratioToCents(ratio: number): number {
+export const ratioToCents = (ratio: number): number => {
   return 1200.0 * Math.log2(ratio);
 }
 
@@ -93,12 +93,12 @@ export function* primeSieve() {
   }
 }
 
-export function getPrimes(n: number): number[] {
+export const getPrimes = (n: number): number[] => {
   const primeGenerator: Generator<number> = primeSieve();
   return Array.from({ length: n }, () => primeGenerator.next().value);
 }
 
-export function monzoToCents(monzo: number[]): number {
+export const monzoToCents = (monzo: number[]): number => {
   const maxIndex = monzo.length;
   const primes = getPrimes(maxIndex+1);
 
@@ -111,7 +111,7 @@ export function monzoToCents(monzo: number[]): number {
 
 }
 
-export function centsToSemitones(cents: number[]): number[] {
+export const centsToSemitones = (cents: number[]): number[] => {
   if (cents[0] !== 0) {
       cents = [0, ...cents];
   }
@@ -123,6 +123,25 @@ export function centsToSemitones(cents: number[]): number[] {
   return semitoneScale;
 }
 
-export function scaleLength(scale: string|number[]): number {
+export const scaleLength = (scale: string|number[]): number => {
   return typeof scale === 'string' ? getScale(scale).length : scale.length;
+}
+
+export const stepsToScale = (steps: number[]) => {
+  return [0,...steps].reduce((scale: number[], step: number, index: number) => {
+    const value = index === 0 ? 0 : step + scale[index-1];
+    console.log(step);
+    return [...scale, value];
+  }, []);
+}
+
+export const scaleToSteps = (scale: number[]) => {
+  const steps: number[] = [];
+  if(scale[0] == 0) scale.shift();
+  let current = 0;
+  scale.forEach((pc) => {
+      steps.push(pc - current);
+      current = pc;
+  });
+  return steps;
 }
