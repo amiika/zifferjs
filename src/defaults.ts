@@ -169,6 +169,12 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
     const aeolyphimic = [3, 2, 1, 1, 3, 2];
     const bocrian = [2, 1, 2, 2, 2, 2, 1];
     const stydian = [2, 2, 1, 2, 1, 2, 2];
+    const aerylian = [1, 2, 2, 2, 1, 3, 1];
+    const thydian = [1, 2, 2, 2, 2, 2, 1];
+    const minordimin = [1, 2, 1, 2, 1, 2, 1, 2];
+    const ionoptyllic = [2, 2, 1, 2, 1, 1, 2, 1];
+    const ionacryllic = [2, 1, 2, 2, 1, 1, 2, 1];
+    const aerycryllic = [2, 2, 1, 2, 2, 1, 1, 1];
     // All scales
     const all_scales = {
         "MAJOR": ionian,
@@ -973,7 +979,8 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
         "IONALIAN": [1, 3, 1, 2, 1, 2, 2],
         "DOLIAN": [3, 1, 1, 2, 2, 2, 1],
         "PORIAN": [1, 1, 2, 2, 2, 1, 3],
-        "AERYLIAN": [1, 2, 2, 2, 1, 3, 1],
+        "AERYLIAN": aerylian,
+        "NEOPOLITAN MINOR": aerylian,
         "ZAGIAN": [2, 2, 2, 1, 3, 1, 1],
         "LAGIAN": [2, 2, 1, 3, 1, 1, 2],
         "TYRIAN": [2, 1, 3, 1, 1, 2, 2],
@@ -1117,8 +1124,11 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
         "GOTHIAN": [2, 2, 1, 1, 2, 2, 2],
         "STORIAN": [2, 1, 1, 2, 2, 2, 2],
         "PYPTIAN": [1, 1, 2, 2, 2, 2, 2],
-        "THYDIAN": [1, 2, 2, 2, 2, 2, 1],
-        "AERYCRYLLIC": [2, 2, 1, 2, 2, 1, 1, 1],
+        "THYDIAN": thydian,
+        "NEOPOLITAN MAJOR": thydian,
+        "AERYCRYLLIC": aerycryllic,
+        "DOMINANT BEBOP": aerycryllic,
+        "BEBOP DOMINANT": aerycryllic,
         "GADYLLIC": [2, 1, 2, 2, 1, 1, 1, 2],
         "SOLYLLIC": [1, 2, 2, 1, 1, 1, 2, 2],
         "ZYLYLLIC": [2, 2, 1, 1, 1, 2, 2, 1],
@@ -1202,7 +1212,9 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
         "DANYLLIC": [1, 2, 1, 2, 2, 2, 1, 1],
         "GOPTYLLIC": [2, 1, 2, 2, 2, 1, 1, 1],
         "EPOCRYLLIC": [1, 2, 2, 2, 1, 1, 1, 2],
-        "IONOPTYLLIC": [2, 2, 1, 2, 1, 1, 2, 1],
+        "IONOPTYLLIC": ionoptyllic,
+        "MARJOR BEBOP": ionoptyllic,
+        "BEBOP MAJOR": ionoptyllic,
         "AEOLORYLLIC": [2, 1, 2, 1, 1, 2, 1, 2],
         "THYDYLLIC": [1, 2, 1, 1, 2, 1, 2, 2],
         "GYCRYLLIC": [2, 1, 1, 2, 1, 2, 2, 1],
@@ -1376,7 +1388,11 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
         "GARYLLIC": [1, 2, 1, 2, 1, 2, 2, 1],
         "GATHYLLIC": [2, 1, 2, 1, 2, 2, 1, 1],
         "MIXOPYRYLLIC": [1, 2, 1, 2, 2, 1, 1, 2],
-        "IONACRYLLIC": [2, 1, 2, 2, 1, 1, 2, 1],
+        "IONACRYLLIC": ionacryllic,
+        "BEBOP MINOR": ionacryllic,
+        "MINOR BEBOP": ionacryllic,
+        "DORIAN BEBOP": ionacryllic,
+        "BEBOP DORIAN": ionacryllic,
         "STYLYLLIC": [1, 2, 2, 1, 1, 2, 1, 2],
         "STYCRYLLIC": [4, 2, 1, 1, 1, 1, 1, 1],
         "IONOTHYLLIC": [2, 1, 1, 1, 1, 1, 1, 4],
@@ -1438,8 +1454,9 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
         "EPOTYLLIC": [2, 1, 1, 2, 2, 1, 1, 2],
         "EPIDYLLIC": [1, 1, 2, 2, 1, 1, 2, 2],
         "KAPTYLLIC": [1, 2, 2, 1, 1, 2, 2, 1],
-        "MAJORDIMIN.": [2, 1, 2, 1, 2, 1, 2, 1],
-        "MINORDIMIN.": [1, 2, 1, 2, 1, 2, 1, 2],
+        "MAJORDIMIN": [2, 1, 2, 1, 2, 1, 2, 1],
+        "MINORDIMIN": minordimin,
+        "OCTATONIC": minordimin,
         "AERYCRYGIC": [2, 2, 1, 1, 1, 2, 1, 1, 1],
         "GADYGIC": [2, 1, 1, 1, 2, 1, 1, 1, 2],
         "SOLYGIC": [1, 1, 1, 2, 1, 1, 1, 2, 2],

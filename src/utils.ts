@@ -1,4 +1,4 @@
-export function seededRandom(seed: string = ''): () => number {
+export const seededRandom = (seed: string = ''): (() => number) => {
   let x: number = 0;
   let y: number = 0;
   let z: number = 0;
@@ -21,7 +21,7 @@ export function seededRandom(seed: string = ''): () => number {
   return next;
 }
 
-export function deepClone<T, U = T extends Array<infer V> ? V : never>(source: T ): T {
+export const deepClone = <T, U = T extends Array<infer V> ? V : never>(source: T ): T => {
     if (Array.isArray(source)) {
         return source.map(item => (deepClone(item))) as T & U[]
     }
@@ -35,11 +35,11 @@ export function deepClone<T, U = T extends Array<infer V> ? V : never>(source: T
     return source
 }
 
-export function choose<T>(arr: Array<T>): T {
+export const choose = <T>(arr: Array<T>): T => {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export function safeEval(expression: string): number {
+export const safeEval = (expression: string): number => {
   try {
     return new Function(`"use strict";return (${expression})`)();
   } catch (error) {

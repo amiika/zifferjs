@@ -2,7 +2,7 @@
 import { pattern,note } from './ziffers';
 import { SCALES } from './defaults';
 import { parse as parseScale } from './parser/scalaParser.ts'
-import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps } from './scale.ts';
+import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps, numberToScale} from './scale.ts';
 
 
 try {

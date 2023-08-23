@@ -74,7 +74,7 @@ export const ratioToCents = (ratio: number): number => {
   return 1200.0 * Math.log2(ratio);
 }
 
-export function* primeSieve() {
+export const primeSieve = function* () {
   const sieve: { [key: number]: number[] } = {};
   let current = 2;
 
@@ -130,18 +130,26 @@ export const scaleLength = (scale: string|number[]): number => {
 export const stepsToScale = (steps: number[]) => {
   return [0,...steps].reduce((scale: number[], step: number, index: number) => {
     const value = index === 0 ? 0 : step + scale[index-1];
-    console.log(step);
     return [...scale, value];
   }, []);
 }
 
-export const scaleToSteps = (scale: number[]) => {
-  const steps: number[] = [];
-  if(scale[0] == 0) scale.shift();
-  let current = 0;
-  scale.forEach((pc) => {
-      steps.push(pc - current);
-      current = pc;
-  });
-  return steps;
+export const scaleToSteps = (pcs: number[]): number[] => {
+  const pc_int = (a: number, b: number): number => {
+    const r = (b - a) % 12;
+    return r < 0 ? r+12 : r;
+  }
+  return pcs.map((pc, i) => pc_int(pc, pcs[(i + 1) % pcs.length]));
+}
+
+export const numberToScale = (number: number): number[] => {
+  if (number < 0 || number > 4095) {
+    console.log("Input number must be odd and between 0 and 4095. Using major (2741) instead.");
+    number = 2741;
+  }
+  if(number % 2 === 0) {
+    console.log("Odd number doesnt create real scale");
+  }
+  const arr = (number >>> 0).toString(2).padStart(12, '0').split('');
+  return arr.reduce((acc, bit, i) => bit === '1' ? [11 - i, ...acc] : acc, [] as number[]);
 }
