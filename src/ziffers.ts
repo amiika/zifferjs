@@ -99,18 +99,26 @@ export class Ziffers {
     }
 
     scale(scale: string) {
+        if(this.isInOptions('scaleName', scale)) return this;
         this.update({scale: scale});
         return this;
     }
 
     key(key: string) {
+        if(this.isInOptions('key', key)) return this;
         this.update({key: key});
         return this;
     }
 
     octave(octave: number) {
+        // TODO: Check if this has side effects?
+        if(this.isInOptions('octave', octave)) return this;
         this.update({octave: octave});
         return this;
+    }
+
+    isInOptions(key: string, value: string|number) {
+        return this.options.nodeOptions && this.options.nodeOptions[key as keyof NodeOptions] === value;
     }
             
     next(): Event {
