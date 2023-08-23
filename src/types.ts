@@ -167,6 +167,16 @@ export abstract class Event extends Base {
         return attributes;
     }
 
+    getExisting(...args: string[]): {[key: string]: any} {
+        const existing = args.reduce((acc, value) => {
+            if(Object.prototype.hasOwnProperty.call(this, value)) {
+                acc[value] = this[value as keyof this];
+            }
+            return acc;
+        }, {} as {[key: string]: any});
+        return existing;
+    }
+
 }
 
 export class Pitch extends Event {
