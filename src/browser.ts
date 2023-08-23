@@ -6,10 +6,8 @@ import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps, n
 
 
 try {
-  const yep = pattern('1 2 3 4');
-  console.log(yep.notes());
-  console.log(yep.key('E').notes());
-  console.log(yep.scale('minor').notes());
+  const yep = pattern('e 1 2 z 3 4');
+  console.log(yep);
   // This should output: 4// This should output: 4
 //console.log('Parsed result:', result);
   //const test = next('1 2 3').scale('minor');

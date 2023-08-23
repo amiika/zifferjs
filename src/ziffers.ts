@@ -94,7 +94,7 @@ export class Ziffers {
     }
 
     retrograde(): Ziffers {
-        this.evaluated.reverse();
+        this.evaluated = this.evaluated.reverse();
         return this;
     }
 
@@ -105,6 +105,7 @@ export class Ziffers {
     }
 
     key(key: string) {
+        console.log("KEY?", this.isInOptions('key', key));
         if(this.isInOptions('key', key)) return this;
         this.update({key: key});
         return this;
@@ -122,20 +123,15 @@ export class Ziffers {
     }
             
     next(): Event {
+        this.index++;
+        this.counter++;
+
+        const nextEvent = this.evaluated[this.index % this.evaluated.length];
+
         if(this.redo > 0 && this.index >= this.evaluated.length*this.redo) {
             this.update();
             this.index = 0;
         }
-        
-        if(this.index < 0) {
-            // Starting first time
-            this.index = 0;
-        }
-
-        const nextEvent = this.evaluated[this.index % this.evaluated.length];
-
-        this.index++;
-        this.counter++;
 
         return nextEvent;
     }

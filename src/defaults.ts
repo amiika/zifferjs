@@ -156,6 +156,7 @@ export const NOTES_TO_INTERVALS: { [key: string]: number } = {
     "m": 1000,
   };
 
+  // FROM: allthescales.org & common synonyms
   const scales = () => {
     // Scales with multiple names
     const aeolian = [2, 1, 2, 2, 1, 2, 2];

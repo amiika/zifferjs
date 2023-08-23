@@ -1,4 +1,6 @@
 import { MODIFIERS, NOTES_TO_INTERVALS, getScale } from "./defaults";
+import { isScale } from "./defaults";
+import { parse as parseScala } from "./parser/scalaParser";
 
 export const noteFromPc = (
     root: number | string,
@@ -152,4 +154,31 @@ export const numberToScale = (number: number): number[] => {
   }
   const arr = (number >>> 0).toString(2).padStart(12, '0').split('');
   return arr.reduce((acc, bit, i) => bit === '1' ? [11 - i, ...acc] : acc, [] as number[]);
+}
+
+export const parseScalaScale = (scala: string): number[] => {
+  try {
+    return parseScala(scala) as number[];
+  } catch (error) {
+    return [];
+  }
+}
+
+export const safeScale = (scale: string|number|number[]): number[] => {
+  if(typeof scale === 'string') {
+    if(isScale(scale)) {
+      return getScale(scale);
+    } else {
+      const scalaScale = parseScalaScale(scale) as number[];
+      if(scalaScale && scalaScale.length > 0) {
+        return scalaScale;
+      } else {
+        return getScale('MAJOR');
+      }
+    }
+  } else if(typeof scale === 'number') {
+    return numberToScale(scale);
+  }
+  // TODO: Check for valid intervals?
+  return scale;
 }

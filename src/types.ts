@@ -1,4 +1,4 @@
-import { noteFromPc, midiToFreq, scaleLength } from './scale.ts';
+import { noteFromPc, midiToFreq, scaleLength, safeScale } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale } from './defaults.ts';
 import { deepClone } from './utils.ts';
 
@@ -208,8 +208,8 @@ export class Pitch extends Event {
 
     evaluate(options: ChangingOptions = {}): Pitch {
         if(options.octave) this.octave = options.octave + (this.octave || 0);
-        if(options.duration) this.duration = options.duration;
-        if(options.scale) this.parsedScale = getScale(options.scale) as number[];
+        if(options.duration || options.duration === 0) this.duration = options.duration;
+        if(options.scale) this.parsedScale = safeScale(options.scale) as number[];
         if(options.key) this.key = options.key;
         const [note,bend] = noteFromPc(this.key!, this.pitch!, this.parsedScale!, this.octave!);
         this.note = note;
@@ -314,7 +314,7 @@ export class DurationChange extends Base {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}) {
-        options.duration = this.duration + (options.duration || 0);
+        options.duration = this.duration;
         return undefined;
     }
 }
