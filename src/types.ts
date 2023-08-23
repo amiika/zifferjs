@@ -37,6 +37,8 @@ export type NodeOptions = {
 export type ChangingOptions = {
     octave?: number;
     duration?: number;
+    scale?: string;
+    key?: string;
 }
 
 export type Node = NodeOptions & {
@@ -190,8 +192,8 @@ export class Pitch extends Event {
               if(property === "pitch" || property === "key" || property === "parsedScale" || property === "octave") {
                 console.log(`${property} has changed to ${value}`);
                   target.refresh();
-              }
-                    }
+                }
+            }
             return true;
           }
         };
@@ -207,6 +209,8 @@ export class Pitch extends Event {
     evaluate(options: ChangingOptions = {}): Pitch {
         if(options.octave) this.octave = options.octave + (this.octave || 0);
         if(options.duration) this.duration = options.duration;
+        if(options.scale) this.parsedScale = getScale(options.scale) as number[];
+        if(options.key) this.key = options.key;
         const [note,bend] = noteFromPc(this.key!, this.pitch!, this.parsedScale!, this.octave!);
         this.note = note;
         this.freq = midiToFreq(this.note);
@@ -298,7 +302,7 @@ export class OctaveChange extends Base {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}) {
-        options.octave = this.octave;
+        options.octave = this.octave + (options.octave || 0);
         return undefined;  
     }
 }
@@ -310,7 +314,7 @@ export class DurationChange extends Base {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}) {
-        options.duration = this.duration;
+        options.duration = this.duration + (options.duration || 0);
         return undefined;
     }
 }
@@ -348,8 +352,8 @@ export class ListOperation extends Base {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}): Pitch[] {
-        this.left.evaluate();
-        this.right.evaluate();
+        this.left.evaluate(options);
+        this.right.evaluate(options);
         // Parse operator from string to javascript operator
         const operator = OPERATORS[this.operation];
         // Create pairs of elements

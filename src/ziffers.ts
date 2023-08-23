@@ -1,7 +1,7 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
-import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys } from './types.ts';
+import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 
 export class Ziffers {
@@ -64,8 +64,8 @@ export class Ziffers {
         }
     }
 
-    update() {
-        this.evaluated = this.evaluate();
+    update(options: ChangingOptions = {}) {
+        this.evaluated = this.evaluate(options);
         this.applyTransformations();
     }
 
@@ -95,6 +95,21 @@ export class Ziffers {
 
     retrograde(): Ziffers {
         this.evaluated.reverse();
+        return this;
+    }
+
+    scale(scale: string) {
+        this.update({scale: scale});
+        return this;
+    }
+
+    key(key: string) {
+        this.update({key: key});
+        return this;
+    }
+
+    octave(octave: number) {
+        this.update({octave: octave});
         return this;
     }
             
@@ -140,10 +155,12 @@ export class Ziffers {
         return this.index >= 0;
     }
 
-    evaluate(): (Pitch|Chord|Rest)[] {
+    
+
+    evaluate(options: ChangingOptions = {}): (Pitch|Chord|Rest)[] {
 
         const items = this.values.map((node: Base) => {
-            return node.evaluate();
+            return node.evaluate(options);
         }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest)[];
         
         items.forEach((item: Event, index) => {
