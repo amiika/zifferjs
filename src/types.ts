@@ -217,17 +217,18 @@ export class Pitch extends Event {
     }
 
     evaluate(options: ChangingOptions = {}): Pitch {
-        if(options.octave) this.octave = options.octave + (this.octave || 0);
-        if(options.duration || options.duration === 0) this.duration = options.duration;
-        if(options.scale) this.parsedScale = safeScale(options.scale) as number[];
-        if(options.key) this.key = options.key;
-        const [note,bend] = noteFromPc(this.key!, this.pitch!, this.parsedScale!, this.octave!);
-        this.note = note;
-        this.freq = midiToFreq(this.note);
+        const clone = deepClone(this);
+        if(options.octave) clone.octave = options.octave + (clone.octave || 0);
+        if(options.duration || options.duration === 0) clone.duration = options.duration;
+        if(options.scale) clone.parsedScale = safeScale(options.scale) as number[];
+        if(options.key) clone.key = options.key;
+        const [note,bend] = noteFromPc(clone.key!, clone.pitch!, clone.parsedScale!, clone.octave!);
+        clone.note = note;
+        clone.freq = midiToFreq(clone.note);
         if(bend) {
-            this.bend = bend;
+            clone.bend = bend;
         }
-        return this;
+        return clone;
     }
 
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
