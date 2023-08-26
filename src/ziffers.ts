@@ -13,6 +13,7 @@ export class Ziffers {
     redo: number;
     index: number = -1;
     globalOptions : GlobalOptions;
+    duration: number;
 
     constructor(input: string, options: NodeOptions = {}, globalOptions: GlobalOptions = {}) {
         this.input = input;
@@ -52,15 +53,17 @@ export class Ziffers {
         this.options = {nodeOptions: options};
 
         try {
-           this.values = parseZiffers(input, this.options);
-           this.evaluated = this.evaluate();
-           this.applyTransformations();
+            this.values = parseZiffers(input, this.options);
+            this.evaluated = this.evaluate();
+            this.applyTransformations();
+            this.duration = this.totalDuration();
         } catch (ex: any) {
             console.log(ex);
             // Handle parsing error
             // [...]
             this.values = [];
             this.evaluated = [];
+            this.duration = 0;
         }
     }
 
@@ -158,21 +161,21 @@ export class Ziffers {
         return this.index >= 0;
     }
 
-    
-
     evaluate(options: ChangingOptions = {}): (Pitch|Chord|Rest)[] {
-
         const items = this.values.map((node: Base) => {
             return node.evaluate(options);
         }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest)[];
-        
-        items.forEach((item: Event, index) => {
-            item._next = index < items.length-1 ? index+1 : 0;
-            item._prev = index > 0 ? index-1 : items.length-1;
-        });
-
         return items;
     }
+
+    totalDuration(): number {
+        const length = this.evaluated.reduce((acc: number, item: Pitch|Chord|Rest) => {
+            return acc + item.collect("duration");
+        }, 0);
+        return length;
+    }
+
+
 
 }
 

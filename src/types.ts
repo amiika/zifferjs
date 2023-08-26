@@ -101,21 +101,12 @@ export abstract class Base {
 
 export abstract class Event extends Base {
     duration!: number;
-    _next!: number;
-    _prev!: number;
     modifiedEvent: Event|undefined = undefined;
     globalOptions!: GlobalOptions;
 
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
-    }
-    next(): number {
-        // TODO: Call modified event next instead?
-        return this._next;
-    }
-    previous(): number {
-        return this._prev;
     }
     collect(name: string): any {
         // Overwrite in subclasses
