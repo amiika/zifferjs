@@ -114,10 +114,15 @@ rest = d:duration? "r"
   return build(types.Rest, {duration: d})
 }
 
-pitch = oct:octave? dur:duration? val:int 
+pitch = oct:octave? dur:duration? add:accidentals? val:int 
 { 
-  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave
-  return build(types.Pitch, {duration: dur, pitch: val, octave: octave})
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
+  return build(types.Pitch, {duration: dur, pitch: val, octave: octave, add: add})
+}
+
+accidentals = acc:("#" / "b")+
+{
+  return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
 }
 
 chord = left:pitch right:pitch+

@@ -172,6 +172,7 @@ export abstract class Event extends Base {
 
 export class Pitch extends Event {
     pitch!: number;
+    add?: number;
     freq?: number;
     note?: number;
     octave?: number;
@@ -214,7 +215,7 @@ export class Pitch extends Event {
         if(options.scale) clone.parsedScale = safeScale(options.scale) as number[];
         if(options.key) clone.key = options.key;
         const [note,bend] = noteFromPc(clone.key!, clone.pitch!, clone.parsedScale!, clone.octave!);
-        clone.note = note;
+        clone.note = clone.add ? note+clone.add : note;
         clone.freq = midiToFreq(clone.note);
         if(bend) {
             clone.bend = bend;

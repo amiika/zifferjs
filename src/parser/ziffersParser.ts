@@ -329,6 +329,8 @@ function peg$parse(input, options) {
   var peg$c21 = "?";
   var peg$c22 = ":";
   var peg$c23 = "r";
+  var peg$c24 = "#";
+  var peg$c25 = "b";
 
   var peg$r0 = /^[0-9]/;
   var peg$r1 = /^[ \n\r\t]/;
@@ -362,6 +364,8 @@ function peg$parse(input, options) {
   var peg$e25 = peg$literalExpectation("?", false);
   var peg$e26 = peg$literalExpectation(":", false);
   var peg$e27 = peg$literalExpectation("r", false);
+  var peg$e28 = peg$literalExpectation("#", false);
+  var peg$e29 = peg$literalExpectation("b", false);
 // @ts-ignore
 
   var peg$f0 = function(s) { 
@@ -441,14 +445,19 @@ function peg$parse(input, options) {
   return build(types.Rest, {duration: d})
 };// @ts-ignore
 
-  var peg$f21 = function(oct, dur, val) { 
+  var peg$f21 = function(oct, dur, add, val) { 
 // @ts-ignore
-  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
 // @ts-ignore
-  return build(types.Pitch, {duration: dur, pitch: val, octave: octave})
+  return build(types.Pitch, {duration: dur, pitch: val, octave: octave, add: add})
 };// @ts-ignore
 
-  var peg$f22 = function(left, right) {// @ts-ignore
+  var peg$f22 = function(acc) {
+// @ts-ignore
+  return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
+};// @ts-ignore
+
+  var peg$f23 = function(left, right) {// @ts-ignore
  return build(types.Chord, {pitches:[left].concat(right)}) };
 // @ts-ignore
   var peg$currPos = 0;
@@ -718,7 +727,7 @@ peg$parsestart() {
     var s0, s1;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 0;
+    var key = peg$currPos * 30 + 0;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -759,7 +768,7 @@ peg$parsefloat() {
     var s0, s1, s2, s3, s4, s5, s6;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 1;
+    var key = peg$currPos * 30 + 1;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1006,7 +1015,7 @@ peg$parseint() {
     var s0, s1, s2;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 2;
+    var key = peg$currPos * 30 + 2;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1080,7 +1089,7 @@ peg$parsews() {
     var s0, s1;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 3;
+    var key = peg$currPos * 30 + 3;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1143,7 +1152,7 @@ peg$parsecomma() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 4;
+    var key = peg$currPos * 30 + 4;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1221,7 +1230,7 @@ peg$parsepipe() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 5;
+    var key = peg$currPos * 30 + 5;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1299,7 +1308,7 @@ peg$parsequote() {
     var s0;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 6;
+    var key = peg$currPos * 30 + 6;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1356,7 +1365,7 @@ peg$parsedurchar() {
     var s0, s1;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 7;
+    var key = peg$currPos * 30 + 7;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1408,7 +1417,7 @@ peg$parseduration() {
     var s0;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 8;
+    var key = peg$currPos * 30 + 8;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1443,7 +1452,7 @@ peg$parseitems() {
     var s0, s1, s2;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 9;
+    var key = peg$currPos * 30 + 9;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1540,7 +1549,7 @@ peg$parselist() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 10;
+    var key = peg$currPos * 30 + 10;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1629,7 +1638,7 @@ peg$parselist_operation() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 11;
+    var key = peg$currPos * 30 + 11;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1696,7 +1705,7 @@ peg$parsemulti() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 12;
+    var key = peg$currPos * 30 + 12;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1797,7 +1806,7 @@ peg$parseeval_item() {
     var s0;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 13;
+    var key = peg$currPos * 30 + 13;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1832,7 +1841,7 @@ peg$parseeval_items() {
     var s0, s1, s2;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 14;
+    var key = peg$currPos * 30 + 14;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -1899,7 +1908,7 @@ peg$parseeval_op() {
     var s0, s1, s2, s3, s4, s5;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 15;
+    var key = peg$currPos * 30 + 15;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2002,7 +2011,7 @@ peg$parseeval() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 16;
+    var key = peg$currPos * 30 + 16;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2117,7 +2126,7 @@ peg$parseoperation() {
     var s0;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 17;
+    var key = peg$currPos * 30 + 17;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2302,7 +2311,7 @@ peg$parseitem() {
     var s0, s1;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 18;
+    var key = peg$currPos * 30 + 18;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2388,7 +2397,7 @@ peg$parsecycle() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 19;
+    var key = peg$currPos * 30 + 19;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2477,7 +2486,7 @@ peg$parseoctave_change() {
     var s0, s1;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 20;
+    var key = peg$currPos * 30 + 20;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2518,7 +2527,7 @@ peg$parseoctave() {
     var s0, s1, s2;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 21;
+    var key = peg$currPos * 30 + 21;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2629,7 +2638,7 @@ peg$parserandom() {
     var s0, s1;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 22;
+    var key = peg$currPos * 30 + 22;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2681,7 +2690,7 @@ peg$parserandom_between() {
     var s0, s1, s2, s3, s4, s5;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 23;
+    var key = peg$currPos * 30 + 23;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2803,7 +2812,7 @@ peg$parserepeat() {
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 24;
+    var key = peg$currPos * 30 + 24;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2881,7 +2890,7 @@ peg$parseduration_change() {
     var s0, s1;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 25;
+    var key = peg$currPos * 30 + 25;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2922,7 +2931,7 @@ peg$parserest() {
     var s0, s1, s2;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 26;
+    var key = peg$currPos * 30 + 26;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -2982,10 +2991,10 @@ peg$parserest() {
   function // @ts-ignore
 peg$parsepitch() {
 // @ts-ignore
-    var s0, s1, s2, s3;
+    var s0, s1, s2, s3, s4;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 27;
+    var key = peg$currPos * 30 + 27;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -3015,13 +3024,20 @@ peg$parsepitch() {
       s2 = null;
     }
 // @ts-ignore
-    s3 = peg$parseint();
+    s3 = peg$parseaccidentals();
 // @ts-ignore
-    if (s3 !== peg$FAILED) {
+    if (s3 === peg$FAILED) {
+// @ts-ignore
+      s3 = null;
+    }
+// @ts-ignore
+    s4 = peg$parseint();
+// @ts-ignore
+    if (s4 !== peg$FAILED) {
 // @ts-ignore
       peg$savedPos = s0;
 // @ts-ignore
-      s0 = peg$f21(s1, s2, s3);
+      s0 = peg$f21(s1, s2, s3, s4);
 // @ts-ignore
     } else {
 // @ts-ignore
@@ -3039,12 +3055,123 @@ peg$parsepitch() {
 
 // @ts-ignore
   function // @ts-ignore
+peg$parseaccidentals() {
+// @ts-ignore
+    var s0, s1, s2;
+
+// @ts-ignore
+    var key = peg$currPos * 30 + 28;
+// @ts-ignore
+    var cached = peg$resultsCache[key];
+
+// @ts-ignore
+    if (cached) {
+// @ts-ignore
+      peg$currPos = cached.nextPos;
+
+// @ts-ignore
+      return cached.result;
+    }
+
+// @ts-ignore
+    s0 = peg$currPos;
+// @ts-ignore
+    s1 = [];
+// @ts-ignore
+    if (input.charCodeAt(peg$currPos) === 35) {
+// @ts-ignore
+      s2 = peg$c24;
+// @ts-ignore
+      peg$currPos++;
+// @ts-ignore
+    } else {
+// @ts-ignore
+      s2 = peg$FAILED;
+// @ts-ignore
+      if (peg$silentFails === 0) { peg$fail(peg$e28); }
+    }
+// @ts-ignore
+    if (s2 === peg$FAILED) {
+// @ts-ignore
+      if (input.charCodeAt(peg$currPos) === 98) {
+// @ts-ignore
+        s2 = peg$c25;
+// @ts-ignore
+        peg$currPos++;
+// @ts-ignore
+      } else {
+// @ts-ignore
+        s2 = peg$FAILED;
+// @ts-ignore
+        if (peg$silentFails === 0) { peg$fail(peg$e29); }
+      }
+    }
+// @ts-ignore
+    if (s2 !== peg$FAILED) {
+// @ts-ignore
+      while (s2 !== peg$FAILED) {
+// @ts-ignore
+        s1.push(s2);
+// @ts-ignore
+        if (input.charCodeAt(peg$currPos) === 35) {
+// @ts-ignore
+          s2 = peg$c24;
+// @ts-ignore
+          peg$currPos++;
+// @ts-ignore
+        } else {
+// @ts-ignore
+          s2 = peg$FAILED;
+// @ts-ignore
+          if (peg$silentFails === 0) { peg$fail(peg$e28); }
+        }
+// @ts-ignore
+        if (s2 === peg$FAILED) {
+// @ts-ignore
+          if (input.charCodeAt(peg$currPos) === 98) {
+// @ts-ignore
+            s2 = peg$c25;
+// @ts-ignore
+            peg$currPos++;
+// @ts-ignore
+          } else {
+// @ts-ignore
+            s2 = peg$FAILED;
+// @ts-ignore
+            if (peg$silentFails === 0) { peg$fail(peg$e29); }
+          }
+        }
+      }
+// @ts-ignore
+    } else {
+// @ts-ignore
+      s1 = peg$FAILED;
+    }
+// @ts-ignore
+    if (s1 !== peg$FAILED) {
+// @ts-ignore
+      peg$savedPos = s0;
+// @ts-ignore
+      s1 = peg$f22(s1);
+    }
+// @ts-ignore
+    s0 = s1;
+
+// @ts-ignore
+    peg$resultsCache[key] = { nextPos: peg$currPos, result: s0 };
+
+// @ts-ignore
+    return s0;
+  }
+
+// @ts-ignore
+  function // @ts-ignore
 peg$parsechord() {
 // @ts-ignore
     var s0, s1, s2, s3;
 
 // @ts-ignore
-    var key = peg$currPos * 29 + 28;
+    var key = peg$currPos * 30 + 29;
 // @ts-ignore
     var cached = peg$resultsCache[key];
 
@@ -3086,7 +3213,7 @@ peg$parsechord() {
 // @ts-ignore
         peg$savedPos = s0;
 // @ts-ignore
-        s0 = peg$f22(s1, s2);
+        s0 = peg$f23(s1, s2);
 // @ts-ignore
       } else {
 // @ts-ignore
@@ -3314,4 +3441,5 @@ export type Repeat = any;
 export type DurationChange = any;
 export type Rest = any;
 export type Pitch = any;
+export type Accidentals = number;
 export type Chord = any;
