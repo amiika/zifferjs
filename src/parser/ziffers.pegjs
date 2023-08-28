@@ -5,8 +5,8 @@
 
   var nodeOptions = options.nodeOptions || {};
 
-  function build(ClassReference, values) {
-    values.text = text();
+  function build(ClassReference, values, cont=undefined) {
+    values.text = cont ? cont : text();
     values.location = location();
     // Merge all default options to values if value is not set, null or undefined
     for (var key in nodeOptions) {
@@ -60,9 +60,26 @@ list = "(" l:(items) ")"
 list_operation = a:list b:operation c:list
 { return build(types.ListOperation,{left: a, operation: b, right: c});  }
 
+multi = "-"? [0-9]+
+{ return parseInt(text()) }
+
+eval_item = multi / int
+
+eval_items = list:(eval_op / eval_item)+
+{ return list.map(val => { return (typeof val === "number") ? val : undefined }); }
+
+eval_op = "("? eval_item operation eval_items ")"?
+{ return Math.ceil(safeEval(text())) }
+
+eval = "{" values:(eval_items / ws)+ "}"
+{ 
+  var pitches = values.filter(a => a).map(val => { return build(types.Pitch, {pitch: val[0]}, val.toString())});
+  return build(types.List,{items: pitches});
+}
+
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
-item = v:(rest / chord / pitch / octave_change / ws / duration_change / random / random_between / list)
+item = v:(rest / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval)
 { return v }
 
 cycle = "<" l:items ">" 

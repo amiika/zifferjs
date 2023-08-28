@@ -138,6 +138,10 @@ export class Ziffers {
         return nextEvent;
     }
 
+    atLast(): boolean {
+        return this.index+1 >= this.evaluated.length*this.redo;
+    }
+
     applyTransformations() {
         // TODO: Make more generic
         if(this.globalOptions?.retrograde) {
