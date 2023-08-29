@@ -67,11 +67,6 @@ export class Ziffers {
         }
     }
 
-    update(options: ChangingOptions = {}) {
-        this.evaluated = this.evaluate(options);
-        this.applyTransformations();
-    }
-
     pitches(): (number|undefined|number[])[] {
         return this.evaluated.map((item: Pitch|Chord|Rest) => {
             return item.collect("pitch");
@@ -124,29 +119,8 @@ export class Ziffers {
         return this.options.nodeOptions && this.options.nodeOptions[key as keyof NodeOptions] === value;
     }
             
-    next(): Event {
-        this.index++;
-        this.counter++;
-
-        if(this.redo > 0 && this.index >= this.evaluated.length*this.redo) {
-            this.update();
-            this.index = 0;
-        }
-
-        const nextEvent = this.evaluated[this.index % this.evaluated.length];
-        
-        return nextEvent;
-    }
-
     atLast(): boolean {
         return this.index+1 >= this.evaluated.length*this.redo;
-    }
-
-    applyTransformations() {
-        // TODO: Make more generic
-        if(this.globalOptions?.retrograde) {
-            this.evaluated = this.evaluated.reverse();
-        }
     }
 
     clone(): Ziffers {
@@ -154,7 +128,7 @@ export class Ziffers {
     }
 
     notStarted() {
-        return this.index < 0;
+        return this.index < 0
     }
 
     peek() {
@@ -163,6 +137,38 @@ export class Ziffers {
 
     hasStarted(): boolean {
         return this.index >= 0;
+    }
+
+    next(): Event {
+
+        // Check for the first run
+        if(this.index<0) this.index = 0;
+
+        // Get next item
+        const nextEvent = this.evaluated[this.index % this.evaluated.length];
+
+        this.index++;
+        this.counter++;
+
+        // Check if next item is last
+        if(this.redo > 0 && this.index >= this.evaluated.length * this.redo) {
+            this.index = 0;
+            this.update();
+        }
+
+        return nextEvent;
+    }
+
+    update(options: ChangingOptions = {}) {
+        this.evaluated = this.evaluate(options);
+        this.applyTransformations();
+    }
+
+    applyTransformations() {
+        // TODO: Make more generic
+        if(this.globalOptions?.retrograde) {
+            this.evaluated = this.evaluated.reverse();
+        }
     }
 
     evaluate(options: ChangingOptions = {}): (Pitch|Chord|Rest)[] {
