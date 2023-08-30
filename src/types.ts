@@ -95,7 +95,7 @@ export abstract class Base {
     }
     // @ts-ignore
     evaluate(options: ChangingOptions = {}): Base|Base[]|undefined {
-        return undefined;
+        return this;
     }
 }
 

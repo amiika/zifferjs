@@ -54,7 +54,7 @@ export class Ziffers {
 
         try {
             this.values = parseZiffers(input, this.options);
-            this.evaluated = this.evaluate();
+            this.evaluated = this.evaluate(this.values);
             this.applyTransformations();
             this.duration = this.totalDuration();
         } catch (ex: any) {
@@ -97,21 +97,17 @@ export class Ziffers {
     }
 
     scale(scale: string) {
-        if(this.isInOptions('scaleName', scale)) return this;
-        this.update({scale: scale});
+        this.applyOptions({scale: scale});
         return this;
     }
 
     key(key: string) {
-        if(this.isInOptions('key', key)) return this;
-        this.update({key: key});
+        this.applyOptions({key: key});
         return this;
     }
 
     octave(octave: number) {
-        // TODO: Check if this has side effects?
-        if(this.isInOptions('octave', octave)) return this;
-        this.update({octave: octave});
+        this.applyOptions({octave: octave});
         return this;
     }
 
@@ -153,14 +149,14 @@ export class Ziffers {
         // Check if next item is last
         if(this.redo > 0 && this.index >= this.evaluated.length * this.redo) {
             this.index = 0;
-            this.update();
+            this.evaluate(this.values);
         }
 
         return nextEvent;
     }
 
-    update(options: ChangingOptions = {}) {
-        this.evaluated = this.evaluate(options);
+    applyOptions(options: ChangingOptions = {}) {
+        this.evaluated = this.evaluate(this.evaluated, options);
         this.applyTransformations();
     }
 
@@ -171,8 +167,8 @@ export class Ziffers {
         }
     }
 
-    evaluate(options: ChangingOptions = {}): (Pitch|Chord|Rest)[] {
-        const items = this.values.map((node: Base) => {
+    evaluate(values: Base[], options: ChangingOptions = {}): (Pitch|Chord|Rest)[] {
+        const items = values.map((node: Base) => {
             return node.evaluate(options);
         }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest)[];
         return items;

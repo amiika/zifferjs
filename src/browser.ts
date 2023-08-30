@@ -6,7 +6,7 @@ import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps, n
 
 
 try {
-  const yep = pattern('e 1 b1 2 #2 3 bb3');
+  const yep = pattern('e | 2 3 4 | 2 5 3 |');
   console.log(yep);
   // This should output: 4// This should output: 4
 //console.log('Parsed result:', result);

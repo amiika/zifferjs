@@ -79,8 +79,14 @@ eval = "{" values:(eval_items / ws)+ "}"
 
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
-item = v:(rest / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval)
+item = v:(rest / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval / bar)
 { return v }
+
+bar = "|"
+{ 
+  // Ignore for now
+  return undefined 
+}
 
 cycle = "<" l:items ">" 
 { return build(types.Cycle,{items: l}) }
