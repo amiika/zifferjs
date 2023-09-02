@@ -1,7 +1,7 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
-import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions } from './types.ts';
+import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 
 export class Ziffers {
@@ -149,7 +149,7 @@ export class Ziffers {
         // Check if next item is last
         if(this.redo > 0 && this.index >= this.evaluated.length * this.redo) {
             this.index = 0;
-            this.evaluate(this.values);
+            this.evaluated = this.evaluate(this.values);
         }
 
         return nextEvent;
@@ -168,10 +168,14 @@ export class Ziffers {
     }
 
     evaluate(values: Base[], options: ChangingOptions = {}): (Pitch|Chord|Rest)[] {
-        const items = values.map((node: Base) => {
+        let items = values.map((node: Base) => {
             return node.evaluate(options);
-        }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest)[];
-        return items;
+        }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest|Subdivision)[];
+        if(options.subdivisions) {  
+            const duration = options.duration ? options.duration : DEFAULT_OPTIONS.duration
+            items = resolveSubdivisions(items, duration);
+         }
+        return items as (Pitch|Chord|Rest)[];
     }
 
     totalDuration(): number {
@@ -181,8 +185,20 @@ export class Ziffers {
         return length;
     }
 
+}
 
-
+const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration: number): (Pitch|Chord|Rest)[] => {
+    const length = values.length;
+    const newDuration = duration / length;
+    const sub = values.map((item: Chord|Rest|Pitch|Subdivision) => {
+        if(item instanceof Subdivision) {
+            return resolveSubdivisions(item.items, newDuration);
+        } else {
+            item.duration = newDuration;
+            return item;
+        }
+    });
+    return sub.flat(Infinity) as (Pitch|Chord|Rest)[];
 }
 
 const getGlobalOption = (options: NodeOptions): GlobalOptions => {

@@ -51,14 +51,25 @@ duration = durchar / float
 
 statement = items
 
-items = n:(repeat / list_operation / list / item / cycle)+
+items = n:(repeat / list_operation / subdivision / list / replist / item / cycle)+
 { return n.filter(a => a) }
 
-list = "(" l:(items) ")"
-{ return build(types.List,{items: l}) }
+list = "(" ":"? l:(items) rep:(listrepeat)? ")"
+{
+  if(rep) return build(types.Repeat,{item: l, times: rep});
+  else return build(types.List,{items: l}); }
+
+listrepeat = ":" n:multi
+{ return n }
 
 list_operation = a:list b:operation c:list
 { return build(types.ListOperation,{left: a, operation: b, right: c});  }
+
+replist = "[:" l:(items) rep:(listrepeat)? "]"
+{ return build(types.RepeatList,{items: l, times: rep}) }
+
+subdivision = "[" l:(items) "]"
+{ return build(types.Subdivision,{items: l}) }
 
 multi = "-"? [0-9]+
 { return parseInt(text()) }
@@ -107,7 +118,7 @@ random = "?"
 random_between = "(" a:int "," b:int ")"
 { return build(types.RandomPitch,{min: a, max: b, seededRandom: options.seededRandom }) }
 
-repeat = n:item ":" i:int
+repeat = n:item ":" i:multi !(")" / "]")
 { return build(types.Repeat,{item: n, times: i}) }
 
 duration_change = dur:duration 

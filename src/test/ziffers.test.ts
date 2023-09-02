@@ -49,6 +49,11 @@ describe('main-tests', () => {
     expect(pattern('er qr').durations()).toEqual([0.125,0.25]);
   })
 
+  it('subdivisions', () => {
+    expect(pattern('[1 [2 3]]').pitches()).toEqual([1,2,3]);
+    expect(pattern('[1 [2 3]]').durations()).toEqual([0.125,0.0625,0.0625]);
+    expect(pattern('[1 [2 (3 4)+(3 6)]]').durations()).toEqual([0.125,0.025,0.025,0.025,0.025,0.025]);
+  })
 
 
 })

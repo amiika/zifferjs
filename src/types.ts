@@ -11,7 +11,6 @@ export type GlobalOptions = {
 export type Options = {
     nodeOptions?: NodeOptions;
     defaultDurs?: {[key: string]: number};
-    
 }
 
 export type NodeOptions = {
@@ -39,6 +38,7 @@ export type ChangingOptions = {
     duration?: number;
     scale?: string;
     key?: string;
+    subdivisions?: boolean;
 }
 
 export type Node = NodeOptions & {
@@ -186,24 +186,6 @@ export class Pitch extends Event {
         Object.assign(this, data);
     }
 
-    static createTracked(data: Partial<Node>): Pitch {
-        const eventHandler = {
-          set(target: any, property: string, value: any) {
-            if (target[property] !== value) {
-              target[property] = value;
-              if(property === "pitch" || property === "key" || property === "parsedScale" || property === "octave") {
-                console.log(`${property} has changed to ${value}`);
-                  target.refresh();
-                }
-            }
-            return true;
-          }
-        };
-    
-        const instance = new Pitch(data);
-        return new Proxy(instance, eventHandler);
-    }
-
     refresh(): void {
         this.evaluate();
     }
@@ -294,6 +276,8 @@ export class RandomPitch extends Pitch {
         const randomValue = this.random();
         this.pitch = Math.floor(randomValue * (this.max - this.min + 1)) + this.min;
         const pitch = new Pitch(this as object).evaluate(options);
+        pitch.type = "Pitch";
+        pitch.text = pitch.pitch.toString();
         return pitch;
     }
 }
@@ -343,6 +327,33 @@ export class List extends Base {
     }
     evaluate(options: ChangingOptions = {}): Pitch[] {
         return this.items.map((item: Base) => { return item.evaluate(options); }) as unknown as Pitch[];
+    }
+}
+
+export class Subdivision extends Base {
+    items!: (Pitch|Chord|Rest|Subdivision)[];
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data);
+    }
+    evaluate(options: ChangingOptions = {}): Subdivision {
+        options.subdivisions = true;
+        this.items = this.items.map((item: Base) => { return item.evaluate(options); }).flat(Infinity) as unknown as Pitch[];
+        return this;
+    }
+}
+
+export class RepeatList extends Base {
+    times!: number;
+    items!: Base[];
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data);
+    }
+    evaluate(options: ChangingOptions = {}): Pitch|Chord|Rest[] {
+        const evaluated = this.items.map((item) => { return item.evaluate(options) }) as Pitch|Chord|Rest[];
+        const repeated = [...Array(this.times)].map(() => evaluated).flat(Infinity)  as Pitch|Chord|Rest[];
+        return repeated;
     }
 }
 

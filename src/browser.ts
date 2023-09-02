@@ -6,7 +6,7 @@ import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps, n
 
 
 try {
-  const yep = pattern('e | 2 3 4 | 2 5 3 |');
+  const yep = pattern('[ 1 [2 (3 4)+(3 6)]]');
   console.log(yep);
   // This should output: 4// This should output: 4
 //console.log('Parsed result:', result);
@@ -15,4 +15,4 @@ try {
   //console.log(result.evaluate());
 } catch (error) {
   console.error('Error while parsing:', error);
-}
+} 
