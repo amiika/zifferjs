@@ -235,15 +235,22 @@ export class Chord extends Event {
         Object.assign(this, data);
         if(this.pitches && this.pitches.length > 0) {
             this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
-        }
+         }
     }
     evaluate(options: ChangingOptions = {}): Chord {
         this.pitches = this.pitches.map((pitch) => pitch.evaluate(options));
+        this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
         return this;
     }
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
         const collect = this.pitches.map((pitch: Pitch) => pitch.collect(name)) as unknown as Pitch[K];
         return collect;
+    }
+    notes(): number[] {
+        return this.pitches.map((pitch) => pitch.note!) as number[];
+    }
+    freqs(): number[] {
+        return this.pitches.map((pitch) => pitch.freq!) as number[];
     }
     scale(name: string): Chord {
         this.pitches.forEach((pitch) => pitch.scale(name));
@@ -273,6 +280,7 @@ export class Roman extends Chord {
             const pitchOct = octave+pc.octave;
             return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add}).evaluate(options);
         });
+        this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
         return this; 
     }
 }

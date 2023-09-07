@@ -6,7 +6,7 @@ import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps, n
 
 
 try {
-  const yep = pattern('0 1 2 3 4', {scale: "CHROMATIC"});
+  const yep = pattern('Cmaj');
   console.log(yep.evaluated);
   // This should output: 4// This should output: 4
 //console.log('Parsed result:', result);
