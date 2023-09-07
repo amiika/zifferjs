@@ -28,10 +28,6 @@ describe('main-tests', () => {
     expect(pattern('_ 1 _2 ^3 4').notes()).toEqual([50,40,65,55]);
   })
 
-  it('chords', () => {
-    expect(pattern('123 234').pitches()).toEqual([1,2,3,2,3,4]);
-  })
-
   it('cycles', () => {
     // Rewrite
     //expect(cachedEventTest('<1 <2 3>>').collect('pitch')).toEqual(1);

@@ -90,7 +90,7 @@ eval = "{" values:(eval_items / ws)+ "}"
 
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
-item = v:(rest / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval / bar)
+item = v:(rest / namedChord / namedNote / romans / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval / bar)
 { return v }
 
 bar = "|"
@@ -144,4 +144,37 @@ accidentals = acc:("#" / "b")+
 
 chord = left:pitch right:pitch+
 { return build(types.Chord, {pitches:[left].concat(right)}) }
+
+chordName = [a-zA-Z0-9\-\*\+]+
+{
+  return text()
+}
+
+noteName = [A-G][bs]?
+{
+  return text()
+}
+
+namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName)
+{ 
+  const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+  const pitches = getPitchesFromNamedChord(name, root, scale, oct, dur);
+  return build(types.Chord, {duration: dur, pitches: pitches, chordName: name})
+}
+
+romans = oct:octave? dur:duration? val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordName)?
+{
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
+  const duration = dur ? dur : options.nodeOptions.duration;
+  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name})
+}
+
+namedNote = oct:octave? dur:duration? name:(noteName)
+{
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
+  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
+  const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+  const pitch = noteNameToPitchClass(name,key,scale);
+  return build(types.Pitch, {duration: dur, pitch: pitch.pc, octave: pitch.octave + octave, add: pitch.add, key: key, scale: scale})
+}
 

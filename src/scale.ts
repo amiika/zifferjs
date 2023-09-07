@@ -1,6 +1,7 @@
-import { MODIFIERS, NOTES_TO_INTERVALS, getScale } from "./defaults";
-import { isScale } from "./defaults";
+import { MODIFIERS, NOTES_TO_INTERVALS, getScale, getScaleLength } from "./defaults";
+import { isScale, CHORDS, CIRCLE_OF_FIFTHS, INTERVALS_TO_NOTES, ROMANS } from "./defaults";
 import { parse as parseScala } from "./parser/scalaParser";
+import { Pitch } from "./types";
 
 export const noteFromPc = (
     root: number | string,
@@ -181,4 +182,221 @@ export const safeScale = (scale: string|number|number[]): number[] => {
   }
   // TODO: Check for valid intervals?
   return scale;
+}
+
+export const namedChordFromDegree = (
+  degree: number,
+  name: string = "major",
+  root: number|string = 60,
+  scale: string = "CHROMATIC",
+  numOctaves: number = 1
+): number[] => {
+  const intervals: number[] = CHORDS[name] || CHORDS["major"];
+  root = typeof root === "string" ? noteNameToMidi(root) : root;
+  const scaleDegree: number = getScaleNotes(scale, root)[degree - 1];
+  const notes: number[] = [];
+
+  for (let curOct = 0; curOct <= numOctaves; curOct++) {
+    for (const interval of intervals) {
+      notes.push(scaleDegree + interval + curOct * 12);
+    }
+  }
+   return notes;
+}
+
+export const getPitchesFromNamedChord = (
+  name: string = "major",
+  root: number|string = 60,
+  scale: string = "MAJOR",
+  numOctaves: number = 1,
+  duration: number
+): Pitch[] => {
+  const notes = namedChordFromDegree(1, name, root, "CHROMATIC", numOctaves);
+  const parsedScale = typeof scale === "string" ? getScale(scale) : scale;
+  const pitches: Pitch[] = notes.map(note => {
+    const pitch = midiToPitchClass(note, root, scale);
+    return new Pitch({text: pitch.text, note: note, pitch: pitch.pc, octave: pitch.octave, add: pitch.add, duration: duration, scaleName: scale, parsedScale: parsedScale, key: root});
+  });
+  return pitches;
+}
+
+export const getScaleNotes = (
+  name: string|number[], 
+  root: number = 60, 
+  numOctaves: number = 1
+  ): number[] => {
+  const scale: number[] = typeof name === "string" ? getScale(name) : name;
+  const scaleNotes: number[] = [root];
+
+  for (let i = 0; i < numOctaves; i++) {
+    for (const semitone of scale) {
+      root += semitone;
+      scaleNotes.push(root);
+    }
+  }
+
+  return scaleNotes;
+}
+
+export const chordFromDegree = (
+  degree: number,
+  scale: string = "MAJOR",
+  root: string | number = 60,
+  numOctaves: number = 1,
+  name: string | undefined = undefined,
+): number[] => {
+  const rootMidi: number = typeof root === "string" ? noteNameToMidi(root) : root;
+
+  if (
+    name &&
+    typeof scale === "string" &&
+    scale.toUpperCase() === "CHROMATIC"
+  ) { name = "major"; }
+
+  if (name) {
+    return namedChordFromDegree(degree, name, rootMidi, scale, numOctaves);
+  } else {
+    return getChordFromScale(degree, rootMidi, scale);
+  }
+}
+
+export const getChordFromScale = (
+  degree: number,
+  root: number = 60,
+  scale: string | number[] = "Major",
+  numNotes: number = 3,
+  skip: number = 2
+): number[] => {
+  const scaleLength: number = typeof scale === "string" ? getScaleLength(scale) : scale.length;
+
+  const numOctaves: number = Math.floor((numNotes * skip + degree - 1) / scaleLength) + 1;
+  const scaleNotes: number[] = getScaleNotes(scale, root, numOctaves);
+
+  const chord: number[] = [];
+
+  for (let i = degree - 1; chord.length < numNotes && i < scaleNotes.length; i += skip) {
+    chord.push(scaleNotes[i]);
+  }
+
+  return chord;
+}
+
+export const chord = (name: string): number[] => {
+  // Parse chord name from notation scientific notation + chord name
+  // For example Cmaj or C7
+  const parsedChord = name.match(/([a-gA-G][#bs]?)([0-9])?([a-zA-Z0-9]+)/);
+  if (parsedChord === null) {
+    // C major chord by default
+    return [60, 64, 67];
+  }
+  let [, root, oct, chordName] = parsedChord;
+  const rootMidi = noteNameToMidi(root);
+  const octave = oct ? parseInt(oct, 10) : 0;
+  const namedChord = namedChordFromDegree(1, chordName, rootMidi, "CHROMATIC", octave);	
+  return namedChord;
+}
+
+export const parseRoman = (numeral: string): number => {
+  const values: number[] = numeral.split('').map(val => ROMANS[val]);
+
+  return values.reduce((result, current, index, array) => {
+    if (index < array.length - 1 && current < array[index + 1]) {
+      return result - current;
+    } else {
+      return result + current;
+    }
+  }, 0);
+}
+
+export const accidentalsFromNoteName = (name: string): number => {
+  if (!CIRCLE_OF_FIFTHS.includes(name)) {
+    name = midiToNoteName(noteNameToMidi(name));
+  }
+
+  const idx: number = CIRCLE_OF_FIFTHS.indexOf(name);
+  return idx - 6;
+}
+
+export const midiToNoteName = (midi: number): string => {
+  return INTERVALS_TO_NOTES[midi % 12];
+}
+
+export const accidentalsFromMidiNote = (note: number): number => {
+  const name: string = midiToNoteName(note);
+  return accidentalsFromNoteName(name);
+}
+
+export const midiToTpc = (note: number, key: string | number): number => {
+  let acc: number;
+
+  if (typeof key === "string") {
+    acc = accidentalsFromNoteName(key[0]);
+  } else {
+    acc = accidentalsFromMidiNote(key);
+  }
+
+  return ((note * 7 + 26 - (11 + acc)) % 12 + (11 + acc)) as number;
+}
+
+export const midiToOctave = (note: number): number => {
+  return note <= 0 ? 0 : Math.floor(note / 12);
+}
+
+type PitchClass = {
+  text: string,
+  pc: number,
+  octave: number,
+  add: number,
+}
+
+export const midiToPitchClass = (note: number, key: string | number = 60, scale: string = "MAJOR"): PitchClass => {
+  function repeatSign(num: number): string {
+    return num > 0 ? "^".repeat(num) : num < 0 ? "_".repeat(Math.abs(num)) : "";
+  }
+  const pitchClass: number = note % 12;
+  const octave: number = midiToOctave(note) - 5;
+
+  if (typeof scale === "string" && scale.toUpperCase() === "CHROMATIC") {
+    return {
+      text: pitchClass.toString(),
+      pc: pitchClass,
+      octave: octave,
+      add: 0
+    };
+  }
+
+  const sharps: string[] = ["0", "#0", "1", "#1", "2", "3", "#3", "4", "#4", "5", "#5", "6"];
+  const flats: string[] = ["0", "b1", "1", "b2", "2", "3", "b4", "4", "b5", "5", "b6", "6"];
+
+  const tpc: number = midiToTpc(note, key);
+
+  let npc: string;
+  if ((tpc >= 6 && tpc <= 12 && flats[pitchClass].length === 2) ||
+      (tpc >= 20 && tpc <= 26 && sharps[pitchClass].length === 2)) {
+    npc = flats[pitchClass];
+  } else {
+    npc = sharps[pitchClass];
+  }
+
+  if (npc.length > 1) {
+    const modifier: number = npc[0] === "#" ? 1 : -1;
+     return {
+      text: repeatSign(octave) + npc,
+      pc: parseInt(npc[1]),
+      octave: octave,
+      add: modifier,
+    };
+  }
+
+  return {
+    text: repeatSign(octave) + npc,
+    pc: parseInt(npc),
+    octave: octave,
+    add: 0
+  };
+}
+
+export const noteNameToPitchClass = (name: string, key: string, scale: string): PitchClass => {
+  const midiNote = noteNameToMidi(name);
+  return midiToPitchClass(midiNote, key, scale);
 }

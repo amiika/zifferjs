@@ -1,0 +1,45 @@
+import { describe, expect, it } from 'vitest'
+import { chord, midiToPitchClass} from '../scale.ts'
+import { pattern } from '../ziffers.ts';
+
+describe('chord-tests', () => {
+
+  it('chords', () => {
+    expect(chord('Cmaj')).toEqual([60,64,67]);
+    expect(chord('Dmaj')).toEqual([62,66,69]);
+    expect(chord('Cmin')).toEqual([60,63,67]);
+    expect(chord('Caug')).toEqual([60,64,68]);
+    expect(chord('EaugMaj7')).toEqual([64,68,72,75]);
+  })
+
+  it('supportive', () => {
+    expect(midiToPitchClass(60)).toEqual({pc: 0, octave: 0, text: "0", add: 0});
+    expect(midiToPitchClass(59)).toEqual({pc: 6, octave: -1, text: "_6", add: 0});
+  })
+
+  it('romans', () => {
+    expect(pattern('i').update().notes()).toEqual([[60,64,67]]);
+    expect(pattern('ii 0').update().notes()).toEqual([[62,65,69], 60]);
+    expect(pattern('imin').update().notes()).toEqual([[60,63,67]]);
+    expect(pattern('i^min').update().notes()).toEqual([[60,63,67]]);
+  })
+
+  it('chords', () => {
+    expect(pattern('123 234').pitches()).toEqual([[1,2,3],[2,3,4]]);
+  })
+
+  it('namedChords', () => {
+    expect(pattern('Cmaj').notes()).toEqual([[60,64,67]]);
+    expect(pattern('Cmaj').pitches()).toEqual([[0,2,4]]);
+    expect(pattern('Cmaj', {scale: "CHROMATIC"}).pitches()).toEqual([[0,4,7]]);
+    expect(pattern('Cmaj Cmin D7 Edim').pitches()).toEqual([[0,2,4],[0,2,4],[1,4,5,0],[2,4,6]]);
+    expect(pattern('Cmaj Cmin').notes()).toEqual([[60,64,67],[60,63,67]]);
+  })
+
+  it('notes', () => {
+    expect(pattern('C D E F G A B').notes()).toEqual([ 60, 62, 64, 65, 67, 69, 71 ]);
+    expect(pattern('(C B)+(D F)').notes()).toEqual([ 62, 72, 65, 76 ]);
+    expect(pattern('C e F F qE F').durations()).toEqual([ 0.25, 0.125, 0.125, 0.25, 0.125 ]);
+  })
+
+})

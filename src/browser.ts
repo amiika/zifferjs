@@ -6,8 +6,8 @@ import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps, n
 
 
 try {
-  const yep = pattern('[ 1 [2 (3 4)+(3 6)]]');
-  console.log(yep);
+  const yep = pattern('0 1 2 3 4', {scale: "CHROMATIC"});
+  console.log(yep.evaluated);
   // This should output: 4// This should output: 4
 //console.log('Parsed result:', result);
   //const test = next('1 2 3').scale('minor');

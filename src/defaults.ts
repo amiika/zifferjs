@@ -11,9 +11,10 @@ export const OPERATORS: {[key: string]: Function} =  {
   "|": (a: number, b: number) => a | b
 }
 
+export const DEFAULT_DURATION = 0.25;
+
 export const DEFAULT_OPTIONS = {
     octave: 0,
-    duration: 0.25,
     key: "C4",
     scale: "IONIAN",
     measure: 0,
@@ -1709,3 +1710,111 @@ export const getScale = (scale: string): number[] => {
 export const isScale = (scale: string): boolean => {
     return scale.toUpperCase() in SCALES;
 }
+
+export const getScaleLength = (scale: string): number => {
+    return getScale(scale).length;
+}
+
+const buildChords = () => {
+  const major = [0, 4, 7];
+  const minor = [0, 3, 7];
+  const major7 = [0, 4, 7, 11];
+  const dom7 = [0, 4, 7, 10];
+  const minor7 = [0, 3, 7, 10];
+  const aug = [0, 4, 8];
+  const dim = [0, 3, 6];
+  const dim7 = [0, 3, 6, 9];
+  const halfdim = [0, 3, 6, 10];
+  const aug7 = [0, 4, 8, 10];
+  const aug9 = [0, 4, 10, 14];
+  const six = [0, 4, 7, 9];
+  
+  const allChords = {
+      "1": [0],
+      "5": [0, 7],
+      "+5": [0, 4, 8],
+      "m+5": [0, 3, 8],
+      "sus2": [0, 2, 7],
+      "sus4": [0, 5, 7],
+      "6": six,
+      "m6": [0, 3, 7, 9],
+      "7sus2": [0, 2, 7, 10],
+      "7sus4": [0, 5, 7, 10],
+      "7-5": [0, 4, 6, 10],
+      "7+5": aug7,
+      "m7+5": [0, 3, 8, 10],
+      "9": [0, 4, 7, 10, 14],
+      "m9": [0, 3, 7, 10, 14],
+      "m7+9": [0, 3, 7, 10, 14],
+      "maj9": [0, 4, 7, 11, 14],
+      "9sus4": [0, 5, 7, 10, 14],
+      "6*9": [0, 4, 7, 9, 14],
+      "m6*9": [0, 3, 7, 9, 14],
+      "7-9": [0, 4, 7, 10, 13],
+      "m7-9": [0, 3, 7, 10, 13],
+      "7-10": [0, 4, 7, 10, 15],
+      "7-11": [0, 4, 7, 10, 16],
+      "7-13": [0, 4, 7, 10, 20],
+      "9+5": [0, 10, 13],
+      "m9+5": [0, 10, 14],
+      "7+5-9": [0, 4, 8, 10, 13],
+      "m7+5-9": [0, 3, 8, 10, 13],
+      "11": [0, 4, 7, 10, 14, 17],
+      "m11": [0, 3, 7, 10, 14, 17],
+      "maj11": [0, 4, 7, 11, 14, 17],
+      "11+": [0, 4, 7, 10, 14, 18],
+      "m11+": [0, 3, 7, 10, 14, 18],
+      "13": [0, 4, 7, 10, 14, 17, 21],
+      "m13": [0, 3, 7, 10, 14, 17, 21],
+      "add2": [0, 2, 4, 7],
+      "add4": [0, 4, 5, 7],
+      "add9": [0, 4, 7, 14],
+      "add11": [0, 4, 7, 17],
+      "add13": [0, 4, 7, 21],
+      "madd2": [0, 2, 3, 7],
+      "madd4": [0, 3, 5, 7],
+      "madd9": [0, 3, 7, 14],
+      "madd11": [0, 3, 7, 17],
+      "madd13": [0, 3, 7, 21],
+      "dim9": [0, 3, 6, 9, 14],
+      "dim": dim,
+      "hdim7": halfdim,
+      "hdim9": [0, 3, 6, 10, 14],
+      "hdimb9": [0, 3, 6, 10, 13],
+      "augMaj7": [0, 4, 8, 11],
+      "minmaj7": [0, 3, 7, 11],
+      "five": [0, 7, 12],
+      "seven": dom7,
+      "nine": aug9,
+      "b9": [0, 4, 10, 13],
+      "mM9": [0, 3, 11, 14],
+      "min7": minor7,
+      "min9": [0, 3, 10, 14],
+      "b5": [0, 4, 6, 12],
+      "mb5": [0, 3, 6, 12],
+      "major": major,
+      "maj": major,
+      "M": major,
+      "minor": minor,
+      "min": minor,
+      "m": minor,
+      "major7": major7,
+      "dom7": dom7,
+      "7": dom7,
+      "M7": major7,
+      "m7": minor7,
+      "augmented": aug,
+      "a": aug,
+      "aug": aug,
+      "diminished": dim,
+      "diminished7": dim7,
+      "dim7": dim7,
+      "halfdim": halfdim,
+      "m7b5": halfdim,
+      "m7-5": halfdim,
+  };
+  const allChordsNames: string[] = Object.keys(allChords);
+  return [allChords, allChordsNames] as [{[key: string]: number[]}, string[]];
+}
+
+export const [CHORDS, CHORD_NAMES]: [{[key: string]: number[]}, string[]] = buildChords();

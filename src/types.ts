@@ -1,5 +1,5 @@
-import { noteFromPc, midiToFreq, scaleLength, safeScale } from './scale.ts';
-import { OPERATORS, getScale, getRandomScale } from './defaults.ts';
+import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, chordFromDegree, midiToPitchClass, namedChordFromDegree } from './scale.ts';
+import { OPERATORS, getScale, getRandomScale, DEFAULT_DURATION } from './defaults.ts';
 import { deepClone } from './utils.ts';
 
 export const globalOptionKeys: string[] = ["retrograde"];
@@ -14,7 +14,8 @@ export type Options = {
 }
 
 export type NodeOptions = {
-    key?: string;
+    key?: string|number;
+    add?: number;
     scale?: string|number[];
     parsedScale?: number[]|undefined;
     scaleName?: string;
@@ -177,14 +178,14 @@ export class Pitch extends Event {
     note?: number;
     octave?: number;
     bend?: number;
-    key?: string;
+    key?: string|number;
     parsedScale?: string|number[];
     scaleName?: string;
 
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
-    }
+     }
 
     refresh(): void {
         this.evaluate();
@@ -193,7 +194,9 @@ export class Pitch extends Event {
     evaluate(options: ChangingOptions = {}): Pitch {
         const clone = deepClone(this);
         if(options.octave) clone.octave = options.octave + (clone.octave || 0);
-        if(options.duration || options.duration === 0) clone.duration = options.duration;
+        if(!clone.duration) {
+            clone.duration = (options.duration || options.duration === 0) ? options.duration : DEFAULT_DURATION;
+        }
         if(options.scale) clone.parsedScale = safeScale(options.scale) as number[];
         if(options.key) clone.key = options.key;
         const [note,bend] = noteFromPc(clone.key!, clone.pitch!, clone.parsedScale!, clone.octave!);
@@ -226,13 +229,17 @@ export class Pitch extends Event {
 
 export class Chord extends Event {
     pitches!: Pitch[];
+    chordName?: string;
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
-        this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
+        if(this.pitches && this.pitches.length > 0) {
+            this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
+        }
     }
-    evaluate(options: ChangingOptions = {}): Pitch[] {
-        return this.pitches.map((pitch) => pitch.evaluate(options));
+    evaluate(options: ChangingOptions = {}): Chord {
+        this.pitches = this.pitches.map((pitch) => pitch.evaluate(options));
+        return this;
     }
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
         const collect = this.pitches.map((pitch: Pitch) => pitch.collect(name)) as unknown as Pitch[K];
@@ -241,6 +248,32 @@ export class Chord extends Event {
     scale(name: string): Chord {
         this.pitches.forEach((pitch) => pitch.scale(name));
         return this;
+    }
+}
+
+export class Roman extends Chord {
+    roman!: string;
+    romanNumeral!: number;
+    octave?: number;
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data);
+    }
+    evaluate(options: ChangingOptions = {}): Roman {
+        this.romanNumeral = parseRoman(this.roman);
+        const key = options.key || 60;
+        const scale = options.scale || "MAJOR";
+        const parsedScale = safeScale(scale) as number[];
+        let octave = (this.octave || 0) + (options.octave || 0);
+        const chord = this.chordName ? namedChordFromDegree(this.romanNumeral, this.chordName, key, scale, octave) : chordFromDegree(this.romanNumeral, scale, key, octave);
+        const pitchObj = chord.map((note) => {
+            return midiToPitchClass(note,key,scale);
+        });
+        this.pitches = pitchObj.map((pc) => {
+            const pitchOct = octave+pc.octave;
+            return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add}).evaluate(options);
+        });
+        return this; 
     }
 }
 

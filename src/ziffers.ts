@@ -1,13 +1,15 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
-import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
-import { Base, Pitch, Chord, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
+import { DEFAULT_OPTIONS, isScale, getScale, DEFAULT_DURATION } from './defaults.ts';
+import { Base, Pitch, Chord, Roman, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
+
+type ZEvent = Pitch|Chord|Roman|Rest;
 
 export class Ziffers {
     input: string;
     values: Base[];
-    evaluated: (Pitch|Chord|Rest)[];
+    evaluated: ZEvent[];
     options: Options;
     counter: number = 0;
     redo: number;
@@ -68,25 +70,26 @@ export class Ziffers {
     }
 
     pitches(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord|Rest) => {
+        return this.evaluated.map((item: ZEvent) => {
             return item.collect("pitch");
         })
     }
 
     notes(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord|Rest) => {
+        return this.evaluated.map((item: ZEvent) => {
             return item.collect("note");
         });  
     }
 
+
     freqs(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord|Rest) => {
+        return this.evaluated.map((item: ZEvent) => {
             return item.collect("freq");
         });
     }
 
     durations(): (number|undefined|number[])[] {
-        return this.evaluated.map((item: Pitch|Chord|Rest) => {
+        return this.evaluated.map((item: ZEvent) => {
             return item.collect("duration");
         });
     }
@@ -167,19 +170,25 @@ export class Ziffers {
         }
     }
 
-    evaluate(values: Base[], options: ChangingOptions = {}): (Pitch|Chord|Rest)[] {
+    update() {
+        this.evaluated = this.evaluate(this.values);
+        this.applyTransformations();
+        return this;
+    }
+
+    evaluate(values: Base[], options: ChangingOptions = {}): ZEvent[] {
         let items = values.map((node: Base) => {
             return node.evaluate(options);
-        }).flat(Infinity).filter((node) => node !== undefined) as (Pitch|Chord|Rest|Subdivision)[];
+        }).flat(Infinity).filter((node) => node !== undefined) as (ZEvent|Subdivision)[];
         if(options.subdivisions) {  
-            const duration = options.duration ? options.duration : DEFAULT_OPTIONS.duration
+            const duration = options.duration ? options.duration : DEFAULT_DURATION;
             items = resolveSubdivisions(items, duration);
          }
-        return items as (Pitch|Chord|Rest)[];
+        return items as ZEvent[];
     }
 
     totalDuration(): number {
-        const length = this.evaluated.reduce((acc: number, item: Pitch|Chord|Rest) => {
+        const length = this.evaluated.reduce((acc: number, item: ZEvent) => {
             return acc + item.collect("duration");
         }, 0);
         return length;
@@ -187,7 +196,7 @@ export class Ziffers {
 
 }
 
-const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration: number): (Pitch|Chord|Rest)[] => {
+const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration: number): ZEvent[] => {
     const length = values.length;
     const newDuration = duration / length;
     const sub = values.map((item: Chord|Rest|Pitch|Subdivision) => {
@@ -198,7 +207,7 @@ const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration:
             return item;
         }
     });
-    return sub.flat(Infinity) as (Pitch|Chord|Rest)[];
+    return sub.flat(Infinity) as ZEvent[];
 }
 
 const getGlobalOption = (options: NodeOptions): GlobalOptions => {
