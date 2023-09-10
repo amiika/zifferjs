@@ -34,6 +34,9 @@ float = ("-"? [0-9]* "." [0-9]+ / "." [0-9]+)
 int = "-"? [0-9]
 { return parseInt(text()); }
 
+multi = "-"? [0-9]+
+{ return parseInt(text()) }
+
 // ------------------ delimiters ---------------------------
 
 ws "whitespace" = [ \n\r\t] 
@@ -70,9 +73,6 @@ replist = "[:" l:(items) rep:(listrepeat)? "]"
 
 subdivision = "[" l:(items) "]"
 { return build(types.Subdivision,{items: l}) }
-
-multi = "-"? [0-9]+
-{ return parseInt(text()) }
 
 eval_item = multi / int
 
@@ -142,31 +142,34 @@ accidentals = acc:("#" / "b")+
   return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
 }
 
-chord = left:pitch right:pitch+
-{ return build(types.Chord, {pitches:[left].concat(right)}) }
+chord = left:pitch right:pitch+ inv:(invert)?
+{ return build(types.Chord, {pitches:[left].concat(right), inversion: inv}) }
 
 chordName = [a-zA-Z0-9\-\*\+]+
 {
   return text()
 }
 
+invert = "%" val:multi
+{ return val }
+
 noteName = [A-G][bs]?
 {
   return text()
 }
 
-namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName)
+namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName) inv:(invert)?
 { 
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
   const pitches = getPitchesFromNamedChord(name, root, scale, oct, dur);
-  return build(types.Chord, {duration: dur, pitches: pitches, chordName: name})
+  return build(types.Chord, {duration: dur, pitches: pitches, chordName: name, inversion: inv})
 }
 
-romans = oct:octave? dur:duration? val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordName)?
+romans = oct:octave? dur:duration? val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordName)? inv:(invert)?
 {
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
   const duration = dur ? dur : options.nodeOptions.duration;
-  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name})
+  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name, inversion: inv})
 }
 
 namedNote = oct:octave? dur:duration? name:(noteName)

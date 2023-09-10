@@ -400,3 +400,46 @@ export const noteNameToPitchClass = (name: string, key: string, scale: string): 
   const midiNote = noteNameToMidi(name);
   return midiToPitchClass(midiNote, key, scale);
 }
+
+// Dmitri Tymoczko voice leading algorithm
+
+const octaveTransform = (inputChord: number[], root: number): number[] => {
+  return inputChord.map(x => root + (x % 12)).sort((a, b) => a - b);
+}
+
+const tMatrix = (chordA: number[], chordB: number[]): (number|undefined)[] => {
+  const root = chordA[0];
+  const transformedA = octaveTransform(chordA, root);
+  const transformedB = octaveTransform(chordB, root);
+  return transformedA.map((a, index) => transformedB[index] ? transformedB[index] - a : undefined);
+}
+
+export const voiceLead = (chordA: number[], chordB: number[]): number[] => {
+  const root = chordA[0];
+  const aLeadings = chordA.map(x => [x,
+    octaveTransform(chordA, root).indexOf(root + (x % 12))
+  ]);
+
+  const tMatrixResult = tMatrix(chordA, chordB);
+
+  const bVoicing = aLeadings.map(([x, y]) => {
+      return tMatrixResult[y] ? x + tMatrixResult[y]! : x;
+  });
+
+  // TODO: Check octave for extra notes in chordB?
+
+  return bVoicing;
+}
+
+export const voiceLeadChords = (inputChords: number[][]): number[][] => {
+  // Initialize the result array with the first chord as-is
+  const voiceLedChords: number[][] = [inputChords[0]];
+
+  // Iterate through each subsequent chord and voice lead it to the previous chord
+  for (let i = 1; i < inputChords.length; i++) {
+    const voiceLedChord = voiceLead(inputChords[i], voiceLedChords[i - 1]);
+    voiceLedChords.push(voiceLedChord);
+  }
+
+  return voiceLedChords;
+}

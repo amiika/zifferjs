@@ -42,4 +42,19 @@ describe('chord-tests', () => {
     expect(pattern('C e F F qE F').durations()).toEqual([ 0.25, 0.125, 0.125, 0.25, 0.125 ]);
   })
 
+  it('inversions', () => {
+    expect(pattern('i%1').notes()).toEqual([[72,64,67]]);
+    expect(pattern('024%1').notes()).toEqual([[72,64,67]]);
+    expect(pattern('Cmaj%1').notes()).toEqual([[72,64,67]]);
+
+    expect(pattern('i%-1').notes()).toEqual([[55,64,60]]);
+    expect(pattern('024%-1').notes()).toEqual([[55,64,60]]);
+    expect(pattern('Cmaj%-1').notes()).toEqual([[55,64,60]]);
+  })
+
+  it('voiceLeading', () => {
+    expect(pattern('i v vi').lead().notes()).toEqual([[60,64,67],[62,67,71],[60,64,69]]);
+    expect(pattern('i v7 vi').lead().notes()).toEqual([[60,64,67],[62,65,67,77],[60,64,67]]);
+  })
+
 })

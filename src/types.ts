@@ -230,11 +230,13 @@ export class Pitch extends Event {
 export class Chord extends Event {
     pitches!: Pitch[];
     chordName?: string;
+    inversion?: number;
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
         if(this.pitches && this.pitches.length > 0) {
             this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
+            if(this.inversion) this.invert(this.inversion);
          }
     }
     evaluate(options: ChangingOptions = {}): Chord {
@@ -255,6 +257,30 @@ export class Chord extends Event {
     scale(name: string): Chord {
         this.pitches.forEach((pitch) => pitch.scale(name));
         return this;
+    }
+    invert(value: number): void {
+         const newPcs = value < 0 ? [...this.pitches].reverse() : [...this.pitches]
+        for (let i = 0; i < Math.abs(value); i++) {
+            const pc = newPcs[i % newPcs.length];
+            if (!pc.octave) pc.octave = 0;
+            pc.octave += value <= 0 ? -1 : 1;
+        }
+        this.pitches = newPcs.map((pitch) => pitch.evaluate());
+    }
+    voiceLeadFromNotes(leadedNotes: number[], options: NodeOptions): void {
+        this.pitches = this.pitches.map((p: Pitch, i: number) => {
+            if(leadedNotes[i]) {
+                const newPitch = midiToPitchClass(leadedNotes[i], options.key, options.scaleName);
+                const pc = deepClone(p);
+                pc.pitch = newPitch.pc;
+                pc.octave = newPitch.octave;
+                pc.add = newPitch.add;
+                pc.text = newPitch.text;
+                pc.note = leadedNotes[i];
+                pc.freq = midiToFreq(leadedNotes[i]);
+                return pc;
+            } else return deepClone(p);
+        });
     }
 }
 
@@ -280,6 +306,7 @@ export class Roman extends Chord {
             const pitchOct = octave+pc.octave;
             return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add}).evaluate(options);
         });
+        if(this.inversion) this.invert(this.inversion);
         this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
         return this; 
     }

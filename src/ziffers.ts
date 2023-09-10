@@ -1,6 +1,7 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale, DEFAULT_DURATION } from './defaults.ts';
+import { voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 
@@ -194,6 +195,24 @@ export class Ziffers {
         return length;
     }
 
+    lead(): Ziffers {
+        // Get first chord from evaluated events
+        let lastChordIndex = this.evaluated.findIndex((o)=>{return o instanceof Chord});
+        if(lastChordIndex>=0) {
+            for(let i = lastChordIndex+1; i<=this.evaluated.length; i++) {
+                if(this.evaluated[i] instanceof Chord) {
+                    const aChord = (this.evaluated[lastChordIndex] as Chord);
+                    const bChord = (this.evaluated[i] as Chord);
+                    const leadedChord = voiceLead(aChord.notes(),bChord.notes());
+                    const newChord = deepClone(bChord);
+                    newChord.voiceLeadFromNotes(leadedChord, this.options.nodeOptions!);
+                    this.evaluated[i] = newChord;
+                    lastChordIndex = i;
+                }
+            }
+        }
+        return this;
+    }
 }
 
 const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration: number): ZEvent[] => {
