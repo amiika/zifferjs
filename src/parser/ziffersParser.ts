@@ -501,8 +501,14 @@ function peg$parse(input, options) {
   return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
 };// @ts-ignore
 
-  var peg$f27 = function(left, right, inv) {// @ts-ignore
- return build(types.Chord, {pitches:[left].concat(right), inversion: inv}) };// @ts-ignore
+  var peg$f27 = function(oct, dur, left, right, inv) { 
+// @ts-ignore
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
+// @ts-ignore
+  const duration = dur ? dur : options.nodeOptions.duration;
+// @ts-ignore
+  return build(types.Chord, {pitches:[left].concat(right), inversion: inv, duration: duration, octave: octave}) 
+  };// @ts-ignore
 
   var peg$f28 = function() {
 // @ts-ignore
@@ -521,31 +527,43 @@ function peg$parse(input, options) {
 // @ts-ignore
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
 // @ts-ignore
+  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
+// @ts-ignore
   const pitches = getPitchesFromNamedChord(name, root, scale, oct, dur);
 // @ts-ignore
-  return build(types.Chord, {duration: dur, pitches: pitches, chordName: name, inversion: inv})
+  const duration = dur ? dur : options.nodeOptions.duration;
+// @ts-ignore
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
+// @ts-ignore
+  return build(types.Chord, {duration: duration, octave: octave, pitches: pitches, chordName: name, inversion: inv, scaleName: scale, key: key})
 };// @ts-ignore
 
   var peg$f32 = function(oct, dur, val, name, inv) {
+// @ts-ignore
+  const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+// @ts-ignore
+  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
 // @ts-ignore
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
 // @ts-ignore
   const duration = dur ? dur : options.nodeOptions.duration;
 // @ts-ignore
-  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name, inversion: inv})
+  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name, inversion: inv, scaleName: scale, key: key})
 };// @ts-ignore
 
   var peg$f33 = function(oct, dur, name) {
 // @ts-ignore
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
 // @ts-ignore
-  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
-// @ts-ignore
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+// @ts-ignore
+  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
 // @ts-ignore
   const pitch = noteNameToPitchClass(name,key,scale);
 // @ts-ignore
-  return build(types.Pitch, {duration: dur, pitch: pitch.pc, octave: pitch.octave + octave, add: pitch.add, key: key, scale: scale})
+  const duration = dur ? dur : options.nodeOptions.duration;
+// @ts-ignore
+  return build(types.Pitch, {duration: dur, pitch: pitch.pc, octave: pitch.octave + octave, add: pitch.add, scaleName: scale, key: key})
 };
 // @ts-ignore
   var peg$currPos = 0;
@@ -3680,7 +3698,7 @@ peg$parseaccidentals() {
   function // @ts-ignore
 peg$parsechord() {
 // @ts-ignore
-    var s0, s1, s2, s3;
+    var s0, s1, s2, s3, s4, s5;
 
 // @ts-ignore
     var key = peg$currPos * 40 + 33;
@@ -3699,40 +3717,54 @@ peg$parsechord() {
 // @ts-ignore
     s0 = peg$currPos;
 // @ts-ignore
-    s1 = peg$parsepitch();
+    s1 = peg$parseoctave();
 // @ts-ignore
-    if (s1 !== peg$FAILED) {
+    if (s1 === peg$FAILED) {
 // @ts-ignore
-      s2 = [];
+      s1 = null;
+    }
 // @ts-ignore
-      s3 = peg$parsepitch();
+    s2 = peg$parseduration();
 // @ts-ignore
-      if (s3 !== peg$FAILED) {
+    if (s2 === peg$FAILED) {
 // @ts-ignore
-        while (s3 !== peg$FAILED) {
+      s2 = null;
+    }
 // @ts-ignore
-          s2.push(s3);
+    s3 = peg$parsepitch();
 // @ts-ignore
-          s3 = peg$parsepitch();
+    if (s3 !== peg$FAILED) {
+// @ts-ignore
+      s4 = [];
+// @ts-ignore
+      s5 = peg$parsepitch();
+// @ts-ignore
+      if (s5 !== peg$FAILED) {
+// @ts-ignore
+        while (s5 !== peg$FAILED) {
+// @ts-ignore
+          s4.push(s5);
+// @ts-ignore
+          s5 = peg$parsepitch();
         }
 // @ts-ignore
       } else {
 // @ts-ignore
-        s2 = peg$FAILED;
+        s4 = peg$FAILED;
       }
 // @ts-ignore
-      if (s2 !== peg$FAILED) {
+      if (s4 !== peg$FAILED) {
 // @ts-ignore
-        s3 = peg$parseinvert();
+        s5 = peg$parseinvert();
 // @ts-ignore
-        if (s3 === peg$FAILED) {
+        if (s5 === peg$FAILED) {
 // @ts-ignore
-          s3 = null;
+          s5 = null;
         }
 // @ts-ignore
         peg$savedPos = s0;
 // @ts-ignore
-        s0 = peg$f27(s1, s2, s3);
+        s0 = peg$f27(s1, s2, s3, s4, s5);
 // @ts-ignore
       } else {
 // @ts-ignore

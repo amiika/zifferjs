@@ -115,6 +115,11 @@ export class Ziffers {
         return this;
     }
 
+    invert(invert: number) {
+        this.applyOptions({inversion: invert});
+        return this;
+    }
+
     isInOptions(key: string, value: string|number) {
         return this.options.nodeOptions && this.options.nodeOptions[key as keyof NodeOptions] === value;
     }

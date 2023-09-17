@@ -16,7 +16,7 @@ export const DEFAULT_DURATION = 0.25;
 export const DEFAULT_OPTIONS = {
     octave: 0,
     key: "C4",
-    scale: "IONIAN",
+    scale: "MAJOR",
     measure: 0,
     degrees: false,
   };

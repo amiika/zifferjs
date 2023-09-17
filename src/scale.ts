@@ -2,6 +2,7 @@ import { MODIFIERS, NOTES_TO_INTERVALS, getScale, getScaleLength } from "./defau
 import { isScale, CHORDS, CIRCLE_OF_FIFTHS, INTERVALS_TO_NOTES, ROMANS } from "./defaults";
 import { parse as parseScala } from "./parser/scalaParser";
 import { Pitch } from "./types";
+import { safeMod } from "./utils";
 
 export const noteFromPc = (
     root: number | string,
@@ -246,7 +247,6 @@ export const chordFromDegree = (
   name: string | undefined = undefined,
 ): number[] => {
   const rootMidi: number = typeof root === "string" ? noteNameToMidi(root) : root;
-
   if (
     name &&
     typeof scale === "string" &&
@@ -338,8 +338,8 @@ export const midiToTpc = (note: number, key: string | number): number => {
   return ((note * 7 + 26 - (11 + acc)) % 12 + (11 + acc)) as number;
 }
 
-export const midiToOctave = (note: number): number => {
-  return note <= 0 ? 0 : Math.floor(note / 12);
+export const midiToOctave = (note: number, key: number = 60): number => {
+  return note <= 0 ? 0 : Math.floor((note - key) / 12);
 }
 
 type PitchClass = {
@@ -353,10 +353,12 @@ export const midiToPitchClass = (note: number, key: string | number = 60, scale:
   function repeatSign(num: number): string {
     return num > 0 ? "^".repeat(num) : num < 0 ? "_".repeat(Math.abs(num)) : "";
   }
-  const pitchClass: number = note % 12;
-  const octave: number = midiToOctave(note) - 5;
+  
+  const keyNumber = typeof key == "number" ? key : noteNameToMidi(key);
+  const pitchClass: number = safeMod(note - keyNumber, 12);
 
-  if (typeof scale === "string" && scale.toUpperCase() === "CHROMATIC") {
+  const octave: number = midiToOctave(note, keyNumber);
+  if(typeof scale === "string" && scale.toUpperCase() === "CHROMATIC") {
     return {
       text: pitchClass.toString(),
       pc: pitchClass,
@@ -364,15 +366,15 @@ export const midiToPitchClass = (note: number, key: string | number = 60, scale:
       add: 0
     };
   }
-
+  
   const sharps: string[] = ["0", "#0", "1", "#1", "2", "3", "#3", "4", "#4", "5", "#5", "6"];
   const flats: string[] = ["0", "b1", "1", "b2", "2", "3", "b4", "4", "b5", "5", "b6", "6"];
-
+  
   const tpc: number = midiToTpc(note, key);
-
+  
   let npc: string;
-  if ((tpc >= 6 && tpc <= 12 && flats[pitchClass].length === 2) ||
-      (tpc >= 20 && tpc <= 26 && sharps[pitchClass].length === 2)) {
+
+  if ((tpc >= 6 && tpc <= 12 && flats[pitchClass].length === 2)) {
     npc = flats[pitchClass];
   } else {
     npc = sharps[pitchClass];
@@ -403,11 +405,11 @@ export const noteNameToPitchClass = (name: string, key: string, scale: string): 
 
 // Dmitri Tymoczko voice leading algorithm
 
-const octaveTransform = (inputChord: number[], root: number): number[] => {
+export const octaveTransform = (inputChord: number[], root: number): number[] => {
   return inputChord.map(x => root + (x % 12)).sort((a, b) => a - b);
 }
 
-const tMatrix = (chordA: number[], chordB: number[]): (number|undefined)[] => {
+export const tMatrix = (chordA: number[], chordB: number[]): (number|undefined)[] => {
   const root = chordA[0];
   const transformedA = octaveTransform(chordA, root);
   const transformedB = octaveTransform(chordB, root);

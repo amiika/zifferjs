@@ -46,3 +46,7 @@ export const safeEval = (expression: string): number => {
     throw new Error(`Error in eval: ${error}`);
   }
 }
+
+export const safeMod = (value: number, n: number) => {
+  return ((value % n) + n) % n;
+}

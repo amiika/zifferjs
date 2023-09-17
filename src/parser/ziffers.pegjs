@@ -142,8 +142,12 @@ accidentals = acc:("#" / "b")+
   return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
 }
 
-chord = left:pitch right:pitch+ inv:(invert)?
-{ return build(types.Chord, {pitches:[left].concat(right), inversion: inv}) }
+chord = oct:octave? dur:duration? left:pitch right:pitch+ inv:(invert)?
+{ 
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
+  const duration = dur ? dur : options.nodeOptions.duration;
+  return build(types.Chord, {pitches:[left].concat(right), inversion: inv, duration: duration, octave: octave}) 
+  }
 
 chordName = [a-zA-Z0-9\-\*\+]+
 {
@@ -161,23 +165,29 @@ noteName = [A-G][bs]?
 namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName) inv:(invert)?
 { 
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const pitches = getPitchesFromNamedChord(name, root, scale, oct, dur);
-  return build(types.Chord, {duration: dur, pitches: pitches, chordName: name, inversion: inv})
+  const duration = dur ? dur : options.nodeOptions.duration;
+  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
+  return build(types.Chord, {duration: duration, octave: octave, pitches: pitches, chordName: name, inversion: inv, scaleName: scale, key: key})
 }
 
 romans = oct:octave? dur:duration? val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordName)? inv:(invert)?
 {
+  const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
   const duration = dur ? dur : options.nodeOptions.duration;
-  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name, inversion: inv})
+  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name, inversion: inv, scaleName: scale, key: key})
 }
 
 namedNote = oct:octave? dur:duration? name:(noteName)
 {
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
-  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const pitch = noteNameToPitchClass(name,key,scale);
-  return build(types.Pitch, {duration: dur, pitch: pitch.pc, octave: pitch.octave + octave, add: pitch.add, key: key, scale: scale})
+  const duration = dur ? dur : options.nodeOptions.duration;
+  return build(types.Pitch, {duration: dur, pitch: pitch.pc, octave: pitch.octave + octave, add: pitch.add, scaleName: scale, key: key})
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SCALES, getScale } from '../defaults.ts'
-import { getPrimes } from '../scale.ts'
+import { getPrimes, midiToTpc } from '../scale.ts'
 import { parse as parseScale } from '../parser/scalaParser.ts'
 import { pattern } from '../ziffers.ts'
 
@@ -34,6 +34,11 @@ describe('scale-tests', () => {
   it('evals', () => {
     expect(parseScale(`100.0 + 0.3
     200.0 + 12.43`)).toEqual([1,-0.97,1.97,-1.88,0.31]);
+  })
+
+  it('tpc', () => {
+    expect(midiToTpc(60,"C4")).toEqual(14); 
+    expect(midiToTpc(50,"D3")).toEqual(16); 
   })
 
 

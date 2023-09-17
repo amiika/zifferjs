@@ -40,6 +40,7 @@ export type ChangingOptions = {
     scale?: string;
     key?: string;
     subdivisions?: boolean;
+    inversion?: number;
 }
 
 export type Node = NodeOptions & {
@@ -231,18 +232,24 @@ export class Chord extends Event {
     pitches!: Pitch[];
     chordName?: string;
     inversion?: number;
+    key?: number|string;
+    scaleName?: string;
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
         if(this.pitches && this.pitches.length > 0) {
             this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
-            if(this.inversion) this.invert(this.inversion);
          }
     }
     evaluate(options: ChangingOptions = {}): Chord {
-        this.pitches = this.pitches.map((pitch) => pitch.evaluate(options));
-        this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
-        return this;
+        const dupChord = deepClone(this);
+        if(options.inversion || dupChord.inversion) {
+            dupChord.pitches = dupChord.invert((options.inversion || dupChord.inversion)!, options);
+        } else {
+            dupChord.pitches = dupChord.pitches.map((pitch) => pitch.evaluate(options));
+        }
+        dupChord.duration = Math.max(...dupChord.pitches.map((pitch) => pitch.duration!));
+        return dupChord;
     }
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
         const collect = this.pitches.map((pitch: Pitch) => pitch.collect(name)) as unknown as Pitch[K];
@@ -258,14 +265,14 @@ export class Chord extends Event {
         this.pitches.forEach((pitch) => pitch.scale(name));
         return this;
     }
-    invert(value: number): void {
-         const newPcs = value < 0 ? [...this.pitches].reverse() : [...this.pitches]
+    invert(value: number, options: ChangingOptions = {}): Pitch[] {
+        const newPcs = value < 0 ? this.pitches.reverse() : this.pitches;
         for (let i = 0; i < Math.abs(value); i++) {
             const pc = newPcs[i % newPcs.length];
             if (!pc.octave) pc.octave = 0;
             pc.octave += value <= 0 ? -1 : 1;
         }
-        this.pitches = newPcs.map((pitch) => pitch.evaluate());
+        return newPcs.map((pitch) => pitch.evaluate(options));
     }
     voiceLeadFromNotes(leadedNotes: number[], options: NodeOptions): void {
         this.pitches = this.pitches.map((p: Pitch, i: number) => {
@@ -294,8 +301,9 @@ export class Roman extends Chord {
     }
     evaluate(options: ChangingOptions = {}): Roman {
         this.romanNumeral = parseRoman(this.roman);
-        const key = options.key || 60;
-        const scale = options.scale || "MAJOR";
+        const key = this.key || options.key || 60;
+        const scale = this.scaleName || options.scale || "MAJOR";
+
         const parsedScale = safeScale(scale) as number[];
         let octave = (this.octave || 0) + (options.octave || 0);
         const chord = this.chordName ? namedChordFromDegree(this.romanNumeral, this.chordName, key, scale, octave) : chordFromDegree(this.romanNumeral, scale, key, octave);
@@ -306,7 +314,10 @@ export class Roman extends Chord {
             const pitchOct = octave+pc.octave;
             return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add}).evaluate(options);
         });
-        if(this.inversion) this.invert(this.inversion);
+        if(options.inversion || this.inversion) {
+            const inversion = options.inversion || this.inversion;
+            this.pitches = this.invert(inversion!, options);
+        }
         this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
         return this; 
     }

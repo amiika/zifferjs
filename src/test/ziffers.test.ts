@@ -23,6 +23,7 @@ describe('main-tests', () => {
 
   it('notes', () => {
     expect(pattern('1 2 3 4').notes()).toEqual([62, 64, 65, 67]);
+    expect(pattern('1 2 3 4',{key: "D3"}).notes()).toEqual([52, 54, 55, 57]);
     expect(pattern('1 2 3 4',{octave: 1}).notes()).toEqual([74,76,77,79]);
     expect(pattern('^ 1 2 3 4').notes()).toEqual([74,76,77,79]);
     expect(pattern('_ 1 _2 ^3 4').notes()).toEqual([50,40,65,55]);
