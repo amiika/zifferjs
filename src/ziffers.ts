@@ -145,7 +145,6 @@ export class Ziffers {
     }
 
     next(): Event {
-
         // Check for the first run
         if(this.index<0) this.index = 0;
 

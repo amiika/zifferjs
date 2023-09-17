@@ -300,26 +300,30 @@ export class Roman extends Chord {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}): Roman {
-        this.romanNumeral = parseRoman(this.roman);
-        const key = this.key || options.key || 60;
-        const scale = this.scaleName || options.scale || "MAJOR";
+        const dup = deepClone(this);
+        dup.romanNumeral = parseRoman(dup.roman);
+        const key = dup.key || options.key || 60;
+        const scale = dup.scaleName || options.scale || "MAJOR";
 
         const parsedScale = safeScale(scale) as number[];
-        let octave = (this.octave || 0) + (options.octave || 0);
-        const chord = this.chordName ? namedChordFromDegree(this.romanNumeral, this.chordName, key, scale, octave) : chordFromDegree(this.romanNumeral, scale, key, octave);
+        let octave = (dup.octave || 0) + (options.octave || 0);
+        const chord = dup.chordName ? namedChordFromDegree(dup.romanNumeral, dup.chordName, key, scale, octave) : chordFromDegree(dup.romanNumeral, scale, key, octave);
         const pitchObj = chord.map((note) => {
             return midiToPitchClass(note,key,scale);
         });
-        this.pitches = pitchObj.map((pc) => {
+        dup.pitches = pitchObj.map((pc) => {
             const pitchOct = octave+pc.octave;
             return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add}).evaluate(options);
         });
-        if(options.inversion || this.inversion) {
-            const inversion = options.inversion || this.inversion;
-            this.pitches = this.invert(inversion!, options);
+        
+        if(options.inversion || dup.inversion) {
+            console.log("ROMAN INVERSION?");
+            const inversion = options.inversion || dup.inversion;
+            dup.pitches = dup.invert(inversion!, options);
+            console.log("PITCHES ROM", dup.pitches);
         }
-        this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
-        return this; 
+        dup.duration = Math.max(...dup.pitches.map((pitch) => pitch.duration!));
+        return dup; 
     }
 }
 

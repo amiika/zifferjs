@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { chord, midiToPitchClass, tMatrix, voiceLead} from '../scale.ts'
 import { pattern } from '../ziffers.ts';
+import { Chord } from '../types.ts';
 
 describe('chord-tests', () => {
 
@@ -63,6 +64,14 @@ describe('chord-tests', () => {
     expect(pattern('i v vi').notes()).toEqual([[60,64,67],[67,71,74],[69,72,76]]);
     expect(pattern('i v vi').lead().notes()).toEqual([[60,64,67],[62,67,71],[60,64,69]]);
     expect(pattern('i v7 vi').lead().notes()).toEqual([[60,64,67],[62,65,67,77],[60,64,67]]);
+  })
+
+  it('inverting', () => {
+    const a = pattern('i i').invert(-1);
+    const b = (a.next() as Chord).notes();
+    const c = (a.next() as Chord).notes();
+    expect(b).toEqual([55,64,60]);
+    expect(c).toEqual([55,64,60]);
   })
 
 })
