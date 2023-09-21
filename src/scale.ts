@@ -222,17 +222,18 @@ export const getPitchesFromNamedChord = (
 }
 
 export const getScaleNotes = (
-  name: string|number[], 
-  root: number = 60, 
+  name: string|number|number[], 
+  root: number|string = 60, 
   numOctaves: number = 1
   ): number[] => {
-  const scale: number[] = typeof name === "string" ? getScale(name) : name;
-  const scaleNotes: number[] = [root];
+  const scale = safeScale(name);
+  let scaleRoot = typeof root === "string" ? noteNameToMidi(root) : root;
+  const scaleNotes: number[] = [scaleRoot];
 
   for (let i = 0; i < numOctaves; i++) {
     for (const semitone of scale) {
-      root += semitone;
-      scaleNotes.push(root);
+      scaleRoot += semitone;
+      scaleNotes.push(scaleRoot);
     }
   }
 

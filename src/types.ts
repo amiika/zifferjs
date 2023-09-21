@@ -228,6 +228,14 @@ export class Pitch extends Event {
     }
 }
 
+export class Sample extends Pitch {
+    sample!: string;
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data);
+    }
+}
+
 export class Chord extends Event {
     pitches!: Pitch[];
     chordName?: string;
@@ -313,14 +321,11 @@ export class Roman extends Chord {
         });
         dup.pitches = pitchObj.map((pc) => {
             const pitchOct = octave+pc.octave;
-            return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add}).evaluate(options);
+            return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add, duration: this.duration}).evaluate(options);
         });
-        
         if(options.inversion || dup.inversion) {
-            console.log("ROMAN INVERSION?");
             const inversion = options.inversion || dup.inversion;
             dup.pitches = dup.invert(inversion!, options);
-            console.log("PITCHES ROM", dup.pitches);
         }
         dup.duration = Math.max(...dup.pitches.map((pitch) => pitch.duration!));
         return dup; 

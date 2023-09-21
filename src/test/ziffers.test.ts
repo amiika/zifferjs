@@ -52,5 +52,10 @@ describe('main-tests', () => {
     expect(pattern('[1 [2 (3 4)+(3 6)]]').durations()).toEqual([0.125,0.025,0.025,0.025,0.025,0.025]);
   })
 
+  it('randomtests', () => {
+    const a = pattern('q 1');
+    expect(a.next().duration).toEqual(0.25);
+  })
+
 
 })

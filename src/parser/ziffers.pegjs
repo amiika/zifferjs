@@ -46,6 +46,10 @@ comma = ws "," ws
 pipe = ws "|" ws
 quote = '"' / "'"
 
+samplename = pitch* [a-z][a-z]+
+{
+  return build(types.Sample, {sample: text()});
+}
 
 durchar = [mklpdcwyhnqaefsxtgujzo]
 { return DEFAULT_DURS[text()]; }
@@ -90,7 +94,7 @@ eval = "{" values:(eval_items / ws)+ "}"
 
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
-item = v:(rest / namedChord / namedNote / romans / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval / bar)
+item = v:(rest / romans / namedChord / namedNote / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval / bar)
 { return v }
 
 bar = "|"
@@ -142,12 +146,11 @@ accidentals = acc:("#" / "b")+
   return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
 }
 
-chord = oct:octave? dur:duration? left:pitch right:pitch+ inv:(invert)?
+chord = oct:octave? left:pitch right:pitch+ inv:(invert)?
 { 
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
-  const duration = dur ? dur : options.nodeOptions.duration;
-  return build(types.Chord, {pitches:[left].concat(right), inversion: inv, duration: duration, octave: octave}) 
-  }
+  return build(types.Chord, {pitches:[left].concat(right), inversion: inv, octave: octave}) 
+}
 
 chordName = [a-zA-Z0-9\-\*\+]+
 {
