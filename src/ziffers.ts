@@ -1,6 +1,6 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
-import { DEFAULT_OPTIONS, isScale, getScale, DEFAULT_DURATION } from './defaults.ts';
+import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
