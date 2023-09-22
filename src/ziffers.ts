@@ -95,6 +95,12 @@ export class Ziffers {
         });
     }
 
+    octaves(): (undefined|number|number[])[] {
+        return this.evaluated.map((item: ZEvent) => {
+            return item.collect("octave");
+        });
+    }
+
     retrograde(): Ziffers {
         this.evaluated = this.evaluated.reverse();
         return this;
@@ -156,7 +162,7 @@ export class Ziffers {
 
         // Check if next item is last
         if(this.redo > 0 && this.index >= this.evaluated.length * this.redo) {
-            this.index = 0;
+            this.index = 0; 
             this.evaluated = this.evaluate(this.values);
         }
 
@@ -185,9 +191,8 @@ export class Ziffers {
         let items = values.map((node: Base) => {
             return node.evaluate(options);
         }).flat(Infinity).filter((node) => node !== undefined) as (ZEvent|Subdivision)[];
-        if(options.subdivisions) {  
-            const duration = options.duration ? options.duration : DEFAULT_DURATION;
-            items = resolveSubdivisions(items, duration);
+        if(options.subdivisions) {
+            items = resolveSubdivisions(items);
          }
         return items as ZEvent[];
     }
@@ -219,14 +224,14 @@ export class Ziffers {
     }
 }
 
-const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration: number): ZEvent[] => {
-    const length = values.length;
-    const newDuration = duration / length;
+const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration: number|undefined = undefined): ZEvent[] => {
     const sub = values.map((item: Chord|Rest|Pitch|Subdivision) => {
         if(item instanceof Subdivision) {
+            const length = item.items.length
+            const newDuration = (duration || item.duration) / length;
             return resolveSubdivisions(item.items, newDuration);
         } else {
-            item.duration = newDuration;
+            item.duration = duration || item.duration;
             return item;
         }
     });

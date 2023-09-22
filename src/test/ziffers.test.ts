@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pattern } from '../ziffers.ts'
+import { Pitch } from '../types.ts';
 
 describe('main-tests', () => {
   it('parse', () => {
@@ -11,6 +12,7 @@ describe('main-tests', () => {
 
   it('repeats', () => {
     expect(pattern('1 2:2 3:3 4').pitches()).toEqual([1,2,2,3,3,3,4]);
+    expect(pattern('^ 4:4').octaves()).toEqual([1,1,1,1]);
   })
 
   it('durations', () => {
@@ -50,6 +52,17 @@ describe('main-tests', () => {
     expect(pattern('[1 [2 3]]').pitches()).toEqual([1,2,3]);
     expect(pattern('[1 [2 3]]').durations()).toEqual([0.125,0.0625,0.0625]);
     expect(pattern('[1 [2 (3 4)+(3 6)]]').durations()).toEqual([0.125,0.025,0.025,0.025,0.025,0.025]);
+    expect(pattern('q [0 3] 4 5 3 2').durations()).toEqual([0.125,0.125,0.25,0.25,0.25, 0.25]);
+    expect(pattern('q [0 3] 4 [4 5] 5 3 2').durations()).toEqual([0.125,0.125,0.25,0.125,0.125,0.25,0.25,0.25]);
+    expect(pattern('h 1 [0 2 3 3] 1 w 3 [0 3] w [0 [2 4]] d 3 [0 [1 2]]').durations()).toEqual([0.5,0.125,0.125,0.125,0.125,0.5,1,0.5,0.5,0.5,0.25,0.25,2,1,0.5,0.5]);
+    expect(pattern('1.0 ^ [0 0] 2 2 [4 4]').octaves()).toEqual([1,1,1,1,1,1])
+    // Subdivision octave test
+    const pat = pattern('1.0 ^ [0 0] 2');
+    pat.next(); pat.next(); pat.next(); pat.next();
+    const pitch = (pat.next() as Pitch)
+    if(pitch) {
+      expect(pitch.octave).toEqual(1);
+    }
   })
 
   it('randomtests', () => {

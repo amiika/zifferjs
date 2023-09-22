@@ -5,11 +5,4 @@ import { parse as parseScale } from './parser/scalaParser.ts'
 import { freqToMidi, midiToFreq, resolvePitchBend, stepsToScale, scaleToSteps, numberToScale, midiToPitchClass} from './scale.ts';
 
 
-try {
-  const yep = pattern('i v vi iv');
-  console.log(yep.notes());
-  yep.invert(-1);
-  console.log(yep.notes());
-} catch (error) {
-  console.error('Error while parsing:', error);
-} 
+console.log(pattern('h [0 2 3 3] 1 w 3 [0 3] w [0 [2 4]] d 3 [0 [1 2 [3 4]]]').durations());

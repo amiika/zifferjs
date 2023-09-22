@@ -419,6 +419,7 @@ export class List extends Base {
 }
 
 export class Subdivision extends Base {
+    duration!: number;
     items!: (Pitch|Chord|Rest|Subdivision)[];
     constructor(data: Partial<Node>) {
         super(data);
@@ -426,8 +427,10 @@ export class Subdivision extends Base {
     }
     evaluate(options: ChangingOptions = {}): Subdivision {
         options.subdivisions = true;
-        this.items = this.items.map((item: Base) => { return item.evaluate(options); }).flat(Infinity) as unknown as Pitch[];
-        return this;
+        const dup = deepClone(this);
+        dup.duration = options.duration || DEFAULT_DURATION;
+        dup.items = dup.items.map((item: Base) => { return item.evaluate(options); }).flat(Infinity) as unknown as Pitch[];
+        return dup;
     }
 }
 
