@@ -17,6 +17,9 @@ describe('main-tests', () => {
 
   it('durations', () => {
     expect(pattern('e 1').durations()[0]).toEqual(0.125);
+    expect(pattern('q 3 e3 5').durations()).toEqual([0.25,0.125,0.25]);
+    expect(pattern('0.25 3 0.125 3 0.25 5').durations()).toEqual([0.25,0.125,0.25]);
+    expect(pattern('1/4 4 2/4 3 1/16 9 1/32 4').durations()).toEqual([0.25,0.5,0.0625,0.03125]);
   })
 
   it('lists', () => {

@@ -5,6 +5,7 @@ describe('sounds-tests', () => {
     it('sample names', () => {
         expect(pattern('bd').sounds()).toEqual(["bd"]);
         expect(pattern('wt_foo bar foo_2 foo2').sounds()).toEqual(["wt_foo","bar", "foo_2", "foo2"]);
+        expect(pattern('jvbass').sounds()).toEqual(["jvbass"]);
     })
 
     it('sound syntax', () => {

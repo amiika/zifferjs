@@ -45,7 +45,7 @@ describe('chord-tests', () => {
   it('notes', () => {
     expect(pattern('C D E F G A B').notes()).toEqual([ 60, 62, 64, 65, 67, 69, 71 ]);
     expect(pattern('(C B)+(D F)').notes()).toEqual([ 62, 72, 65, 76 ]);
-    expect(pattern('C e F F qE F').durations()).toEqual([ 0.25, 0.125, 0.125, 0.25, 0.125 ]);
+    expect(pattern('C e F F q E e F').durations()).toEqual([ 0.25, 0.125, 0.125, 0.25, 0.125 ]);
   })
 
   it('inversions', () => {
@@ -72,6 +72,10 @@ describe('chord-tests', () => {
     const c = (a.next() as Chord).notes();
     expect(b).toEqual([55,64,60]);
     expect(c).toEqual([55,64,60]);
+  })
+
+  it('chordswithsounds', () => {
+   // expect(pattern('0:{0}2:{1}5:{2}').indices()).toEqual([[0,1,2]]);
   })
 
 })

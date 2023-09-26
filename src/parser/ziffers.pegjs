@@ -81,7 +81,10 @@ snum = ":" n:numeric_param
 durchar = [mklpdcwyhnqaefsxtgujzo]
 { return DEFAULT_DURS[text()]; }
 
-duration = durchar / float
+duration = ratio / durchar / float
+
+ratio = n:multi "/" d:multi
+{ return n/d }
 
 statement = items
 
@@ -212,22 +215,18 @@ namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName) inv
   return build(types.Chord, {duration: duration, chordOctave: octave, pitches: pitches, chordName: name, inversion: inv, scaleName: scale, key: key})
 }
 
-romans = oct:octave? dur:duration? val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordName)? inv:(invert)?
+romans = val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordName)? inv:(invert)?
 {
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
   const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
-  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
-  const duration = dur ? dur : options.nodeOptions.duration;
-  return build(types.Roman, {duration: duration, roman: val, chordOctave: octave, chordName: name, inversion: inv, scaleName: scale, key: key})
+  return build(types.Roman, {roman: val, chordName: name, inversion: inv, scaleName: scale, key: key})
 }
 
-namedNote = oct:octave? dur:duration? name:(noteName)
+namedNote = name:(noteName)
 {
-  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
   const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const pitch = noteNameToPitchClass(name,key,scale);
-  const duration = dur ? dur : options.nodeOptions.duration;
-  return build(types.Pitch, {duration: dur, pitch: pitch.pc, pitchOctave: pitch.octave + octave, add: pitch.add, scaleName: scale, key: key})
+  return build(types.Pitch, {pitch: pitch.pc, add: pitch.add, scaleName: scale, key: key})
 }
 
