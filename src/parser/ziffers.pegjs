@@ -67,7 +67,7 @@ sound_items = soundname / sound_cycle / ws
 pitched_sound = "@" v:(sound_param)
 { return v }
 
-containers = list / subdivision / cycle
+containers = list_operation / list / subdivision / cycle / replist
 
 sound_event = e:(containers / item) s:(pitched_sound)
 { return build(types.SoundEvent,{item: e, sound: s}) }
@@ -85,7 +85,7 @@ duration = durchar / float
 
 statement = items
 
-items = n:(sound_index / sound_event / repeat / list_operation / subdivision / list / replist / item / cycle)+
+items = n:(repeat / sound_index / sound_event / list_operation / subdivision / list / replist / item / cycle)+
 { return n.filter(a => a) }
 
 numeric_param = ws / multi / random / random_between / num_cycle / eval_param
@@ -160,7 +160,7 @@ random = "?"
 random_between = "(" a:multi "," b:multi ")"
 { return build(types.RandomPitch,{min: a, max: b, seededRandom: options.seededRandom }) }
 
-repeat = n:item "!" i:multi
+repeat = n:(sound_index / sound_event / containers / item) "!" i:multi
 { return build(types.Repeat,{item: n, times: i}) }
 
 duration_change = dur:duration 
@@ -168,7 +168,7 @@ duration_change = dur:duration
   return build(types.DurationChange,{duration: dur}) 
 }
 
-rest = d:duration? "r"
+rest = d:duration? "r" ![a-z]
 {
   return build(types.Rest, {duration: d})
 }
@@ -176,7 +176,7 @@ rest = d:duration? "r"
 pitch = oct:octave? dur:duration? add:accidentals? val:(int / random / random_between / eval_param)
 {
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
-  return build(types.Pitch, {duration: dur, pitch: val, octave: octave, add: add})
+  return build(types.Pitch, {duration: dur, pitch: val, pitchOctave: octave, add: add})
 }
 
 accidentals = acc:("#" / "b")+
@@ -184,10 +184,9 @@ accidentals = acc:("#" / "b")+
   return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
 }
 
-chord = oct:octave? left:pitch right:pitch+ inv:(invert)?
+chord = left:pitch right:pitch+ inv:(invert)?
 { 
-  const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
-  return build(types.Chord, {pitches:[left].concat(right), inversion: inv, octave: octave}) 
+  return build(types.Chord, {pitches:[left].concat(right), inversion: inv}) 
 }
 
 chordName = [a-zA-Z0-9\-\*\+]+
@@ -210,7 +209,7 @@ namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName) inv
   const pitches = getPitchesFromNamedChord(name, root, scale, oct, dur);
   const duration = dur ? dur : options.nodeOptions.duration;
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
-  return build(types.Chord, {duration: duration, octave: octave, pitches: pitches, chordName: name, inversion: inv, scaleName: scale, key: key})
+  return build(types.Chord, {duration: duration, chordOctave: octave, pitches: pitches, chordName: name, inversion: inv, scaleName: scale, key: key})
 }
 
 romans = oct:octave? dur:duration? val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordName)? inv:(invert)?
@@ -219,7 +218,7 @@ romans = oct:octave? dur:duration? val:("iii" / "ii" / "iv" / "i" / "vii" / "vi"
   const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
   const duration = dur ? dur : options.nodeOptions.duration;
-  return build(types.Roman, {duration: duration, roman: val, octave: octave, chordName: name, inversion: inv, scaleName: scale, key: key})
+  return build(types.Roman, {duration: duration, roman: val, chordOctave: octave, chordName: name, inversion: inv, scaleName: scale, key: key})
 }
 
 namedNote = oct:octave? dur:duration? name:(noteName)
@@ -229,6 +228,6 @@ namedNote = oct:octave? dur:duration? name:(noteName)
   const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const pitch = noteNameToPitchClass(name,key,scale);
   const duration = dur ? dur : options.nodeOptions.duration;
-  return build(types.Pitch, {duration: dur, pitch: pitch.pc, octave: pitch.octave + octave, add: pitch.add, scaleName: scale, key: key})
+  return build(types.Pitch, {duration: dur, pitch: pitch.pc, pitchOctave: pitch.octave + octave, add: pitch.add, scaleName: scale, key: key})
 }
 

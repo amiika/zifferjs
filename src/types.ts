@@ -198,6 +198,7 @@ export class Pitch extends Event {
     freq?: number;
     note?: number;
     octave?: number;
+    pitchOctave?: number;
     bend?: number;
     key?: string|number;
     parsedScale?: string|number[];
@@ -214,7 +215,7 @@ export class Pitch extends Event {
 
     evaluate(options: ChangingOptions = {}): Pitch {
         const clone = deepClone(this);
-        if(options.octave) clone.octave = options.octave + (clone.octave || 0);
+        if(options.octave) clone.octave = options.octave + (clone.pitchOctave || 0);
         if(!clone.duration) {
             clone.duration = (options.duration || options.duration === 0) ? options.duration : DEFAULT_DURATION;
         }
@@ -385,6 +386,7 @@ export class Roman extends Chord {
     roman!: string;
     romanNumeral!: number;
     octave?: number;
+    chordOctave?: number;
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
@@ -396,7 +398,7 @@ export class Roman extends Chord {
         const scale = dup.scaleName || options.scale || "MAJOR";
 
         const parsedScale = safeScale(scale) as number[];
-        let octave = (dup.octave || 0) + (options.octave || 0);
+        let octave = (dup.chordOctave || 0) + (options.octave || 0);
         const chord = dup.chordName ? namedChordFromDegree(dup.romanNumeral, dup.chordName, key, scale, octave) : chordFromDegree(dup.romanNumeral, scale, key, octave);
         const pitchObj = chord.map((note) => {
             return midiToPitchClass(note,key,scale);
@@ -505,16 +507,17 @@ export class List extends Base {
 export class Subdivision extends Base {
     duration!: number;
     items!: (Pitch|Chord|Rest|Subdivision)[];
+    evaluated!: (Pitch|Chord|Rest|Subdivision)[];
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}): Subdivision {
         options.subdivisions = true;
-        const dup = deepClone(this);
-        dup.duration = options.duration || DEFAULT_DURATION;
-        dup.items = dup.items.map((item: Base) => { return item.evaluate(options); }).flat(Infinity) as unknown as Pitch[];
-        return dup;
+        //const dup = deepClone(this);
+        this.duration = options.duration || DEFAULT_DURATION;
+        this.evaluated = this.items.map((item: Base) => { return item.evaluate(options); }).filter((v) => v).flat(Infinity) as unknown as Pitch[];
+        return this;
     }
 }
 

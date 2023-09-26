@@ -238,9 +238,9 @@ export class Ziffers {
 const resolveSubdivisions = (values: (Chord|Rest|Pitch|SoundEvent|Subdivision)[], duration: number|undefined = undefined): ZEvent[] => {
     const sub = values.map((item: Chord|Rest|Pitch|SoundEvent|Subdivision) => {
         if(item instanceof Subdivision) {
-            const length = item.items.length
+            const length = item.evaluated.length
             const newDuration = (duration || item.duration) / length;
-            return resolveSubdivisions(item.items, newDuration);
+            return resolveSubdivisions(item.evaluated, newDuration);
         } else {
             item.duration = duration || item.duration;
             return item;
