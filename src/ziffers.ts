@@ -2,10 +2,10 @@ import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { voiceLead } from './scale.ts';
-import { Base, Pitch, Chord, Roman, Rest, Event, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
+import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 
-type ZEvent = Pitch|Chord|Roman|Rest;
+type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
 export class Ziffers {
     input: string;
@@ -82,6 +82,17 @@ export class Ziffers {
         });  
     }
 
+    sounds(): string[] {
+        return this.evaluated.map((item: ZEvent) => {
+            return item.collect("sound");
+        });  
+    }
+
+    indices(): number[] {
+        return this.evaluated.map((item: ZEvent) => {
+            return item.collect("soundIndex");
+        });
+    }
 
     freqs(): (number|undefined|number[])[] {
         return this.evaluated.map((item: ZEvent) => {
@@ -224,8 +235,8 @@ export class Ziffers {
     }
 }
 
-const resolveSubdivisions = (values: (Chord|Rest|Pitch|Subdivision)[], duration: number|undefined = undefined): ZEvent[] => {
-    const sub = values.map((item: Chord|Rest|Pitch|Subdivision) => {
+const resolveSubdivisions = (values: (Chord|Rest|Pitch|SoundEvent|Subdivision)[], duration: number|undefined = undefined): ZEvent[] => {
+    const sub = values.map((item: Chord|Rest|Pitch|SoundEvent|Subdivision) => {
         if(item instanceof Subdivision) {
             const length = item.items.length
             const newDuration = (duration || item.duration) / length;

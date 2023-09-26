@@ -46,10 +46,37 @@ comma = ws "," ws
 pipe = ws "|" ws
 quote = '"' / "'"
 
-samplename = pitch* [a-z][a-z]+
+sound = t:(soundname)
 {
-  return build(types.Sample, {sample: text()});
+  return build(types.Sound, {sound: t});
 }
+
+parallelSound = sound ("," sound)*
+{ return text() }
+
+soundname = [a-z][a-z_]+[a-z_0-9]*
+{ return text() }
+
+sound_param = sound_cycle / sound_items
+
+sound_cycle = "<" l:(sound_param+) ">" 
+{ return build(types.Cycle,{items: l}) }
+
+sound_items = soundname / sound_cycle / ws
+
+pitched_sound = "@" v:(sound_param)
+{ return v }
+
+containers = list / subdivision / cycle
+
+sound_event = e:(containers / item) s:(pitched_sound)
+{ return build(types.SoundEvent,{item: e, sound: s}) }
+
+sound_index = e:(sound_event / containers / item) i:(snum)
+{ return build(types.SoundIndex,{item: e, soundIndex: i}) }
+
+snum = ":" n:numeric_param
+{ return n }
 
 durchar = [mklpdcwyhnqaefsxtgujzo]
 { return DEFAULT_DURS[text()]; }
@@ -58,13 +85,19 @@ duration = durchar / float
 
 statement = items
 
-items = n:(repeat / list_operation / subdivision / list / replist / item / cycle)+
+items = n:(sound_index / sound_event / repeat / list_operation / subdivision / list / replist / item / cycle)+
 { return n.filter(a => a) }
+
+numeric_param = ws / multi / random / random_between / num_cycle / eval_param
+
+num_cycle = "<" l:(numeric_param+) ">" 
+{ return build(types.Cycle,{items: l}) }
 
 list = "(" ":"? l:(items) rep:(listrepeat)? ")"
 {
   if(rep) return build(types.Repeat,{item: l, times: rep});
-  else return build(types.List,{items: l}); }
+  else return build(types.List,{items: l}); 
+}
 
 listrepeat = ":" n:multi
 { return n }
@@ -92,9 +125,14 @@ eval = "{" values:(eval_items / ws)+ "}"
   return build(types.List,{items: pitches});
 }
 
+eval_param = "{" v:(multi / random_between) "}"
+{
+  return v;
+}
+
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
-item = v:(rest / romans / namedChord / namedNote / chord / pitch / octave_change / ws / duration_change / random / random_between / list / eval / bar)
+item = v:(rest / romans / namedChord / namedNote / sound / chord / pitch / octave_change / ws / duration_change / list / eval / bar)
 { return v }
 
 bar = "|"
@@ -119,10 +157,10 @@ octave = ("^" / "_")+
 random = "?"
 { return build(types.RandomPitch,{seededRandom: options.seededRandom}) }
 
-random_between = "(" a:int "," b:int ")"
+random_between = "(" a:multi "," b:multi ")"
 { return build(types.RandomPitch,{min: a, max: b, seededRandom: options.seededRandom }) }
 
-repeat = n:item ":" i:multi !(")" / "]")
+repeat = n:item "!" i:multi
 { return build(types.Repeat,{item: n, times: i}) }
 
 duration_change = dur:duration 
@@ -135,8 +173,8 @@ rest = d:duration? "r"
   return build(types.Rest, {duration: d})
 }
 
-pitch = oct:octave? dur:duration? add:accidentals? val:int 
-{ 
+pitch = oct:octave? dur:duration? add:accidentals? val:(int / random / random_between / eval_param)
+{
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
   return build(types.Pitch, {duration: dur, pitch: val, octave: octave, add: add})
 }

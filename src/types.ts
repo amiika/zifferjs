@@ -41,6 +41,8 @@ export type ChangingOptions = {
     key?: string;
     subdivisions?: boolean;
     inversion?: number;
+    sound?: string;
+    soundIndex?: number|RandomPitch;
 }
 
 export type Node = NodeOptions & {
@@ -53,6 +55,9 @@ export type Node = NodeOptions & {
     freq?: number;
     note?: number;
     bend?: number;
+    // Sound
+    sound?: string;
+    soundIndex?: number;
     // Chord
     pitches?: Node[];
     // List operation
@@ -99,12 +104,17 @@ export abstract class Base {
     evaluate(options: ChangingOptions = {}): Base|Base[]|undefined {
         return this;
     }
+    evaluateValue(): any {
+        return this.text;
+    }
 }
 
 export abstract class Event extends Base {
     duration!: number;
     modifiedEvent: Event|undefined = undefined;
     globalOptions!: GlobalOptions;
+    sound?: string|Base;
+    soundIndex?: number|RandomPitch;
 
     constructor(data: Partial<Node>) {
         super(data);
@@ -163,17 +173,27 @@ export abstract class Event extends Base {
     getExisting(...args: string[]): {[key: string]: any} {
         const existing = args.reduce((acc, value) => {
             if(Object.prototype.hasOwnProperty.call(this, value)) {
-                acc[value] = this[value as keyof this];
+                const val = this[value as keyof this];
+                if(val || val===0) acc[value] = this[value as keyof this];
             }
             return acc;
         }, {} as {[key: string]: any});
         return existing;
     }
-
+    mapExisting(fromKeys: string[], toKeys: string[]): {[key: string]: any} {
+        const existing = fromKeys.reduce((acc, value, index) => {
+            if(Object.prototype.hasOwnProperty.call(this, value)) {
+                const val = this[value as keyof this];
+                if(val || val===0) acc[toKeys[index]] = this[value as keyof this];
+            }
+            return acc;
+        }, {} as {[key: string]: any});
+        return existing;
+    }
 }
 
 export class Pitch extends Event {
-    pitch!: number;
+    pitch!: number|RandomPitch;
     add?: number;
     freq?: number;
     note?: number;
@@ -200,11 +220,33 @@ export class Pitch extends Event {
         }
         if(options.scale) clone.parsedScale = safeScale(options.scale) as number[];
         if(options.key) clone.key = options.key;
-        const [note,bend] = noteFromPc(clone.key!, clone.pitch!, clone.parsedScale!, clone.octave!);
-        clone.note = clone.add ? note+clone.add : note;
-        clone.freq = midiToFreq(clone.note);
-        if(bend) {
-            clone.bend = bend;
+        if(options.soundIndex || options.soundIndex===0) {
+            if(!(typeof options.soundIndex === "number")) {
+                clone.soundIndex = (options.soundIndex as Event).evaluateValue() as unknown as number;
+            } else {
+                clone.soundIndex = options.soundIndex;
+            }
+        }
+        if(options.sound) {
+            if(!(typeof options.sound === "string")) {
+                clone.sound = (options.sound as Event).evaluateValue() as unknown as string; 
+            } else { 
+                clone.sound = options.sound;
+            }
+        }
+        if(clone.pitch || clone.pitch === 0) {
+            if(clone.pitch instanceof RandomPitch) {
+                clone.pitch = clone.pitch.evaluateValue();
+            }
+            const [note,bend] = noteFromPc(clone.key!, (clone.pitch as number)!, clone.parsedScale!, clone.octave!);
+            clone.note = clone.add ? note+clone.add : note;
+            clone.freq = midiToFreq(clone.note);
+            if(bend) {
+                clone.bend = bend;
+            }
+        }
+        if(clone.soundIndex instanceof RandomPitch) {
+            clone.soundIndex = clone.soundIndex.evaluateValue();
         }
         return clone;
     }
@@ -228,11 +270,47 @@ export class Pitch extends Event {
     }
 }
 
-export class Sample extends Pitch {
-    sample!: string;
+export class Sound extends Pitch {
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
+    }
+    evaluateValue() {
+        return this.sound;
+    }
+}
+
+export class SoundEvent extends Event {
+    item!: Base
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data);
+    }
+    evaluate(options?: ChangingOptions): Event|Event[]|undefined {
+        let soundValue = this.sound;
+        if(options) {
+            options.sound = soundValue as string;
+        } else {
+            options = {sound: soundValue as string}
+        }
+        const node: Event = this.item.evaluate(options) as Event;
+        return node;
+    }
+}
+
+export class SoundIndex extends Event {
+    item!: Base;
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data);
+    }
+    evaluate(options?: ChangingOptions): Event|Event[]|undefined {
+        if(options) {
+            options.soundIndex = this.soundIndex;
+        } else {
+            options = {soundIndex: this.soundIndex}
+        }
+        return this.item.evaluate(options) as Event;
     }
 }
 
@@ -268,6 +346,10 @@ export class Chord extends Event {
     }
     freqs(): number[] {
         return this.pitches.map((pitch) => pitch.freq!) as number[];
+    }
+    midiChord(): {[key: string]: any} {
+        const params = this.pitches.map((pitch) => pitch.mapExisting(["note","soundIndex"],["note","channel"]));
+        return params;
     }
     scale(name: string): Chord {
         this.pitches.forEach((pitch) => pitch.scale(name));
@@ -361,12 +443,14 @@ export class RandomPitch extends Pitch {
         }
     }
     evaluate(options: ChangingOptions = {}): Pitch {
-        const randomValue = this.random();
-        this.pitch = Math.floor(randomValue * (this.max - this.min + 1)) + this.min;
+        this.pitch = this.evaluateValue();
         const pitch = new Pitch(this as object).evaluate(options);
         pitch.type = "Pitch";
         pitch.text = pitch.pitch.toString();
         return pitch;
+    }
+    evaluateValue(): number {
+        return Math.floor(this.random() * (this.max - this.min + 1)) + this.min;
     }
 }
 
@@ -482,6 +566,7 @@ export class Cycle extends Event {
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
+        this.items = this.items.filter((item) => item !== undefined);
         this.index = 0;
     }
     nextItem(options: ChangingOptions = {}): Base | Base[] | undefined {
@@ -491,13 +576,22 @@ export class Cycle extends Event {
         }
         this.index = this.index+1;
         if(value instanceof Base) {
-            return value.evaluate(options);
+            const test = value.evaluate(options) as Event;
+            return test;
         }
         return value; 
     }
     evaluate(options: ChangingOptions = {}): Base | Base[] | undefined {
         const value = this.nextItem(options);
         return value;
+    }
+    evaluateValue(options: ChangingOptions = {}): any {
+        const next = this.nextItem(options);
+        if(next instanceof Base) {
+            return next.evaluateValue();
+        } else {
+            return next;
+        }
     }
 
 }
