@@ -81,7 +81,7 @@ snum = ":" n:numeric_param
 durchar = [mklpdcwyhnqaefsxtgujzo]
 { return DEFAULT_DURS[text()]; }
 
-duration = ratio / durchar / float
+duration = ratio / float / durchar
 
 ratio = n:multi "/" d:multi
 { return n/d }
@@ -171,7 +171,10 @@ duration_change = dur:duration
   return build(types.DurationChange,{duration: dur}) 
 }
 
-rest = d:duration? "r" ![a-z]
+rest_duration = d:duration "^"
+{ return d }
+
+rest = d:rest_duration? "r" ![a-zA-Z0-9]
 {
   return build(types.Rest, {duration: d})
 }

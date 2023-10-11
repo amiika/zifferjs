@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SCALES, getScale } from '../defaults.ts'
-import { getPrimes, midiToTpc } from '../scale.ts'
+import { getAllScaleNotes, getPrimes, midiToTpc } from '../scale.ts'
 import { parse as parseScale } from '../parser/scalaParser.ts'
 import { pattern } from '../ziffers.ts'
 
@@ -39,6 +39,15 @@ describe('scale-tests', () => {
   it('tpc', () => {
     expect(midiToTpc(60,"C4")).toEqual(14); 
     expect(midiToTpc(50,"D3")).toEqual(16); 
+  })
+
+  it('allScaleNotes', () => {
+    // From 21 to 108
+    expect(getAllScaleNotes("major", "C")).toEqual([21,23,24,26,28,29,31,33,35,36,38,40,41,43,45,47,48,50,52,53,55,57,59,60,62,64,65,67,69,71,72,74,76,77,79,81,83,84,86,88,89,91,93,95,96,98,100,101,103,105,107,108]) 
+    expect(getAllScaleNotes("minor", "C")).toEqual([22, 24, 26, 27, 29, 31, 32, 34, 36, 38, 39, 41, 43, 44, 46, 48, 50, 51, 53, 55, 56, 58, 60, 62, 63, 65, 67, 68, 70, 72, 74, 75, 77, 79, 80, 82, 84, 86, 87, 89, 91, 92, 94, 96, 98, 99, 101, 103, 104, 106, 108])
+    expect(getAllScaleNotes("minor pentatonic", "D")).toEqual([21, 24, 26, 29, 31, 33, 36, 38, 41, 43, 45, 48, 50, 53, 55, 57, 60, 62, 65, 67, 69, 72, 74, 77, 79, 81, 84, 86, 89, 91, 93, 96, 98, 101, 103, 105, 108])
+    expect(getAllScaleNotes("dorian", "E")).toEqual([21, 23, 25, 26, 28, 30, 31, 33, 35, 37, 38, 40, 42, 43, 45, 47, 49, 50, 52, 54, 55, 57, 59, 61, 62, 64, 66, 67, 69, 71, 73, 74, 76, 78, 79, 81, 83, 85, 86, 88, 90, 91, 93, 95, 97, 98, 100, 102, 103, 105, 107])
+    expect(getAllScaleNotes("dorian", "C")).toEqual([21, 22, 24, 26, 27, 29, 31, 33, 34, 36, 38, 39, 41, 43, 45, 46, 48, 50, 51, 53, 55, 57, 58, 60, 62, 63, 65, 67, 69, 70, 72, 74, 75, 77, 79, 81, 82, 84, 86, 87, 89, 91, 93, 94, 96, 98, 99, 101, 103, 105, 106, 108])
   })
 
 

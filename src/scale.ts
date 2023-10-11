@@ -40,13 +40,13 @@ export const noteFromPc = (
     
 }
 
-export const noteNameToMidi = (name: string): number => {
+export const noteNameToMidi = (name: string, defaultOctave: number = 4): number => {
   const items = name.match(/^([a-gA-G])([#bs])?([1-9])?$/);
   if (items === null) {
     return 60; // Default MIDI note C4 if the input is invalid
   }
   const [, noteName, modifierSymbol, octaveStr] = items;
-  const octave = octaveStr ? parseInt(octaveStr, 10) : 4;
+  const octave = octaveStr ? parseInt(octaveStr, 10) : defaultOctave;
   const modifier = MODIFIERS[modifierSymbol] || 0;
   const interval = NOTES_TO_INTERVALS[noteName.toUpperCase()];
   return 12 + octave * 12 + interval + modifier;
@@ -238,6 +238,25 @@ export const getScaleNotes = (
   }
 
   return scaleNotes;
+}
+
+/* Get all scale notes, defaults for full sized keyboard from 21 to 108 */
+export const getAllScaleNotes = (
+  name: string|number|number[],
+  key: string|number = "C",
+  from: number = 21,
+  to: number = 108
+): number[] => {
+  const scale = safeScale(name);
+  const scaleNotes: number[] = [];
+  let scaleRoot = typeof key === "string" ? noteNameToMidi(key, 0) : key;
+  for (let i = 0; i < 9; i++) {
+    for (const semitone of scale) {
+      scaleRoot += semitone;
+      scaleNotes.push(scaleRoot);
+    }
+  }
+  return scaleNotes.filter(note => note >= from && note <= to);
 }
 
 export const chordFromDegree = (

@@ -20,10 +20,15 @@ describe('main-tests', () => {
     expect(pattern('q 3 e3 5').durations()).toEqual([0.25,0.125,0.25]);
     expect(pattern('0.25 3 0.125 3 0.25 5').durations()).toEqual([0.25,0.125,0.25]);
     expect(pattern('1/4 4 2/4 3 1/16 9 1/32 4').durations()).toEqual([0.25,0.5,0.0625,0.03125]);
+   // expect(pattern('q. 0 0 | q0 e1 q.2 | q2 e1 q2 e3 | h.4 | e 7 7 7 4 4 4 2 2 2 0 0 0 | q4 e3 q2 e1 | h. 0 ').durations()).toEqual([])
   })
 
   it('lists', () => {
     expect(pattern('(0 4 3 5)+(e0 3)').pitches()).toEqual([0, 4, 3, 5, 3, 7, 6, 8]);
+  })
+
+  it('loops', () => {
+   // expect(pattern('(: 1 2 3 :)').pitches()).toEqual([1,2,3,1,2,3]);
   })
 
   it('notes', () => {
@@ -48,7 +53,8 @@ describe('main-tests', () => {
 })
 
   it('rests', () => {
-    expect(pattern('er qr').durations()).toEqual([0.125,0.25]);
+    expect(pattern('e^r 1/4^r 0.25^r').durations()).toEqual([0.125,0.25,0.25]);
+    expect(pattern('0 r 3 e 4 r').durations()).toEqual([0.25,0.25,0.25,0.125,0.125]);
   })
 
   it('subdivisions', () => {

@@ -421,7 +421,7 @@ export class Rest extends Event {
         super(data);
     }
     evaluate(options: ChangingOptions = {}): Rest {
-        if(options.duration) this.duration = options.duration;
+        if(!this.duration) this.duration = (options.duration || options.duration === 0) ? options.duration : DEFAULT_DURATION;
         return this;
     }
 }
