@@ -107,6 +107,10 @@ export abstract class Base {
     evaluateValue(): any {
         return this.text;
     }
+
+    toString(): string {
+        return this.text;
+    }
 }
 
 export abstract class Event extends Base {

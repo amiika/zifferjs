@@ -4,6 +4,7 @@ import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
+import { rsystem } from './rules.ts';
 
 type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
@@ -233,6 +234,18 @@ export class Ziffers {
         }
         return this;
     }
+
+    toString(): string {
+        return this.evaluated.map((item: ZEvent) => {
+            return item.toString();
+        }).join(" ");
+    }
+
+    rules(rules: Record<string|number, string | number | ((...args: any[]) => string|number)>, gen: number = 1): Ziffers {
+        const replacedString = rsystem(this.input, rules, gen);
+        return new Ziffers(replacedString, this.options.nodeOptions!, this.globalOptions);
+    }
+
 }
 
 const resolveSubdivisions = (values: (Chord|Rest|Pitch|SoundEvent|Subdivision)[], duration: number|undefined = undefined): ZEvent[] => {

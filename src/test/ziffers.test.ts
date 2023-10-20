@@ -79,5 +79,10 @@ describe('main-tests', () => {
     expect(a.next().duration).toEqual(0.25);
   })
 
+  it('toString', () => {
+    expect(pattern('1 2 3 4').toString()).toEqual('1 2 3 4');
+    expect(pattern('1  2 3 4').toString()).toEqual('1 2 3 4');
+  })
+
 
 })
