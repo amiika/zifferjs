@@ -5,6 +5,7 @@ import { voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 import { rsystem } from './rules.ts';
+import { TonnetzSpaces } from './tonnetz.ts';
 
 type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
@@ -244,6 +245,17 @@ export class Ziffers {
     rules(rules: Record<string|number, string | number | ((...args: any[]) => string|number)>, gen: number = 1): Ziffers {
         const replacedString = rsystem(this.input, rules, gen);
         return new Ziffers(replacedString, this.options.nodeOptions!, this.globalOptions);
+    }
+
+    tonnetzChords(chordType: string, tonnetz: TonnetzSpaces = [3,4,5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    return item.tonnetzChord(chordType, tonnetz);
+                } else return item;
+            });
+        }
+        return this;
     }
 
 }

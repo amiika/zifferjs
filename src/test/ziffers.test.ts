@@ -10,6 +10,11 @@ describe('main-tests', () => {
     expect(true).to.be.true;
   })
 
+  it('octaves', () => {
+    //expect(pattern('0 ^0').octaves()).toEqual([0,1]);
+    //expect(pattern('0 7').octaves()).toEqual([0,1]);
+  })
+
   it('repeats', () => {
     expect(pattern('1 2!2 3!3 4').pitches()).toEqual([1,2,2,3,3,3,4]);
     expect(pattern('^ 4!4').octaves()).toEqual([1,1,1,1]);

@@ -1,6 +1,7 @@
-import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, chordFromDegree, midiToPitchClass, namedChordFromDegree } from './scale.ts';
+import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, chordFromDegree, midiToPitchClass, namedChordFromDegree, noteNameToMidi } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale, DEFAULT_DURATION } from './defaults.ts';
 import { deepClone } from './utils.ts';
+import { TonnetzSpaces, chordFromTonnetz } from './tonnetz.ts';
 
 export const globalOptionKeys: string[] = ["retrograde"];
 
@@ -205,7 +206,7 @@ export class Pitch extends Event {
     pitchOctave?: number;
     bend?: number;
     key?: string|number;
-    parsedScale?: string|number[];
+    parsedScale?: number[];
     scaleName?: string;
 
     constructor(data: Partial<Node>) {
@@ -272,6 +273,28 @@ export class Pitch extends Event {
     randomScale(): Pitch {
         this.parsedScale = getRandomScale();
         return this.evaluate();
+    }
+
+    tonnetzChord(chordType: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
+        const chordNotes = chordFromTonnetz(this.note!, chordType, tonnetz);
+        const pitches = chordNotes.map((note) => {
+            const rootedNote = note + (typeof this.key == "number" ? note : noteNameToMidi(this.key!)); 
+            const pitchClass = midiToPitchClass(rootedNote, this.key!, this.scaleName!);
+            
+            const pitch = new Pitch({
+                note: rootedNote, 
+                duration: this.duration, 
+                key: this.key, 
+                parsedScale: this.parsedScale, 
+                scaleName: this.scaleName, 
+                pitch: pitchClass.pc, 
+                octave: pitchClass.octave, 
+                add: pitchClass.add, 
+                text: pitchClass.text
+            });
+            return pitch as unknown as Node;
+        });
+        return new Chord({pitches: pitches, duration: this.duration});
     }
 }
 
