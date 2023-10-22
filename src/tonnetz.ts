@@ -81,6 +81,18 @@ export const halfDiminishedChord = (rootNote: number, tonnetz: TonnetzSpaces): T
     return halfdim7;
 };
 
+export const augmentedTriadChord = (rootNote: number, tonnetz: TonnetzSpaces): TriadChord => {
+    const [a, b, c] = tonnetz;
+    const modulo = a + b + c;
+
+    const firstNote = ((rootNote % modulo) + modulo) % modulo;
+    const secondNote = ((rootNote + b % modulo) + modulo) % modulo;
+    const thirdNote = ((rootNote + (2 * b) % modulo) + modulo) % modulo;
+
+    const augmentedTriad: TriadChord = [firstNote, secondNote, thirdNote];
+    return augmentedTriad;
+}
+
 export const chordNotesToModN = <T extends number[]>(chord: T, modulo: number = 12): T => {
     const notesModN: number[] = [];
     for (let i = 0; i < chord.length; i++) {
@@ -143,6 +155,8 @@ export const CHORD_TYPES: ChordGenerators = {
     "7": dominantSeventChord,
     "m7": minorSeventhChord,
     "hdim7": halfDiminishedChord,
+    "aug": augmentedTriadChord,
+    "augmented": augmentedTriadChord
 };
 
 export const chordFromTonnetz = (rootNote: number, chordType: string, tonnetz: TonnetzSpaces = [3,4,5]): TriadChord|Tetrachord => {
@@ -204,4 +218,21 @@ export const enneaCycles = (rootNote: number, tonnetz: TonnetzSpaces, reps: numb
     return arrayTargetSet;
 }
 
+export const weitzmannRegions = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 5]): Map<TriadChord, TriadChord[]> => {
+    const [a, b, c] = tonnetz;
+    const augmentedTriadRoot: TriadChord = augmentedTriadChord(rootNote, tonnetz);
+
+    const arrayTargetSet: TriadChord[] = [];
+    const childChord1 = chordNotesToModN(minorChordFromTonnetz(rootNote + (b - a), tonnetz));
+    const childChord2 = chordNotesToModN(minorChordFromTonnetz(rootNote + c, tonnetz))
+    const childChord3 = chordNotesToModN(minorChordFromTonnetz(rootNote + b + c, tonnetz))
+    const childChord4 = chordNotesToModN(majorChordFromTonnetz(rootNote, tonnetz));
+    const childChord5 = chordNotesToModN(majorChordFromTonnetz(rootNote + (-b), tonnetz));
+    const childChord6 = chordNotesToModN(majorChordFromTonnetz(rootNote + b, tonnetz));
+    arrayTargetSet.push(childChord1, childChord2, childChord3, childChord4, childChord5, childChord6);
+
+    const treeChords: Map<TriadChord, TriadChord[]> = new Map();
+    treeChords.set(augmentedTriadRoot, arrayTargetSet)
+    return treeChords;
+}
 
