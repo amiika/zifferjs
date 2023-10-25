@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SCALES, getScale } from '../defaults.ts'
-import { getAllScaleNotes, getPrimes, midiToTpc } from '../scale.ts'
+import { getAllScaleNotes, getPrimes, midiToTpc, normalForm, prime } from '../scale.ts'
 import { parse as parseScale } from '../parser/scalaParser.ts'
 import { pattern } from '../ziffers.ts'
 
@@ -48,6 +48,12 @@ describe('scale-tests', () => {
     expect(getAllScaleNotes("minor pentatonic", "D")).toEqual([21, 24, 26, 29, 31, 33, 36, 38, 41, 43, 45, 48, 50, 53, 55, 57, 60, 62, 65, 67, 69, 72, 74, 77, 79, 81, 84, 86, 89, 91, 93, 96, 98, 101, 103, 105, 108])
     expect(getAllScaleNotes("dorian", "E")).toEqual([21, 23, 25, 26, 28, 30, 31, 33, 35, 37, 38, 40, 42, 43, 45, 47, 49, 50, 52, 54, 55, 57, 59, 61, 62, 64, 66, 67, 69, 71, 73, 74, 76, 78, 79, 81, 83, 85, 86, 88, 90, 91, 93, 95, 97, 98, 100, 102, 103, 105, 107])
     expect(getAllScaleNotes("dorian", "C")).toEqual([21, 22, 24, 26, 27, 29, 31, 33, 34, 36, 38, 39, 41, 43, 45, 46, 48, 50, 51, 53, 55, 57, 58, 60, 62, 63, 65, 67, 69, 70, 72, 74, 75, 77, 79, 81, 82, 84, 86, 87, 89, 91, 93, 94, 96, 98, 99, 101, 103, 105, 106, 108])
+  })
+
+  it('normalForm', () => {
+    expect(pattern("2647").notes()).toEqual([[64, 71, 67, 72]]);
+    expect(normalForm(pattern("2647").notes()[0] as number[])).toEqual([72,64,67,71]);
+    expect(normalForm((pattern("{11}723", {scale: "chromatic"}).pitches()[0]) as number[])).toEqual([11,2,3,7]);
   })
 
 

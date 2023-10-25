@@ -465,3 +465,51 @@ export const voiceLeadChords = (inputChords: number[][]): number[][] => {
 
   return voiceLedChords;
 }
+
+export function transpose(pitches: number[], interval: number, base: number = 12): number[] {
+  return pitches.map((x) => (x + interval) % base);
+}
+
+export function invert(pitches: number[], axis: number = 0, base: number = 12): number[] {
+  return pitches.map((x) => { return (axis - x) % base });
+}
+
+export function multiply(pitches: number[], m: number = 5, base: number = 12): number[] {
+  return pitches.map((x) => (x * m) % base);
+}
+
+export function zero(pitches: number[], base: number = 12): number[] {
+  return transpose(pitches, -pitches[0], base);
+}
+
+export function cycles(pitches: number[]) {
+  const sortedPitches = pitches.slice().sort((a, b) => a - b);
+  const cyclicVariations = [];
+  for (let i = 0; i < sortedPitches.length; i++) {
+    cyclicVariations.push(sortedPitches.slice(i).concat(sortedPitches.slice(0, i)));
+  }
+  return cyclicVariations;
+}
+
+export function normalForm(pitches: number[], base: number = 12): number[] {
+  return mostLeftCompact(cycles(pitches), base);
+}
+
+export function prime(pitches: number[], base: number = 12): number[] {
+  return mostLeftCompact([normalForm(pitches, base), normalForm(invert(pitches, 0, base), base)], base);
+}
+
+export function arrayToBinary(array: number[]): number {
+  return array.reduce((sum, n) => sum + 2 ** n, 0);
+}
+
+export function mostLeftCompact(pcsetArray: number[][], base: number): number[] {
+  if (!pcsetArray.every((pcs) => pcs.length === pcsetArray[0].length)) {
+    throw new Error("Format error: All pitch sets must have the same cardinality");
+  }
+  const zeroedPitchArrays = pcsetArray.map((pcs) => zero(pcs, base));
+  const binaries = zeroedPitchArrays.map((array) => arrayToBinary(array));
+  const minBinary = Math.min(...binaries);
+  const winners = pcsetArray.filter((_, i) => binaries[i] === minBinary);
+  return winners.sort()[0];
+}

@@ -1,7 +1,7 @@
 import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, chordFromDegree, midiToPitchClass, namedChordFromDegree, noteNameToMidi } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale, DEFAULT_DURATION } from './defaults.ts';
 import { deepClone } from './utils.ts';
-import { TonnetzSpaces, chordFromTonnetz } from './tonnetz.ts';
+import { TonnetzSpaces, TriadChord, chordFromTonnetz, transform } from './tonnetz.ts';
 
 export const globalOptionKeys: string[] = ["retrograde"];
 
@@ -199,6 +199,7 @@ export abstract class Event extends Base {
 
 export class Pitch extends Event {
     pitch!: number|RandomPitch;
+    originalPitch?: number;
     add?: number;
     freq?: number;
     note?: number;
@@ -220,7 +221,6 @@ export class Pitch extends Event {
 
     evaluate(options: ChangingOptions = {}): Pitch {
         const clone = deepClone(this);
-        if(options.octave) clone.octave = options.octave + (clone.pitchOctave || 0);
         if(!clone.duration) {
             clone.duration = (options.duration || options.duration === 0) ? options.duration : DEFAULT_DURATION;
         }
@@ -244,6 +244,12 @@ export class Pitch extends Event {
             if(clone.pitch instanceof RandomPitch) {
                 clone.pitch = clone.pitch.evaluateValue();
             }
+            if(clone.parsedScale && clone.pitch >= clone.parsedScale.length) {
+                clone.originalPitch = clone.pitch;
+                clone.pitchOctave = Math.floor(clone.pitch / clone.parsedScale.length);
+                clone.pitch = clone.pitch % clone.parsedScale.length;
+            }
+            if(options.octave || clone.pitchOctave) clone.octave = (options.octave || 0) + (clone.pitchOctave || 0);
             const [note,bend] = noteFromPc(clone.key!, (clone.pitch as number)!, clone.parsedScale!, clone.octave!);
             clone.note = clone.add ? note+clone.add : note;
             clone.freq = midiToFreq(clone.note);
@@ -278,9 +284,9 @@ export class Pitch extends Event {
     tonnetzChord(chordType: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
         const chordNotes = chordFromTonnetz(this.note!, chordType, tonnetz);
         const pitches = chordNotes.map((note) => {
-            const rootedNote = note + (typeof this.key == "number" ? note : noteNameToMidi(this.key!)); 
+            const rootedNote = note + (typeof this.key == "number" ? note : noteNameToMidi(this.key!)) + ((this.octave||0)*12); 
             const pitchClass = midiToPitchClass(rootedNote, this.key!, this.scaleName!);
-            
+
             const pitch = new Pitch({
                 note: rootedNote, 
                 duration: this.duration, 
@@ -288,7 +294,7 @@ export class Pitch extends Event {
                 parsedScale: this.parsedScale, 
                 scaleName: this.scaleName, 
                 pitch: pitchClass.pc, 
-                octave: pitchClass.octave, 
+                octave: (this.octave||0)+pitchClass.octave, 
                 add: pitchClass.add, 
                 text: pitchClass.text
             });
@@ -406,6 +412,16 @@ export class Chord extends Event {
                 return pc;
             } else return deepClone(p);
         });
+    }
+
+    triadTransformation(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
+        const chordNotes = this.notes();
+        if(chordNotes.length === 3) {
+            const transformedChord = transform(chordNotes as TriadChord, transformation, tonnetz);
+            return new Chord({pitches: transformedChord.map((note) => {
+                return new Pitch({note: note, duration: this.duration, key: this.key, scaleName: this.scaleName}) as unknown as Node;
+            })});
+        } else return this;
     }
 }
 

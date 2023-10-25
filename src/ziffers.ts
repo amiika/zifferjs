@@ -163,6 +163,11 @@ export class Ziffers {
         return this.index >= 0;
     }
 
+    reset() {
+        this.index = -1;
+        this.counter = 0;
+    }
+
     next(): Event {
         // Check for the first run
         if(this.index<0) this.index = 0;
@@ -252,6 +257,17 @@ export class Ziffers {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
                     return item.tonnetzChord(chordType, tonnetz);
+                } else return item;
+            });
+        }
+        return this;
+    }
+
+    tonnetzTransformation(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Chord) {
+                    return item.triadTransformation(transformation, tonnetz);
                 } else return item;
             });
         }
