@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SCALES, getScale } from '../defaults.ts'
-import { getAllScaleNotes, getPrimes, midiToTpc, normalForm, prime } from '../scale.ts'
+import { getAllScaleNotes, getPrimes, midiToTpc, normalForm } from '../scale.ts'
 import { parse as parseScale } from '../parser/scalaParser.ts'
 import { pattern } from '../ziffers.ts'
 
