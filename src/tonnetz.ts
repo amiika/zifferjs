@@ -115,16 +115,17 @@ export const chordNotesToModN = <T extends number[]>(chord: T, modulo: number = 
     return notesModN as T;
 }
 
-export function sortingTriadChord(disorderedTriad: TriadChord): TriadChord {
-    disorderedTriad.sort((a, b) => a - b);
+export const sortingTriadChord = (disorderedTriad: TriadChord, tonnetz: TonnetzSpaces): TriadChord => {
+    const [, , c] = tonnetz;
+    disorderedTriad.sort((x, y) => x - y);
     const temp: TriadChord = [...disorderedTriad];
 
-    if (Math.abs(disorderedTriad[1] - disorderedTriad[0]) === 5) {
+    if (Math.abs(disorderedTriad[1] - disorderedTriad[0]) === c) {
         disorderedTriad[0] = temp[1];
         disorderedTriad[1] = temp[2];
         disorderedTriad[2] = temp[0];
     }
-    if (Math.abs(disorderedTriad[2] - disorderedTriad[1]) === 5) {
+    if (Math.abs(disorderedTriad[2] - disorderedTriad[1]) === c) {
         disorderedTriad[0] = temp[2];
         disorderedTriad[1] = temp[0];
         disorderedTriad[2] = temp[1];
@@ -138,7 +139,7 @@ export const parallelTransform: TransformationFunctions = (chordFromTonnetz, ton
     const p: number = (a - b);
 
     const reduceModN = chordNotesToModN(chordFromTonnetz);
-    const rootPositionTriad = sortingTriadChord(reduceModN);
+    const rootPositionTriad = sortingTriadChord(reduceModN, tonnetz);
     const transformedChord: TriadChord = [...rootPositionTriad];
     if (transformedChord[1] % modulo !== (transformedChord[0] + b) % modulo) {
         transformedChord[1] -= p;
@@ -155,7 +156,7 @@ export const leadingToneTransform: TransformationFunctions = (chordFromTonnetz, 
     const l: number = (b - c);
 
     const reduceModN = chordNotesToModN(chordFromTonnetz);
-    const rootPositionTriad = sortingTriadChord(reduceModN);
+    const rootPositionTriad = sortingTriadChord(reduceModN, tonnetz);
     const transformedChord: TriadChord = [...rootPositionTriad];
     if (transformedChord[1] % modulo !== (transformedChord[0] + b) % modulo) {
         transformedChord[2] -= l;
@@ -172,7 +173,7 @@ export const relativeTransform: TransformationFunctions = (chordFromTonnetz, ton
     const r: number = (a - c)
 
     const reduceModN = chordNotesToModN(chordFromTonnetz);
-    const rootPositionTriad = sortingTriadChord(reduceModN);
+    const rootPositionTriad = sortingTriadChord(reduceModN, tonnetz);
     const transformedChord: TriadChord = [...rootPositionTriad];
     if (transformedChord[1] % modulo !== (transformedChord[0] + b) % modulo) {
         transformedChord[0] += r;
