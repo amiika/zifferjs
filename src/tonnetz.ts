@@ -53,7 +53,7 @@ export const dominantSeventChord = (rootNote: number, tonnetz: TonnetzSpaces): T
 
     const dominant7: Tetrachord = [firstNote, secondNote, thirdNote, fourthNote];
     return dominant7;
-};
+}
 
 export const minorSeventhChord = (rootNote: number, tonnetz: TonnetzSpaces): Tetrachord => {
     const [a, b, c] = tonnetz;
@@ -66,7 +66,7 @@ export const minorSeventhChord = (rootNote: number, tonnetz: TonnetzSpaces): Tet
 
     const min7: Tetrachord = [firstNote, secondNote, thirdNote, fourthNote];
     return min7;
-};
+}
 
 export const halfDiminishedChord = (rootNote: number, tonnetz: TonnetzSpaces): Tetrachord => {
     const [a, b, c] = tonnetz;
@@ -79,7 +79,7 @@ export const halfDiminishedChord = (rootNote: number, tonnetz: TonnetzSpaces): T
 
     const halfdim7: Tetrachord = [firstNote, secondNote, thirdNote, fourthNote];
     return halfdim7;
-};
+}
 
 export const augmentedTriadChord = (rootNote: number, tonnetz: TonnetzSpaces): TriadChord => {
     const [a, b, c] = tonnetz;
@@ -104,7 +104,7 @@ export const diminishedSeventhChord = (rootNote: number, tonnetz: TonnetzSpaces)
 
     const dim7: Tetrachord = [firstNote, secondNote, thirdNote, fourthNote];
     return dim7;
-};
+}
 
 export const chordNotesToModN = <T extends number[]>(chord: T, modulo: number = 12): T => {
     const notesModN: number[] = [];
@@ -216,7 +216,7 @@ export const transform = (chord: TriadChord, transformation: string, tonnetz: To
             transformedChord = TRANSFORMATIONS[validTransformation](transformedChord, tonnetz);
         }
     }
-    return transformedChord;
+    return sortingTriadChord(transformedChord, tonnetz);
 }
 
 export const hexaCycles = (rootNote: number, tonnetz: TonnetzSpaces, reps: number = 3): TriadChord[] => {
