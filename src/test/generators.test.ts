@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Ziffers, collect, pattern } from '../ziffers';
+import { Ziffers, collect } from '../ziffers';
 
 function* collatz(n: number): Generator<number, void, void> {
     while (n !== 1) {

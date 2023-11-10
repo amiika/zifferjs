@@ -5,3 +5,4 @@ export { getScale, isScale, SCALES, CHORDS, CHORD_NAMES } from './defaults.ts';
 export { freqToMidi, midiToFreq, midiToNoteName, parseRoman, resolvePitchBend, noteFromPc, noteNameToPitchClass, chord, safeScale, getChordFromScale, chordFromDegree, getScaleNotes, getAllScaleNotes, noteNameToMidi, stepsToScale, scaleToSteps, voiceLead, voiceLeadChords, nearScales } from './scale.ts';
 export { parse as parseScala } from './parser/scalaParser.ts';
 export { rsystem, stringRewrite } from './rules.ts';
+export * from './patterns.ts';
