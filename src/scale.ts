@@ -152,10 +152,21 @@ export const numberToScale = (number: number): number[] => {
     number = 2741;
   }
   if(number % 2 === 0) {
-    console.log("Odd number doesnt create real scale");
+    console.log("Even numbers doesnt create a 'real' scale");
   }
   const arr = (number >>> 0).toString(2).padStart(12, '0').split('');
   return arr.reduce((acc, bit, i) => bit === '1' ? [11 - i, ...acc] : acc, [] as number[]);
+}
+
+export function scaleToNumber(pcs: number[]): number {
+  if (pcs.length > 0 && pcs[pcs.length - 1] === 12) {
+    pcs.pop(); // Remove the last value if 12
+  }
+  let number = 0;
+  for (const pc of pcs) {
+    number |= (1 << pc);
+  }
+  return number;
 }
 
 export const parseScalaScale = (scala: string): number[] => {
@@ -179,7 +190,7 @@ export const safeScale = (scale: string|number|number[]): number[] => {
       }
     }
   } else if(typeof scale === 'number') {
-    return numberToScale(scale);
+    return scaleToSteps(numberToScale(scale));
   }
   // TODO: Check for valid intervals?
   return scale;
@@ -512,4 +523,29 @@ export function mostLeftCompact(pcsetArray: number[][], base: number): number[] 
   const minBinary = Math.min(...binaries);
   const winners = pcsetArray.filter((_, i) => binaries[i] === minBinary);
   return winners.sort()[0];
+}
+
+export function nearScales(scale: number): number[] {
+  const near: number[] = [];
+  for (let i = 1; i < 12; i++) {
+    let copy = scale;
+    if (scale & (1 << i)) {
+      // Tone off
+      const off = copy ^ (1 << i);
+      near.push(off);
+      // Down one semitone
+      copy = off | (1 << (i - 1));
+      near.push(copy);
+      // Up one semitone but not octave
+      if (i !== 11) {
+        copy = off | (1 << (i + 1));
+        near.push(copy);
+      }
+    } else {
+      copy = copy | (1 << i);
+      near.push(copy);
+    }
+  }
+  const uniq = Array.from(new Set(near));
+  return uniq;
 }

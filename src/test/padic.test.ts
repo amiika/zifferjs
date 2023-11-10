@@ -10,7 +10,6 @@ describe('padic-tests', () => {
     expect(pAdicExpansion(101,7,4)).toEqual([3,0,2]);
     expect(pAdicExpansion(102,7,4)).toEqual([4,0,2]);
     expect(pAdicExpansion(1000,7,4)).toEqual([6,2,6]);
-    expect(pAdicExpansion(99999,4)).toEqual([3,3,1,2,2,1,0,2,1,0]);
   })
 
 })

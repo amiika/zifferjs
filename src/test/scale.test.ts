@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { SCALES, getScale } from '../defaults.ts'
-import { getAllScaleNotes, getPrimes, midiToTpc, normalForm } from '../scale.ts'
+import { SCALES, SCALE_NAMES, getScale } from '../defaults.ts'
+import { getAllScaleNotes, getPrimes, midiToTpc, nearScales, normalForm, numberToScale, safeScale, scaleToNumber, scaleToSteps, stepsToScale } from '../scale.ts'
 import { parse as parseScale } from '../parser/scalaParser.ts'
 import { pattern } from '../ziffers.ts'
 
@@ -56,6 +56,20 @@ describe('scale-tests', () => {
     expect(normalForm((pattern("{11}723", {scale: "chromatic"}).pitches()[0]) as number[])).toEqual([11,2,3,7]);
   })
 
+  it('numberToScale', () => {
+    expect(scaleToSteps(numberToScale(2741))).toEqual(SCALES["MAJOR"]);
+    expect(safeScale(2741)).toEqual(safeScale("major"));
+    expect(numberToScale(349)).toEqual([0,2,3,4,6,8]);
+    expect(scaleToNumber(numberToScale(349))).toEqual(349);
+    expect(stepsToScale([3, 2, 2, 3, 2])).toEqual([0, 3, 5, 7, 10, 12]);
+    expect(numberToScale(1193)).toEqual([0, 3, 5, 7, 10]);
+    expect(scaleToNumber(stepsToScale([3, 2, 2, 3, 2]))).toEqual(1193);
+    expect((SCALE_NAMES[scaleToNumber(stepsToScale([3, 2, 2, 3, 2])).toString()][0])).toEqual("Minor Pentatonic");
+  })
+
+  it('nearScales', () => {
+    expect(nearScales(349)).toEqual([351, 345, 347, 341, 333, 365, 381, 285, 317, 413, 477, 93, 221, 605, 861, 1373, 2397]);
+  })
 
 
 })

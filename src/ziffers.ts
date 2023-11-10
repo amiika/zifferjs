@@ -11,6 +11,8 @@ type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
 export class Ziffers {
     input: string;
+    generator?: Generator<number>;
+    generatorDone?: boolean = false;
     values: Base[];
     evaluated: ZEvent[];
     options: Options;
@@ -70,6 +72,31 @@ export class Ziffers {
             this.evaluated = [];
             this.duration = 0;
         }
+    }
+
+    static fromGenerator(generator: Generator<number>, options: NodeOptions = {}): Ziffers {
+        const number = generator.next().value;
+        const ziff = this.fromNumber(number, options);
+        ziff.generator = generator;
+        return ziff;
+    }
+
+    static fromNumber(num: number, options: NodeOptions = {}) {
+        const input = this.inputFromNumber(num);
+        return new Ziffers(input, options);
+    }
+
+    static inputFromNumber(num: number) {
+        let input = num.toString();
+        if(input.length>1) input = input.split("").join(" ");
+        return input;
+    }
+
+    revaluate() {
+        this.values = parseZiffers(this.input, this.options);
+        this.evaluated = this.evaluate(this.values);
+        this.applyTransformations();
+        this.duration = this.totalDuration();
     }
 
     pitches(): (number|undefined|number[])[] {
@@ -180,7 +207,16 @@ export class Ziffers {
 
         // Check if next item is last
         if(this.redo > 0 && this.index >= this.evaluated.length * this.redo) {
-            this.index = 0; 
+            this.index = 0;
+            if(this.generator) {
+                const next = this.generator.next();
+                if(next.done) {
+                    this.generatorDone = true;
+                } else {
+                    this.input = Ziffers.inputFromNumber(next.value);
+                    this.revaluate();
+                }
+            }
             this.evaluated = this.evaluate(this.values);
         }
 
@@ -305,3 +341,33 @@ const getGlobalOption = (options: NodeOptions): GlobalOptions => {
 export const pattern = (input: string, options: object = {}): Ziffers => {
     return new Ziffers(input, options);
 }
+
+
+// TODO: REMOVE?
+export function* cycle(generaterFn: (...kwargs: any[]) => Generator<number>, ...kwargs: any[]): Generator<number> {
+    let generator = generaterFn(...kwargs);
+    while (true) {
+      const result = generator.next();
+      if (result.done) {
+        generator = generaterFn(...kwargs);
+      } else {
+        yield result.value;
+      }
+    }
+  }
+
+  export function collect(count: number, generatorFn: (...kwargs: any[]) => Generator<number>, ...kwargs: any[]): number[] {
+    const collectedValues: number[] = [];
+    let generator = generatorFn(...kwargs);
+  
+    for (let i = 0; i < count; i++) {
+      const result = generator.next();
+      if (result.done) {
+        generator = generatorFn(...kwargs);
+      } else {
+        collectedValues.push(result.value);
+      }
+    }
+  
+    return collectedValues;
+  }
