@@ -1,7 +1,7 @@
 import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, chordFromDegree, midiToPitchClass, namedChordFromDegree, noteNameToMidi } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale, DEFAULT_DURATION } from './defaults.ts';
 import { deepClone } from './utils.ts';
-import { TonnetzSpaces, TriadChord, chordFromTonnetz, transform } from './tonnetz.ts';
+import { Tetrachord, TonnetzSpaces, TriadChord, chordFromTonnetz, seventhsTransform, transform } from './tonnetz.ts';
 
 export const globalOptionKeys: string[] = ["retrograde"];
 
@@ -361,6 +361,12 @@ export class Chord extends Event {
             this.duration = Math.max(...this.pitches.map((pitch) => pitch.duration!));
          }
     }
+    static fromPitchClassArray(pcs: number[], key: string|number, scaleName: string): Chord {
+        const pitches = pcs.map((pc) => {
+            return new Pitch({pitch: pc, key: key, scaleName: scaleName, parsedScale: safeScale(scaleName)}) as unknown as Node;
+        });
+        return new Chord({pitches: pitches});
+    }
     evaluate(options: ChangingOptions = {}): Chord {
         const dupChord = deepClone(this);
         if(options.inversion || dupChord.inversion) {
@@ -380,6 +386,9 @@ export class Chord extends Event {
     }
     freqs(): number[] {
         return this.pitches.map((pitch) => pitch.freq!) as number[];
+    }
+    pcs(): number[] {
+        return this.pitches.map((pitch) => pitch.pitch!) as number[];
     }
     midiChord(): {[key: string]: any} {
         const params = this.pitches.map((pitch) => pitch.mapExisting(["note","soundIndex"],["note","channel"]));
@@ -414,15 +423,32 @@ export class Chord extends Event {
         });
     }
 
-    triadTransformation(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
-        const chordNotes = this.notes();
-        if(chordNotes.length === 3) {
-            const transformedChord = transform(chordNotes as TriadChord, transformation, tonnetz);
-            return new Chord({pitches: transformedChord.map((note) => {
-                return new Pitch({note: note, duration: this.duration, key: this.key, scaleName: this.scaleName}) as unknown as Node;
+    triadTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
+        const pcs = this.pcs();
+        if(pcs.length === 3) {
+            const transformedChord = transform(pcs as TriadChord, transformation, tonnetz);
+            const parsedScale = this.pitches[0].parsedScale!;
+            const chord = new Chord({pitches: transformedChord.map((pc) => {
+                const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                return newPitch as unknown as Node;
             })});
+            return chord.evaluate();
         } else return this;
     }
+
+    tetraTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
+        const pcs = this.pcs();
+        if(pcs.length === 4) {
+            const transformedChord = seventhsTransform(pcs as Tetrachord, transformation, tonnetz);
+            const parsedScale = this.pitches[0].parsedScale!;
+            const chord = new Chord({pitches: transformedChord.map((pc) => {
+                const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                return newPitch as unknown as Node;
+            })});
+            return chord.evaluate();
+        } else return this;
+    }
+
 }
 
 export class Roman extends Chord {

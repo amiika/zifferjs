@@ -326,7 +326,7 @@ export const transform = (chord: TriadChord, transformation: string, tonnetz: To
     return sortingTriadChord(transformedChord, tonnetz);
 }
 
-export const hexaCycles = (rootNote: number, tonnetz: TonnetzSpaces, reps: number = 3): TriadChord[] => {
+export const hexaCycles = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 5], reps: number = 3): TriadChord[] => {
     const [, b,] = tonnetz;
     const arrayTargetSet: TriadChord[] = [];
     for (let index = 0; index < Math.abs(reps); index++) {
@@ -338,7 +338,7 @@ export const hexaCycles = (rootNote: number, tonnetz: TonnetzSpaces, reps: numbe
     return arrayTargetSet;
 }
 
-export const octaCycles = (rootNote: number, tonnetz: TonnetzSpaces, reps: number = 4): TriadChord[] => {
+export const octaCycles = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 5], reps: number = 4): TriadChord[] => {
     const [a] = tonnetz;
     const arrayTargetSet: TriadChord[] = [];
     for (let index = 0; index < Math.abs(reps); index++) {
@@ -781,6 +781,10 @@ export const n51: TransformationFunctionsSeventhChords = (chordFromTonnetz, tonn
 }
 
 export const SEVENTHSTRANFORMATIONS: ObjectTransformationsSeventhChords = {
+    "p": p12,
+    "l": l13,
+    "r": r12,
+    "q": q15,
     "p12": p12,
     "p14": p14,
     "p23": p23,
@@ -801,7 +805,8 @@ export const SEVENTHSTRANFORMATIONS: ObjectTransformationsSeventhChords = {
 }
 
 export const seventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord => {
-    const transformations = transformation.split("-");
+    const transformations = transformation.match(/[a-z][0-9]*/g);
+    if (!transformations || transformations && transformations.length<1) return chord;
     let transformedChord: Tetrachord = [...chord];
     for (let i = 0; i < transformations.length; i++) {
         const validTransformation = transformations[i];

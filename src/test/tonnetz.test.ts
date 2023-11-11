@@ -10,6 +10,26 @@ describe('tonnetz-tests', () => {
         expect(pattern('0 1 2 3 4 5 6 7 8 9 {10 11}', { scale: "chromatic" }).tonnetzChords('M').notes()).toEqual([[60, 64, 67], [61, 65, 68], [62, 66, 69], [63, 67, 70], [64, 68, 71], [65, 69, 60], [66, 70, 61], [67, 71, 62], [68, 60, 63], [69, 61, 64], [70, 62, 65], [71, 63, 66]]);
     });
 
+    it('triadTonnetz', () => {
+        expect(pattern("024").triadTonnetz("p").notes()[0]).toEqual([60, 65, 67]);
+        expect(pattern("024 246").triadTonnetz("plr").notes()).toEqual([[77, 65, 69], [69,72,60]]);
+    });
+
+    it('tetraTonnetz', () => {
+        expect(pattern("0246").tetraTonnetz("p").notes()[0]).toEqual([60, 64, 67, 71]);
+        expect(pattern("0246").tetraTonnetz("plr").notes()[0]).toEqual([60, 64, 67, 71]);
+        expect(pattern("i7").notes()[0]).toEqual([60, 64, 67, 70]);
+        expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([60, 64, 67, 71]);
+        expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([60, 64, 67, 71]);
+        expect(pattern("vi7").tetraTonnetz("p12 r53").notes()[0]).toEqual([69, 60, 64, 67]);
+    });
+
+    it('hexaCycle', () => {
+        expect(pattern("0").hexaCycle().notes()).toEqual([[60,67,72],[60,65,72],[74,60,65],[74,79,65],[67,74,79],[67,72,79]]);
+        expect(pattern("0").octaCycle().notes()).toEqual([[60,67,72],[60,65,72],[65,72,77],[65,71,77],[71,77,62],[71,76,62],[76,62,67],[76,60,67]]);
+        expect(pattern("0").enneaCycle().notes()).toEqual([[60,67,72,77],[60,65,72,77],[60,65,71,77],[74,60,65,71],[74,79,65,71],[74,79,64,71],[67,74,79,64],[67,72,79,64],[67,72,77,64]]);
+    });
+
     it('tonnetzTransformation "p,r,l" and involutions to "normal form"', () => {
         expect(transform([0, 4, 7], "p")).toEqual([0, 3, 7]);
         expect(transform([0, 3, 7], "p")).toEqual([0, 4, 7]);

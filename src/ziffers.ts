@@ -5,7 +5,7 @@ import { voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 import { rsystem } from './rules.ts';
-import { TonnetzSpaces } from './tonnetz.ts';
+import { TonnetzSpaces, enneaCycles, hexaCycles, octaCycles } from './tonnetz.ts';
 
 type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
@@ -299,13 +299,72 @@ export class Ziffers {
         return this;
     }
 
-    tonnetzTransformation(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Ziffers {
+    triadTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Chord) {
-                    return item.triadTransformation(transformation, tonnetz);
+                    return item.triadTonnetz(transformation, tonnetz);
                 } else return item;
             });
+        }
+        return this;
+    }
+
+    tetraTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Chord) {
+                    return item.tetraTonnetz(transformation, tonnetz);
+                } else return item;
+            });
+        }
+        return this;
+    }
+
+    hexaCycle(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = hexaCycles(item.pitch as number, tonnetz);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate();
+                    });
+                    return zCycle as ZEvent[];
+                }
+                return item;
+            }).flat(Infinity) as ZEvent[];
+        }
+        return this;
+    }
+
+    octaCycle(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = octaCycles(item.pitch as number, tonnetz);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate();
+                    });
+                    return zCycle as ZEvent[];
+                }
+                return item;
+            }).flat(Infinity) as ZEvent[];
+        }
+        return this;
+    }
+
+    enneaCycle(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = enneaCycles(item.pitch as number, tonnetz);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate();
+                    });
+                    return zCycle as ZEvent[];
+                }
+                return item;
+            }).flat(Infinity) as ZEvent[];
         }
         return this;
     }
