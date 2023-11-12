@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pattern } from '../ziffers.ts'
-import { boretzRegions, octaTowers, transform, weitzmannRegions } from '../tonnetz.ts';
+import { boretzRegions, octaTowers, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
 
 describe('tonnetz-tests', () => {
 
@@ -196,6 +196,19 @@ describe('tonnetz-tests', () => {
 
         expect(transform([0, 4, 7], "hsftnprpl")).toEqual([2, 6, 9]);
         expect(transform([0, 3, 7], "hsftnprpl")).toEqual([10, 1, 5]);
+    })
+
+    it('seventhTransformations', () => {
+        expect(pattern("i7", {scale: "CHROMATIC"}).pitches()).toEqual([[0, 4, 7, 10]]);
+        expect(seventhsTransform([0, 4, 7, 10], "p12")).toEqual([0, 3, 7, 10]);
+        expect(seventhsTransform([0, 4, 7, 10], "l13")).toEqual([4, 7, 10, 2]);
+        expect(seventhsTransform([0, 4, 7, 10], "r12")).toEqual([9, 0, 4, 7]);
+        expect(seventhsTransform([0, 4, 7, 10], "r12r42")).toEqual([0, 4, 7, 11]);
+
+        /* ODD? Or is it? */
+        expect(seventhsTransform([0, 4, 7, 10], "p23")).toEqual([0, 4, 7, 10]);
+        expect(seventhsTransform([0, 4, 7, 10], "p23r23")).toEqual([0, 4, 7, 10]);
+        expect(seventhsTransform([0, 4, 7, 10], "p23 r23 l42")).toEqual([0, 4, 7, 10]);
     })
 
     it('octatowers', () => {

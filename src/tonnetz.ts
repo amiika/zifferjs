@@ -806,7 +806,9 @@ export const SEVENTHSTRANFORMATIONS: ObjectTransformationsSeventhChords = {
 
 export const seventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord => {
     const transformations = transformation.match(/[a-z][0-9]*/g);
-    if (!transformations || transformations && transformations.length<1) return chord;
+    if (!transformations || transformations && transformations.length<1) {
+        return chord;
+    }
     let transformedChord: Tetrachord = [...chord];
     for (let i = 0; i < transformations.length; i++) {
         const validTransformation = transformations[i];
