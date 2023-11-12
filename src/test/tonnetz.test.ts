@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pattern } from '../ziffers.ts'
-import { transform } from '../tonnetz.ts';
+import { boretzRegions, octaTowers, transform, weitzmannRegions } from '../tonnetz.ts';
 
 describe('tonnetz-tests', () => {
 
@@ -197,4 +197,17 @@ describe('tonnetz-tests', () => {
         expect(transform([0, 4, 7], "hsftnprpl")).toEqual([2, 6, 9]);
         expect(transform([0, 3, 7], "hsftnprpl")).toEqual([10, 1, 5]);
     })
+
+    it('octatowers', () => {
+        expect(octaTowers(0)).toEqual([[[0,3,6,10],[9,0,3,7],[6,9,0,4],[3,6,9,1]],[[0,3,7,10],[9,0,4,7],[6,9,1,4],[3,6,10,1]],[[3,7,10,1],[0,4,7,10],[9,1,4,7],[6,10,1,4]]]);
+    })
+
+    it('weitzmanRegions', () => {
+        expect(weitzmannRegions(0).keys().next().value).toEqual([0,4,8]);
+    })
+
+    it('borentzRegions', () => {
+        expect(boretzRegions(0).keys().next().value).toEqual([0,3,6,9]);
+    })
+
 });
