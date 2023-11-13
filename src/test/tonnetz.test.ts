@@ -13,6 +13,8 @@ describe('tonnetz-tests', () => {
     it('triadTonnetz', () => {
         expect(pattern("024").triadTonnetz("p").notes()[0]).toEqual([60, 65, 67]);
         expect(pattern("024 246").triadTonnetz("plr").notes()).toEqual([[77, 65, 69], [69,72,60]]);
+        expect(pattern("i v",{scale: "major"}).triadTonnetz("p").notes()).toEqual([[60, 65, 67], [62, 69, 71]]);
+        expect(pattern("i v",{scale: "chromatic"}).triadTonnetz("p").notes()).toEqual([[ 60, 63, 64 ], [64, 67, 68]]);
     });
 
     it('tetraTonnetz', () => {
@@ -206,7 +208,14 @@ describe('tonnetz-tests', () => {
         expect(seventhsTransform([0, 4, 7, 10], "r12r42")).toEqual([0, 4, 7, 11]);
 
         /* ODD? Or is it? */
-        expect(seventhsTransform([0, 4, 7, 10], "p23")).toEqual([0, 4, 7, 10]);
+        expect(seventhsTransform([0, 4, 7, 10], "p35")).toEqual([0, 4, 7, 10]);
+/*
+        "p12": p12,
+    "p14": p14,
+    "p23": p23,
+    "p35": p35,
+    */
+
         expect(seventhsTransform([0, 4, 7, 10], "p23r23")).toEqual([0, 4, 7, 10]);
         expect(seventhsTransform([0, 4, 7, 10], "p23 r23 l42")).toEqual([0, 4, 7, 10]);
     })

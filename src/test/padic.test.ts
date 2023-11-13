@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { pAdicExpansion, pAdicNorm, pAdicValuation } from '../patterns.ts';
+import { pAdicExpansion, pAdicNorm, pAdicValuation, padicFibonacci } from '../patterns.ts';
+import { collect } from '../ziffers.ts';
 describe('padic-tests', () => {
 
   it('padic', () => {
