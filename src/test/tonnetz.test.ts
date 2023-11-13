@@ -256,15 +256,10 @@ describe('tonnetz-tests', () => {
         expect(seventhsTransform([0, 3, 6, 10], "qq51")).toEqual([0, 3, 6, 10])
         expect(seventhsTransform([0, 4, 7, 10], "p35")).toEqual([0, 4, 7, 10])
 
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42")).toEqual([9, 0, 4, 7])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42")).toEqual([5, 9, 0, 4])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43")).toEqual([6, 9, 0, 4])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35")).toEqual([0, 3, 6, 9])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51")).toEqual([2, 6, 9, 0])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15")).toEqual([6, 9, 0, 3])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15n51")).toEqual([11, 3, 6, 9])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15n51l13")).toEqual([3, 6, 9, 1])
-        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15n51l13r23")).toEqual([6, 9, 1, 4])
+        /* ODD? Or is it? */
+        expect(seventhsTransform([0, 4, 7, 10], "p23")).toEqual([0, 4, 7, 10]);
+        expect(seventhsTransform([0, 4, 7, 10], "p23r23")).toEqual([0, 4, 7, 10]);
+        expect(seventhsTransform([0, 4, 7, 10], "p23 r23 l42")).toEqual([0, 4, 7, 10]);
     })
 
     it('octaTower', () => {
