@@ -849,4 +849,3 @@ export const seventhsTransform = (chord: Tetrachord, transformation: string, ton
     }
     return transformedChord;
 }
-

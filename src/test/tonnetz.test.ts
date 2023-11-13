@@ -16,8 +16,8 @@ describe('tonnetz-tests', () => {
     });
 
     it('tetraTonnetz', () => {
-        // expect(pattern("0246").tetraTonnetz("p").notes()[0]).toEqual([60, 64, 67, 71]);
-        // expect(pattern("0246").tetraTonnetz("plr").notes()[0]).toEqual([60, 64, 67, 71]);
+        // expect(pattern("0246").tetraTonnetz("p").notes()[0]).toEqual([60, 64, 67, 71]); problem with RegExp
+        // expect(pattern("0246").tetraTonnetz("plr").notes()[0]).toEqual([60, 64, 67, 71]);  problem with RegExp
         expect(pattern("i7").notes()[0]).toEqual([60, 64, 67, 70]);
         expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([60, 64, 67, 71]);
         expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([60, 64, 67, 71]);
@@ -256,10 +256,15 @@ describe('tonnetz-tests', () => {
         expect(seventhsTransform([0, 3, 6, 10], "qq51")).toEqual([0, 3, 6, 10])
         expect(seventhsTransform([0, 4, 7, 10], "p35")).toEqual([0, 4, 7, 10])
 
-        /* ODD? Or is it? */
-        expect(seventhsTransform([0, 4, 7, 10], "p23")).toEqual([0, 4, 7, 10]);
-        expect(seventhsTransform([0, 4, 7, 10], "p23r23")).toEqual([0, 4, 7, 10]);
-        expect(seventhsTransform([0, 4, 7, 10], "p23 r23 l42")).toEqual([0, 4, 7, 10]);
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42")).toEqual([9, 0, 4, 7])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42")).toEqual([5, 9, 0, 4])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43")).toEqual([6, 9, 0, 4])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35")).toEqual([0, 3, 6, 9])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51")).toEqual([2, 6, 9, 0])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15")).toEqual([6, 9, 0, 3])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15n51")).toEqual([11, 3, 6, 9])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15n51l13")).toEqual([3, 6, 9, 1])
+        expect(seventhsTransform([0, 4, 7, 10], "p14r42l42q43rr35qq51l15n51l13r23")).toEqual([6, 9, 1, 4])
     })
 
     it('octaTower', () => {
@@ -306,11 +311,13 @@ describe('tonnetz-tests', () => {
 
     it('Weitzmann Regions', () => {
         expect(weitzmannRegions(0)).toEqual([
-            [0, 4, 8], [1, 4, 8], [5, 8, 0], [9, 0, 4],
+            [0, 4, 8],
+            [1, 4, 8], [5, 8, 0], [9, 0, 4],
             [0, 4, 7], [8, 0, 3], [4, 8, 11]
         ]);
         expect(weitzmannRegions(2)).toEqual([
-            [2, 6, 10], [3, 6, 10], [7, 10, 2], [11, 2, 6],
+            [2, 6, 10],
+            [3, 6, 10], [7, 10, 2], [11, 2, 6],
             [2, 6, 9], [10, 2, 5], [6, 10, 1]
         ]);
     });
