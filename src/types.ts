@@ -429,11 +429,12 @@ export class Chord extends Event {
         if(notes.length === 3) {
             const splittedTransforms = transformationInput.split(" ");
             const allTransforms = splittedTransforms.map((transformation) => {
-                const transformedChord = transform(notes as TriadChord, transformation, tonnetz);
+                const transformedChord = transform(notes as TriadChord, transformation, tonnetz)?.sort((a,b) => a-b);
                 if(!transformedChord) return this;
                 const parsedScale = this.pitches[0].parsedScale!;
                 const chord = new Chord({pitches: transformedChord.map((pc) => {
-                    const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                    const newPC = midiToPitchClass(pc, this.key, this.scaleName);
+                    const newPitch = new Pitch({pitch: newPC.pc, add: newPC.add, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
                     return newPitch as unknown as Node;
                 })});
                 return chord.evaluate();
@@ -447,11 +448,12 @@ export class Chord extends Event {
         if(notes.length === 4) {
             const splittedTransforms = transformationInput.split(" ");
             const allTransforms = splittedTransforms.map((transformation) => {
-                const transformedChord = seventhsTransform(notes as Tetrachord, transformation, tonnetz);
+                const transformedChord = seventhsTransform(notes as Tetrachord, transformation, tonnetz)?.sort((a,b) => a-b);
                 if(!transformedChord) return this;
                 const parsedScale = this.pitches[0].parsedScale!;
                 const chord = new Chord({pitches: transformedChord.map((pc) => {
-                    const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                    const newPC = midiToPitchClass(pc, this.key, this.scaleName);
+                    const newPitch = new Pitch({pitch: newPC.pc, add: newPC.add, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
                     return newPitch as unknown as Node;
                 })});
                 return chord.evaluate();

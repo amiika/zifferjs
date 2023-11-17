@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SCALES, SCALE_NAMES, getScale } from '../defaults.ts'
-import { getAllScaleNotes, getPrimes, midiToTpc, nearScales, normalForm, numberToScale, safeScale, scaleToNumber, scaleToSteps, stepsToScale } from '../scale.ts'
+import { getAllScaleNotes, getPrimes, midiToPitchClass, midiToTpc, nearScales, normalForm, numberToScale, safeScale, scaleToNumber, scaleToSteps, stepsToScale } from '../scale.ts'
 import { parse as parseScale } from '../parser/scalaParser.ts'
 import { pattern } from '../ziffers.ts'
 
@@ -71,5 +71,10 @@ describe('scale-tests', () => {
     expect(nearScales(349)).toEqual([351, 345, 347, 341, 333, 365, 381, 285, 317, 413, 477, 93, 221, 605, 861, 1373, 2397]);
   })
 
+  it('midiToPc', () => {
+    expect(midiToPitchClass(60).pc).toEqual(0);
+    expect(midiToPitchClass(60, "D4").pc).toEqual(5);
+    expect(midiToPitchClass(3, "C4").pc).toEqual(2);
+  })
 
 })
