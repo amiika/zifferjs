@@ -596,10 +596,12 @@ export const TRANSFORMATIONS: ObjectTransformations = {
     "p41": p41,
     "lt13": lt13,
     "l41": l41,
+    "l14": l14,
     "rt23": rt23,
     "rt42": rt42,
     "q13": q13,
     "q42": q42,
+    "n42": n42,
 };
 
 export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord | undefined => {
