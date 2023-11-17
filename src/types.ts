@@ -407,6 +407,7 @@ export class Chord extends Event {
         }
         return newPcs.map((pitch) => pitch.evaluate(options));
     }
+    
     voiceLeadFromNotes(leadedNotes: number[], options: NodeOptions): void {
         this.pitches = this.pitches.map((p: Pitch, i: number) => {
             if(leadedNotes[i]) {
@@ -424,9 +425,9 @@ export class Chord extends Event {
     }
 
     triadTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
-        const pcs = this.pcs();
-        if(pcs.length === 3) {
-            const transformedChord = transform(pcs as TriadChord, transformation, tonnetz);
+        const notes = this.notes();
+        if(notes.length === 3) {
+            const transformedChord = transform(notes as TriadChord, transformation, tonnetz);
             const parsedScale = this.pitches[0].parsedScale!;
             const chord = new Chord({pitches: transformedChord.map((pc) => {
                 const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
@@ -437,9 +438,9 @@ export class Chord extends Event {
     }
 
     tetraTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
-        const pcs = this.pcs();
-        if(pcs.length === 4) {
-            const transformedChord = seventhsTransform(pcs as Tetrachord, transformation, tonnetz);
+        const notes = this.notes();
+        if(notes.length === 4) {
+            const transformedChord = seventhsTransform(notes as Tetrachord, transformation, tonnetz);
             const parsedScale = this.pitches[0].parsedScale!;
             const chord = new Chord({pitches: transformedChord.map((pc) => {
                 const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});

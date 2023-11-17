@@ -11,17 +11,17 @@ describe('tonnetz-tests', () => {
     });
 
     it('triadTonnetz', () => {
-        expect(pattern("024").triadTonnetz("p").notes()[0]).toEqual([60, 65, 67]);
-        expect(pattern("024 246").triadTonnetz("plr").notes()).toEqual([[77, 65, 69], [69, 72, 60]]);
+        expect(pattern("024").triadTonnetz("p").notes()[0]).toEqual([ 60, 65, 72 ]);
+        expect(pattern("024 246").triadTonnetz("plr").notes()).toEqual([[ 69, 74, 60 ], [ 79, 65, 71 ]]);
     });
 
     it('tetraTonnetz', () => {
         // expect(pattern("0246").tetraTonnetz("p").notes()[0]).toEqual([60, 64, 67, 71]); problem with RegExp
         // expect(pattern("0246").tetraTonnetz("plr").notes()[0]).toEqual([60, 64, 67, 71]);  problem with RegExp
         expect(pattern("i7").notes()[0]).toEqual([60, 64, 67, 70]);
-        expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([60, 64, 67, 71]);
-        expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([60, 64, 67, 71]);
-        expect(pattern("vi7").tetraTonnetz("p12 r53").notes()[0]).toEqual([69, 60, 64, 67]);
+        expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([ 65, 72, 77, 62 ]);
+        expect(pattern("i7").tetraTonnetz("p12 l13 r12").notes()[0]).toEqual([ 65, 72, 77, 62 ]);
+        expect(pattern("vi7").tetraTonnetz("p12 r53").notes()[0]).toEqual([ 76, 60, 67, 72 ]);
     });
 
     it('hexaCycle', () => {
