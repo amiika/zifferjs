@@ -407,7 +407,7 @@ export class Chord extends Event {
         }
         return newPcs.map((pitch) => pitch.evaluate(options));
     }
-    
+
     voiceLeadFromNotes(leadedNotes: number[], options: NodeOptions): void {
         this.pitches = this.pitches.map((p: Pitch, i: number) => {
             if(leadedNotes[i]) {
@@ -424,29 +424,39 @@ export class Chord extends Event {
         });
     }
 
-    triadTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
+    triadTonnetz(transformationInput: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord|Chord[] {
         const notes = this.notes();
         if(notes.length === 3) {
-            const transformedChord = transform(notes as TriadChord, transformation, tonnetz);
-            const parsedScale = this.pitches[0].parsedScale!;
-            const chord = new Chord({pitches: transformedChord.map((pc) => {
-                const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
-                return newPitch as unknown as Node;
-            })});
-            return chord.evaluate();
+            const splittedTransforms = transformationInput.split(" ");
+            const allTransforms = splittedTransforms.map((transformation) => {
+                const transformedChord = transform(notes as TriadChord, transformation, tonnetz);
+                if(!transformedChord) return this;
+                const parsedScale = this.pitches[0].parsedScale!;
+                const chord = new Chord({pitches: transformedChord.map((pc) => {
+                    const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                    return newPitch as unknown as Node;
+                })});
+                return chord.evaluate();
+            });
+            return allTransforms;
         } else return this;
     }
 
-    tetraTonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord {
+    tetraTonnetz(transformationInput: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord|Chord[] {
         const notes = this.notes();
         if(notes.length === 4) {
-            const transformedChord = seventhsTransform(notes as Tetrachord, transformation, tonnetz);
-            const parsedScale = this.pitches[0].parsedScale!;
-            const chord = new Chord({pitches: transformedChord.map((pc) => {
-                const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
-                return newPitch as unknown as Node;
-            })});
-            return chord.evaluate();
+            const splittedTransforms = transformationInput.split(" ");
+            const allTransforms = splittedTransforms.map((transformation) => {
+                const transformedChord = seventhsTransform(notes as Tetrachord, transformation, tonnetz);
+                if(!transformedChord) return this;
+                const parsedScale = this.pitches[0].parsedScale!;
+                const chord = new Chord({pitches: transformedChord.map((pc) => {
+                    const newPitch = new Pitch({pitch: pc, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                    return newPitch as unknown as Node;
+                })});
+                return chord.evaluate();
+            });
+            return allTransforms;
         } else return this;
     }
 

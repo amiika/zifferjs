@@ -370,13 +370,19 @@ export const TRANSFORMATIONS: ObjectTransformations = {
     "t": t6
 };
 
-export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord => {
+export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord|undefined => {
     const transformations = transformation.split("");
+    if(transformations.length === 0) return undefined;
     let transformedChord: TriadChord = [...chord];
     for (let i = 0; i < transformations.length; i++) {
         const validTransformation = transformations[i];
         if (validTransformation) {
-            transformedChord = TRANSFORMATIONS[validTransformation](transformedChord, tonnetz);
+            const parsedTransform = TRANSFORMATIONS[validTransformation];
+            if (parsedTransform) {
+                transformedChord = parsedTransform(transformedChord, tonnetz);
+            } else {
+                return undefined;
+            }
         }
     }
     return sortingTriadChord(transformedChord, tonnetz);
@@ -1334,16 +1340,21 @@ export const SEVENTHSTRANFORMATIONS: ObjectTransformationsSeventhChords = {
     "qq98": qq98
 }
 
-export const seventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord => {
+export const seventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord|undefined => {
     const transformations = transformation.match(/([a-z]{1,2}[0-9]*)/g);
     if (!transformations || transformations && transformations.length < 1) {
-        return chord;
+        return undefined;
     }
     let transformedChord: Tetrachord = [...chord];
     for (let i = 0; i < transformations.length; i++) {
         const validTransformation = transformations[i];
         if (validTransformation) {
-            transformedChord = SEVENTHSTRANFORMATIONS[validTransformation](transformedChord, tonnetz);
+            const parsedTransform = SEVENTHSTRANFORMATIONS[validTransformation]
+            if(parsedTransform) {
+                transformedChord = parsedTransform(transformedChord, tonnetz);
+            } else {
+                return undefined;
+            }
         }
     }
     return transformedChord;

@@ -305,7 +305,7 @@ export class Ziffers {
                 if(item instanceof Chord) {
                     return item.triadTonnetz(transformation, tonnetz);
                 } else return item;
-            });
+            }).flat(Infinity) as ZEvent[];
         }
         return this;
     }
@@ -316,7 +316,7 @@ export class Ziffers {
                 if(item instanceof Chord) {
                     return item.tetraTonnetz(transformation, tonnetz);
                 } else return item;
-            });
+            }).flat(Infinity) as ZEvent[];
         }
         return this;
     }
