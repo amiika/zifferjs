@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pattern } from '../ziffers.ts'
-import { boretzRegions, enneaCycles, hexaCycles, octaCycles, octaTower, octaTowerLeft, octaTowerRight, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
+import { boretzRegions, enneaCycles, hexaCycles, octaCycles, octaTower, octaTowerLeft, octaTowerRight, randomSeventhTransformation, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
 
 describe('tonnetz-tests', () => {
 
@@ -381,6 +381,10 @@ describe('tonnetz-tests', () => {
             [4, 8, 11, 2], [8, 11, 2, 6], [7, 11, 2, 5],
             [11, 2, 5, 9], [10, 2, 5, 8], [2, 5, 8, 0]
         ]);
+    });
+
+    it('Random transformtion', () => {
+        expect(randomSeventhTransformation([0, 4, 7, 10])).toEqual(expect.arrayContaining([expect.any(Number), expect.any(Number), expect.any(Number), expect.any(Number)]));
     });
 
 });

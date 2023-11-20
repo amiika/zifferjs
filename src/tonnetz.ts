@@ -1668,7 +1668,7 @@ export const AVAILABLESEVENTHSTRANSFORMATIONS: { readonly [key: string]: { reado
     }
   };
 
-export const getAvailableSeventhsTransformations = (chord: Tetrachord, tonnetz: TonnetzSpaces = [3, 4, 5]): readonly string[] | string => {
+export const getAvailableSeventhsTransformations = (chord: Tetrachord, tonnetz: TonnetzSpaces = [3, 4, 5]): { readonly [key: string]: readonly string[] }  => {
     for (const chordFunction of Object.keys(CHORD_TYPES_SEVENTHS)) {
         let chordCompare = CHORD_TYPES_SEVENTHS[chordFunction](chord[0], tonnetz);
         let arrayOfComparedValues: boolean[] = chord.map((item, index) => item === chordCompare[index]);
@@ -1677,7 +1677,7 @@ export const getAvailableSeventhsTransformations = (chord: Tetrachord, tonnetz: 
             return AVAILABLESEVENTHSTRANSFORMATIONS[chordFunction]
         }
     }
-    return `No transformations available`
+    return {}
 }
 
 export const randomSeventhTransformation = (chord: Tetrachord, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord => {
@@ -1687,7 +1687,9 @@ export const randomSeventhTransformation = (chord: Tetrachord, tonnetz: TonnetzS
         const isEachElementTrue: boolean = arrayOfComparedValues.every(item => item === true);
         if (isEachElementTrue) {
             const transformations = AVAILABLESEVENTHSTRANSFORMATIONS[chordFunction]
-            const randomTransformation = transformations[(Math.floor(Math.random() * transformations.length))]
+            // Pick random key
+            const transformKey = Object.keys(transformations)[(Math.floor(Math.random() * Object.keys(transformations).length))]
+            const randomTransformation = transformations[transformKey][(Math.floor(Math.random() * transformations[transformKey].length))]
             return SEVENTHSTRANFORMATIONS[randomTransformation](chord, tonnetz)
         }
     }
