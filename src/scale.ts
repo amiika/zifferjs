@@ -279,7 +279,7 @@ export const chordFromDegree = (
 ): number[] => {
   const rootMidi: number = typeof root === "string" ? noteNameToMidi(root) : root;
   if (
-    name &&
+    !name &&
     typeof scale === "string" &&
     scale.toUpperCase() === "CHROMATIC"
   ) { name = "major"; }
@@ -302,7 +302,7 @@ export const getChordFromScale = (
 
   const numOctaves: number = Math.floor((numNotes * skip + degree - 1) / scaleLength) + 1;
   const scaleNotes: number[] = getScaleNotes(scale, root, numOctaves);
-
+  
   const chord: number[] = [];
 
   for (let i = degree - 1; chord.length < numNotes && i < scaleNotes.length; i += skip) {
