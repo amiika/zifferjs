@@ -227,7 +227,11 @@ export class Pitch extends Event {
         if(options.scale) {
             if(typeof options.scale === "string" && clone.scaleName !== options.scale) {
                 clone.scaleName = options.scale;
-                if(clone.originalPitch) clone.pitch = clone.originalPitch;
+                if(clone.originalPitch) {
+                    clone.pitch = clone.originalPitch;
+                    clone.pitchOctave = 0;
+                    clone.octave = 0;
+                }
             }
             clone.parsedScale = safeScale(options.scale) as number[];
         }
