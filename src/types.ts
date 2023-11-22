@@ -224,7 +224,17 @@ export class Pitch extends Event {
         if(!clone.duration) {
             clone.duration = (options.duration || options.duration === 0) ? options.duration : DEFAULT_DURATION;
         }
-        if(options.scale) clone.parsedScale = safeScale(options.scale) as number[];
+        if(options.scale) {
+            if(typeof options.scale === "string" && clone.scaleName !== options.scale) {
+                clone.scaleName = options.scale;
+                if(clone.originalPitch) {
+                    clone.pitch = clone.originalPitch;
+                    clone.pitchOctave = 0;
+                    clone.octave = 0;
+                }
+            }
+            clone.parsedScale = safeScale(options.scale) as number[];
+        }
         if(options.key) clone.key = options.key;
         if(options.soundIndex || options.soundIndex===0) {
             if(!(typeof options.soundIndex === "number")) {
@@ -354,6 +364,7 @@ export class Chord extends Event {
     inversion?: number;
     key?: number|string;
     scaleName?: string;
+    parsedScale?: number[];
     constructor(data: Partial<Node>) {
         super(data);
         Object.assign(this, data);
@@ -369,6 +380,10 @@ export class Chord extends Event {
     }
     evaluate(options: ChangingOptions = {}): Chord {
         const dupChord = deepClone(this);
+        if(options.scale) {
+            if(typeof options.scale === "string") dupChord.scaleName = options.scale;
+            dupChord.parsedScale = safeScale(options.scale) as number[];
+        }
         if(options.inversion || dupChord.inversion) {
             dupChord.pitches = dupChord.invert((options.inversion || dupChord.inversion)!, options);
         } else {
@@ -395,6 +410,11 @@ export class Chord extends Event {
         return params;
     }
     scale(name: string): Chord {
+        if(this.scaleName!==name) {
+            this.scaleName = name;
+            this.parsedScale = getScale(name) as number[];
+            return this.evaluate();
+        }
         this.pitches.forEach((pitch) => pitch.scale(name));
         return this;
     }
@@ -478,13 +498,16 @@ export class Roman extends Chord {
         dup.romanNumeral = parseRoman(dup.roman);
         const key = dup.key || options.key || 60;
         const scale = dup.scaleName || options.scale || "MAJOR";
+        if(typeof scale === "string") dup.scaleName = options.scale;
 
         const parsedScale = safeScale(scale) as number[];
         let octave = (dup.chordOctave || 0) + (options.octave || 0);
         const chord = dup.chordName ? namedChordFromDegree(dup.romanNumeral, dup.chordName, key, scale, octave) : chordFromDegree(dup.romanNumeral, scale, key, octave);
+
         const pitchObj = chord.map((note) => {
             return midiToPitchClass(note,key,scale);
         });
+
         dup.pitches = pitchObj.map((pc) => {
             const pitchOct = octave+pc.octave;
             return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add, duration: this.duration}).evaluate(options);
