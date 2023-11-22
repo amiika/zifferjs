@@ -302,7 +302,7 @@ export const getChordFromScale = (
 
   const numOctaves: number = Math.floor((numNotes * skip + degree - 1) / scaleLength) + 1;
   const scaleNotes: number[] = getScaleNotes(scale, root, numOctaves);
-  
+
   const chord: number[] = [];
 
   for (let i = degree - 1; chord.length < numNotes && i < scaleNotes.length; i += skip) {
@@ -355,6 +355,17 @@ export const midiToNoteName = (midi: number): string => {
 export const accidentalsFromMidiNote = (note: number): number => {
   const name: string = midiToNoteName(note);
   return accidentalsFromNoteName(name);
+}
+
+export const chordToPcSet = (chord: number[]): number[] => {
+  /** 
+   * Convert a chord to a pitch class set
+   * @param {number[]} chord - The chord in midi notes
+   * @returns {number[]} The unique pitch class set
+   */
+  return chord.map((note) => note % 12)
+  .filter((value, index, self) => self.indexOf(value) === index)
+  .sort((a, b) => a - b);
 }
 
 export const midiToTpc = (note: number, key: string | number): number => {

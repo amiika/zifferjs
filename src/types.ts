@@ -463,12 +463,12 @@ export class Chord extends Event {
         } else return this;
     }
 
-    tetraTonnetz(transformationInput: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord|Chord[] {
+    tetraTonnetz(transformationInput: string, tonnetz: TonnetzSpaces = [3,4,5], transformFunc: Function = seventhsTransform): Chord|Chord[] {
         const notes = this.notes();
         if(notes.length === 4) {
             const splittedTransforms = transformationInput.split(" ");
             const allTransforms = splittedTransforms.map((transformation) => {
-                const transformedChord = seventhsTransform(notes as Tetrachord, transformation, tonnetz)?.sort((a,b) => a-b);
+                const transformedChord = transformFunc(notes as Tetrachord, transformation, tonnetz)?.sort((a,b) => a-b);
                 if(!transformedChord) return this;
                 const parsedScale = this.pitches[0].parsedScale!;
                 const chord = new Chord({pitches: transformedChord.map((pc) => {

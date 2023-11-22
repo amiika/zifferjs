@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { chord, midiToPitchClass, tMatrix, voiceLead} from '../scale.ts'
+import { chord, chordToPcSet, midiToPitchClass, tMatrix, voiceLead} from '../scale.ts'
 import { pattern } from '../ziffers.ts';
 import { Chord } from '../types.ts';
 
@@ -75,7 +75,15 @@ describe('chord-tests', () => {
   })
 
   it('chordswithsounds', () => {
-   // expect(pattern('0:{0}2:{1}5:{2}').indices()).toEqual([[0,1,2]]);
+    expect(pattern('0:{0}2:{1}5:{2}').indices()).toEqual([0,1,2]);
+  })
+
+  it('chordToPcSet', () => {
+    expect(chordToPcSet([60,64,67])).toEqual([0,4,7]);
+    expect(chordToPcSet([60,64,67]).toString()).toEqual("0,4,7");
+    expect(chordToPcSet([60,64,67,72]).toString()).toEqual("0,4,7");
+    const c = pattern('i7-5').notes()[0] as number[];
+    expect(chordToPcSet(c)).toEqual([0,4,6,10]);
   })
 
 })
