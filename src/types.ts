@@ -468,7 +468,7 @@ export class Chord extends Event {
         if(notes.length === 4) {
             const splittedTransforms = transformationInput.split(" ");
             const allTransforms = splittedTransforms.map((transformation) => {
-                const transformedChord = transformFunc(notes as Tetrachord, transformation, tonnetz)?.sort((a,b) => a-b);
+                const transformedChord = (transformFunc(notes as Tetrachord, transformation, tonnetz) as Tetrachord)?.sort((a,b) => a-b);
                 if(!transformedChord) return this;
                 const parsedScale = this.pitches[0].parsedScale!;
                 const chord = new Chord({pitches: transformedChord.map((pc) => {
