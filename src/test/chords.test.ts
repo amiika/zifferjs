@@ -27,6 +27,7 @@ describe('chord-tests', () => {
     expect(pattern('ii 0').update().notes()).toEqual([[62,65,69], 60]);
     expect(pattern('imin').update().notes()).toEqual([[60,63,67]]);
     expect(pattern('i^min').update().notes()).toEqual([[60,63,67]]);
+    expect(pattern('i', {scale: "minor"}).notes()[0]).toEqual([60,63,67]);
   })
 
   it('chords', () => {

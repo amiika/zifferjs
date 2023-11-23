@@ -1,4 +1,4 @@
-import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, chordFromDegree, midiToPitchClass, namedChordFromDegree, noteNameToMidi } from './scale.ts';
+import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, midiToPitchClass, namedChordFromDegree, noteNameToMidi, getScaleNotes, getChordFromScale } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale, DEFAULT_DURATION } from './defaults.ts';
 import { deepClone } from './utils.ts';
 import { Tetrachord, TonnetzSpaces, TriadChord, chordFromTonnetz, seventhsTransform, transform } from './tonnetz.ts';
@@ -410,11 +410,7 @@ export class Chord extends Event {
         return params;
     }
     scale(name: string): Chord {
-        if(this.scaleName!==name) {
-            this.scaleName = name;
-            this.parsedScale = getScale(name) as number[];
-            return this.evaluate();
-        }
+        if(this.scaleName!==name) return this.evaluate({scale: name})
         this.pitches.forEach((pitch) => pitch.scale(name));
         return this;
     }
@@ -495,23 +491,36 @@ export class Roman extends Chord {
     }
     evaluate(options: ChangingOptions = {}): Roman {
         const dup = deepClone(this);
+        if(options.scale && typeof options.scale === "string") {
+            dup.scaleName = options.scale;
+        }
         dup.romanNumeral = parseRoman(dup.roman);
         const key = dup.key || options.key || 60;
-        const scale = dup.scaleName || options.scale || "MAJOR";
-        if(typeof scale === "string") dup.scaleName = options.scale;
 
+        const scale = dup.scaleName || "MAJOR";
         const parsedScale = safeScale(scale) as number[];
+
         let octave = (dup.chordOctave || 0) + (options.octave || 0);
-        const chord = dup.chordName ? namedChordFromDegree(dup.romanNumeral, dup.chordName, key, scale, octave) : chordFromDegree(dup.romanNumeral, scale, key, octave);
 
-        const pitchObj = chord.map((note) => {
-            return midiToPitchClass(note,key,scale);
-        });
-
-        dup.pitches = pitchObj.map((pc) => {
-            const pitchOct = octave+pc.octave;
-            return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add, duration: this.duration}).evaluate(options);
-        });
+        if(dup.chordName) {
+            const chord = namedChordFromDegree(dup.romanNumeral, dup.chordName, key, scale, octave);
+            const pitchObj = chord.map((note) => {
+                return midiToPitchClass(note,key,scale);
+            });
+            dup.pitches = pitchObj.map((pc) => {
+                const pitchOct = octave+pc.octave;
+                return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add, duration: this.duration}).evaluate(options);
+            });
+        } else {
+            const scaleNotes: number[] = getScaleNotes(scale, 0, 7);
+            const chrom_pcs: number[] = getChordFromScale(dup.romanNumeral, 0, scale);
+            const pcs: number[] = chrom_pcs.map((note) => {
+                return scaleNotes.indexOf(note);
+            });
+            dup.pitches = pcs.map((pc) => {
+                return new Pitch({pitch: pc, octave: octave, key: key, parsedScale: parsedScale, duration: this.duration}).evaluate(options);
+            });
+        }
         if(options.inversion || dup.inversion) {
             const inversion = options.inversion || dup.inversion;
             dup.pitches = dup.invert(inversion!, options);

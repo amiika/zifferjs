@@ -342,7 +342,7 @@ export class Ziffers {
                 if(item instanceof Pitch) {
                     const chordCycle = hexaCycles(item.pitch as number, tonnetz);
                     const zCycle = chordCycle.map((chord: number[]) => {
-                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate();
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration});
                     });
                     return zCycle as ZEvent[];
                 }
