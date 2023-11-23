@@ -5,7 +5,7 @@ import { voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 import { rsystem } from './rules.ts';
-import { TonnetzSpaces, enneaCycles, hexaCycles, octaCycles } from './tonnetz.ts';
+import { TonnetzSpaces, enneaCycles, explorativeSeventhsTransform, hexaCycles, octaCycles } from './tonnetz.ts';
 
 type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
@@ -295,6 +295,21 @@ export class Ziffers {
                     return item.tonnetzChord(chordType, tonnetz);
                 } else return item;
             });
+        }
+        return this;
+    }
+
+    tonnetz(transformation: string, tonnetz: TonnetzSpaces = [3,4,5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Chord) {
+                    if(item.notes().length===3) {
+                        return item.triadTonnetz(transformation, tonnetz);
+                    } else if(item.notes().length===4) {
+                        return item.tetraTonnetz(transformation, tonnetz, explorativeSeventhsTransform);
+                    }
+                } else return item;
+            }).flat(Infinity) as ZEvent[];
         }
         return this;
     }

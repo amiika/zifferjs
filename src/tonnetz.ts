@@ -1,3 +1,5 @@
+import { safeMod } from "./utils"
+
 export type TonnetzSpaceConnected = [3, 4, 5] | [1, 1, 10] | [1, 2, 9] | [1, 3, 8] | [1, 4, 7] | [1, 5, 6] | [2, 3, 7] | [2, 5, 5]
 export type TonnetzSpaceNonConnected = [2, 4, 6] | [2, 2, 8] | [3, 3, 6] | [4, 4, 4]
 
@@ -616,9 +618,9 @@ export const TRANSFORMATIONS: ObjectTransformations = {
     "n42": n42,
 };
 
-export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord | undefined => {
-    const transformations = transformation.split("");
-    if (transformations.length === 0) return undefined;
+export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord => {
+    const transformations = transformation.replace(/[^a-z]/g, '').split("");
+    if (transformations.length === 0) return chord;
     let transformedChord: TriadChord = [...chord];
     for (let i = 0; i < transformations.length; i++) {
         const validTransformation = transformations[i];
@@ -626,8 +628,6 @@ export const transform = (chord: TriadChord, transformation: string, tonnetz: To
             const parsedTransform = TRANSFORMATIONS[validTransformation];
             if (parsedTransform) {
                 transformedChord = parsedTransform(transformedChord, tonnetz);
-            } else {
-                return undefined;
             }
         }
     }
@@ -1575,10 +1575,10 @@ export const SEVENTHSTRANFORMATIONS: ObjectTransformationsSeventhChords = {
     "qq98": qq98
 }
 
-export const seventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord | undefined => {
+export const seventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord => {
     const transformations = transformation.match(/([a-z]{1,2}[0-9]*)/g);
     if (!transformations || transformations && transformations.length < 1) {
-        return undefined;
+        return chord;
     }
     let transformedChord: Tetrachord = [...chord];
     for (let i = 0; i < transformations.length; i++) {
@@ -1587,10 +1587,32 @@ export const seventhsTransform = (chord: Tetrachord, transformation: string, ton
             const parsedTransform = SEVENTHSTRANFORMATIONS[validTransformation]
             if (parsedTransform) {
                 transformedChord = parsedTransform(transformedChord, tonnetz);
-            } else {
-                return undefined;
             }
         }
+    }
+    return transformedChord;
+}
+
+export const explorativeSeventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord => {
+    const regxp = new RegExp("([a-z])([0-9]*)", "g");
+    let operations = regxp.exec(transformation);
+    if (!operations || operations && operations.length < 1) {
+        return chord;
+    }
+    let transformedChord: Tetrachord = [...chordNotesToModN(chord)];
+    while (operations != null) {
+        const chordTransformations = getAvailableSeventhsTransformations(transformedChord);
+        if (chordTransformations) {
+            const transformOp = chordTransformations[operations[1]]
+            if (transformOp) {
+                let operationIndex = 0;
+                if (operations[2].length > 0) operationIndex = parseInt(operations[2]) - 1
+                operationIndex = safeMod(operationIndex, transformOp.length);
+                const parsedTransform = transformOp[operationIndex];
+                transformedChord = SEVENTHSTRANFORMATIONS[parsedTransform](transformedChord, tonnetz);
+            }
+        }
+        operations = regxp.exec(transformation);
     }
     return transformedChord;
 }
