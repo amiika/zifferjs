@@ -604,7 +604,7 @@ export const TRANSFORMATIONS: ObjectTransformations = {
     "n": n,
     "s": s,
     "h": h,
-    "t": t6,
+    "t6": t6,
     "p32": p32,
     "p41": p41,
     "lt13": lt13,
@@ -625,13 +625,15 @@ export const AVAILABLETRANSFORMATIONS: { readonly [key: string]: readonly string
     "n": ["n", "n42"],
     "s": ["s"],
     "h": ["h"],
-    "t": ["t"],
+    "t": ["t6"],
     "q": ["q13", "q42"]
 }
 
 export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord => {
-    const transformations = transformation.replace(/[^a-z]/g, '').split("");
-    if (transformations.length === 0) return chord;
+    const transformations = transformation.match(/(([plrfnshtq]|[rl][t])[0-9]*)/g);
+    if (!transformations || transformations && transformations.length < 1) {
+        return chord;
+    }
     let transformedChord: TriadChord = [...chord];
     for (let i = 0; i < transformations.length; i++) {
         const validTransformation = transformations[i];
