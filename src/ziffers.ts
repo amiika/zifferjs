@@ -2,7 +2,7 @@ import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { voiceLead } from './scale.ts';
-import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision } from './types.ts';
+import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 import { rsystem } from './rules.ts';
 import { TonnetzSpaces, enneaCycles, explorativeSeventhsTransform, hexaCycles, octaCycles } from './tonnetz.ts';
@@ -277,6 +277,27 @@ export class Ziffers {
         return this;
     }
 
+    arpeggio(indexes: string|number[]): Ziffers {
+        if(typeof indexes === "string") {
+            const parsedEvents = parseZiffers(indexes, this.options);
+            const pitches = this.evaluate(parsedEvents);
+            indexes = pitches.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    return item.pitch as number;
+                }
+                return undefined;
+            }).filter((item: number|undefined) => item !== undefined) as number[];
+        }
+        const arpeggiated = this.evaluated.map((item: ZEvent) => {
+            if(item instanceof Chord) {
+                return new Arpeggio({chord: item, indexes: indexes} as object).evaluate();
+            }
+            return item;
+        });
+        this.evaluated = arpeggiated.flat(Infinity) as ZEvent[];
+        return this;
+    }
+
     toString(): string {
         return this.evaluated.map((item: ZEvent) => {
             return item.toString();
@@ -342,7 +363,7 @@ export class Ziffers {
                 if(item instanceof Pitch) {
                     const chordCycle = hexaCycles(item.pitch as number, tonnetz);
                     const zCycle = chordCycle.map((chord: number[]) => {
-                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration});
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration, octave: item.octave});
                     });
                     return zCycle as ZEvent[];
                 }
@@ -358,7 +379,7 @@ export class Ziffers {
                 if(item instanceof Pitch) {
                     const chordCycle = octaCycles(item.pitch as number, tonnetz);
                     const zCycle = chordCycle.map((chord: number[]) => {
-                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate();
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration, octave: item.octave});
                     });
                     return zCycle as ZEvent[];
                 }
@@ -374,7 +395,7 @@ export class Ziffers {
                 if(item instanceof Pitch) {
                     const chordCycle = enneaCycles(item.pitch as number, tonnetz);
                     const zCycle = chordCycle.map((chord: number[]) => {
-                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate();
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration, octave: item.octave});
                     });
                     return zCycle as ZEvent[];
                 }

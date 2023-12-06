@@ -87,4 +87,21 @@ describe('chord-tests', () => {
     expect(chordToPcSet(c)).toEqual([0,4,6,10]);
   })
 
+  it('arpeggios', () => {
+    expect(pattern("024").notes()).toEqual([[60,64,67]]);
+    expect(pattern("024@(0 2 1)").notes()).toEqual([60,67,64]);
+    expect(pattern("024@(0 2 1 3)").notes()).toEqual([60,67,64,60]);
+    expect(pattern("i@(0 2 1 3)").notes()).toEqual([60,67,64,60]);
+    expect(pattern("i7@(0 2 1 3)").notes()).toEqual([60,67,64,70]);
+    expect(pattern("C7@(0 2 1 3)").notes()).toEqual([60,67,64,70]);
+    expect(pattern("Cmaj@(0 2 1 3)").notes()).toEqual([60,67,64,60]);
+    expect(pattern("Dmaj@(0 2 1 3)").notes()).toEqual([62,69,66,62]);
+  
+    expect(pattern("024").arpeggio("0 2 1").notes()).toEqual([60,67,64]);
+    expect(pattern("0246").arpeggio("0 2 1 3").notes()).toEqual([60,67,64,71]);
+    expect(pattern("0246").arpeggio([0,2,1,3]).notes()).toEqual([60,67,64,71]);
+    expect(pattern("i7").arpeggio([0,2,1,3]).notes()).toEqual([60,67,64,70]);
+  })
+
+
 })

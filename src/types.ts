@@ -618,6 +618,28 @@ export class List extends Base {
     }
 }
 
+export class Arpeggio extends List {
+    chord!: Chord;
+    indexes!: List|number[];
+    constructor(data: Partial<Node>) {
+        super(data);
+        Object.assign(this, data);
+    }
+    evaluate(options: ChangingOptions = {}): Pitch[] {
+        let numberIndexes: number[] = [];
+        if(this.indexes instanceof List) {
+            const pitchIndexes = this.indexes.evaluate(options);
+            numberIndexes = pitchIndexes.map(p => p.pitch) as unknown as number[];
+        } else {
+            numberIndexes = this.indexes;
+        }
+        const chord = this.chord.evaluate(options);
+        const chordLength = chord.pitches.length;
+        const pitches = numberIndexes.map(i => chord.pitches[i % chordLength].evaluate(options));
+        return pitches;
+    }
+}
+
 export class Subdivision extends Base {
     duration!: number;
     items!: (Pitch|Chord|Rest|Subdivision)[];

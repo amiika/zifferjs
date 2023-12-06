@@ -88,7 +88,7 @@ ratio = n:multi "/" d:multi
 
 statement = items
 
-items = n:(repeat / sound_index / sound_event / list_operation / subdivision / list / replist / item / cycle)+
+items = n:(repeat / arpeggio / sound_index / sound_event / list_operation / subdivision / list / replist / item / cycle)+
 { return n.filter(a => a) }
 
 numeric_param = ws / multi / random / random_between / num_cycle / eval_param
@@ -188,6 +188,11 @@ pitch = oct:octave? dur:duration? add:accidentals? val:(int / random / random_be
 accidentals = acc:("#" / "b")+
 {
   return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
+}
+
+arpeggio = c:(chord / namedChord / romans) "@" l:list
+{
+  return build(types.Arpeggio, {chord: c, indexes: l})
 }
 
 chord = left:pitch right:pitch+ inv:(invert)?
