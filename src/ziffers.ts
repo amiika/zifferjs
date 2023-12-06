@@ -2,7 +2,7 @@ import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { voiceLead } from './scale.ts';
-import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio } from './types.ts';
+import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
 import { deepClone, seededRandom } from './utils.ts';
 import { rsystem } from './rules.ts';
 import { TonnetzSpaces, enneaCycles, explorativeTransform, hexaCycles, octaCycles } from './tonnetz.ts';
@@ -277,20 +277,15 @@ export class Ziffers {
         return this;
     }
 
-    arpeggio(indexes: string|number[]): Ziffers {
-        if(typeof indexes === "string") {
-            const parsedEvents = parseZiffers(indexes, this.options);
-            const pitches = this.evaluate(parsedEvents);
-            indexes = pitches.map((item: ZEvent) => {
-                if(item instanceof Pitch) {
-                    return item.pitch as number;
-                }
-                return undefined;
-            }).filter((item: number|undefined) => item !== undefined) as number[];
-        }
+    arpeggio(indexes: string|List|number[]|number): Ziffers {
+        if(typeof indexes === "number") indexes = [indexes];
+        const options = {...DEFAULT_OPTIONS, ...this.options};
         const arpeggiated = this.evaluated.map((item: ZEvent) => {
             if(item instanceof Chord) {
-                return new Arpeggio({chord: item, indexes: indexes} as object).evaluate();
+                if(typeof indexes === "string") {
+                    indexes = new List({items: parseZiffers(indexes, options)} as object);
+                }
+                return new Arpeggio({chord: item, indexes: indexes} as object).evaluate(options);
             }
             return item;
         });

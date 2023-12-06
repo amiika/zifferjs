@@ -613,8 +613,8 @@ export class List extends Base {
         super(data);
         Object.assign(this, data);
     }
-    evaluate(options: ChangingOptions = {}): Pitch[] {
-        return this.items.map((item: Base) => { return item.evaluate(options); }) as unknown as Pitch[];
+    evaluate(options: ChangingOptions = {}): (Pitch|Chord)[] {
+        return this.items.map((item: Base) => { return item.evaluate(options); }) as unknown as (Pitch|Chord)[];
     }
 }
 
@@ -625,18 +625,43 @@ export class Arpeggio extends List {
         super(data);
         Object.assign(this, data);
     }
-    evaluate(options: ChangingOptions = {}): Pitch[] {
-        let numberIndexes: number[] = [];
-        if(this.indexes instanceof List) {
-            const pitchIndexes = this.indexes.evaluate(options);
-            numberIndexes = pitchIndexes.map(p => p.pitch) as unknown as number[];
-        } else {
-            numberIndexes = this.indexes;
-        }
+    evaluate(options: ChangingOptions = {}): (Pitch|Chord)[] {
         const chord = this.chord.evaluate(options);
         const chordLength = chord.pitches.length;
-        const pitches = numberIndexes.map(i => chord.pitches[i % chordLength].evaluate(options));
-        return pitches;
+        if(this.indexes instanceof List) {
+            const pitchIndexes = this.indexes.evaluate(options).filter((item) => item !== undefined);
+            return pitchIndexes.map((idx: Pitch|Chord) => {
+                if(idx instanceof Chord) {
+                    idx.pitches = idx.pitches.map((pc) => {
+                        return chord.pitches[pc.pitch as number % chordLength];
+                    });
+                } else if (idx instanceof Pitch){
+                    const origPitch = chord.pitches[idx.pitch as number % chordLength];
+                    idx.pitch = origPitch.pitch;
+                    idx.octave = origPitch.octave;
+                    idx.add = origPitch.add;
+                    idx.key = origPitch.key;
+                    idx.scaleName = origPitch.scaleName;
+                    idx.parsedScale = origPitch.parsedScale;
+                }
+                return idx.evaluate(options);
+            })
+        } else if(Array.isArray(this.indexes)) {
+            const pitches = this.indexes.map(i => {
+                if(Array.isArray(i)) {
+                    const chordPitches = i.map((index) => {
+                        return chord.pitches[index % chordLength];
+                    }) as unknown as Node[];
+                    return new Chord({pitches: chordPitches, duration: chord.duration}).evaluate(options);
+                } else {
+                    const pitch = chord.pitches[i % chordLength];
+                    return pitch.evaluate(options);
+                }
+            }) as unknown as (Pitch|Chord)[];
+            return pitches;
+        } else {
+            return [];
+        }
     }
 }
 
