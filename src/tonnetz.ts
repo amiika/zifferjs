@@ -605,7 +605,6 @@ export const TRANSFORMATIONS: ObjectTransformations = {
     "s": s,
     "h": h,
     "t": t6,
-
     "p32": p32,
     "p41": p41,
     "lt13": lt13,
@@ -617,6 +616,18 @@ export const TRANSFORMATIONS: ObjectTransformations = {
     "q42": q42,
     "n42": n42,
 };
+
+export const AVAILABLETRANSFORMATIONS: { readonly [key: string]: readonly string[] }  = {
+    "p": ["p", "p32", "p41"],
+    "l": ["l", "lt13", "l41"],
+    "r": ["r", "rt23", "rt42"],
+    "f": ["f"],
+    "n": ["n", "n42"],
+    "s": ["s"],
+    "h": ["h"],
+    "t": ["t"],
+    "q": ["q13", "q42"]
+}
 
 export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord => {
     const transformations = transformation.replace(/[^a-z]/g, '').split("");
@@ -1593,23 +1604,34 @@ export const seventhsTransform = (chord: Tetrachord, transformation: string, ton
     return transformedChord;
 }
 
-export const explorativeSeventhsTransform = (chord: Tetrachord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): Tetrachord => {
+export const explorativeTransform = (chord: number[], transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): number[] => {
     const regxp = new RegExp("([a-z])([0-9]*)", "g");
     let operations = regxp.exec(transformation);
     if (!operations || operations && operations.length < 1) {
         return chord;
     }
-    let transformedChord: Tetrachord = [...chordNotesToModN(chord)];
+    let transformedChord: number[] = [...chordNotesToModN(chord)];
     while (operations != null) {
-        const chordTransformations = getAvailableSeventhsTransformations(transformedChord);
-        if (chordTransformations) {
-            const transformOp = chordTransformations[operations[1]]
-            if (transformOp) {
+        if(transformedChord.length===4) {
+            const chordTransformations = getAvailableSeventhsTransformations(transformedChord as Tetrachord);
+            if (chordTransformations) {
+                const transformOp = chordTransformations[operations[1]]
+                if (transformOp) {
+                    let operationIndex = 0;
+                    if (operations[2].length > 0) operationIndex = parseInt(operations[2]) - 1
+                    operationIndex = safeMod(operationIndex, transformOp.length);
+                    const parsedTransform = transformOp[operationIndex];
+                    transformedChord = SEVENTHSTRANFORMATIONS[parsedTransform](transformedChord as Tetrachord, tonnetz);
+                }
+            }
+        } else if(transformedChord.length===3) {
+            const transformOp = AVAILABLETRANSFORMATIONS[operations[1]]
+            if(transformOp) {
                 let operationIndex = 0;
                 if (operations[2].length > 0) operationIndex = parseInt(operations[2]) - 1
                 operationIndex = safeMod(operationIndex, transformOp.length);
                 const parsedTransform = transformOp[operationIndex];
-                transformedChord = SEVENTHSTRANFORMATIONS[parsedTransform](transformedChord, tonnetz);
+                transformedChord = TRANSFORMATIONS[parsedTransform](transformedChord as TriadChord, tonnetz);
             }
         }
         operations = regxp.exec(transformation);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pattern } from '../ziffers.ts'
-import { boretzRegions, enneaCycles, explorativeSeventhsTransform, getAvailableSeventhsTransformations, hexaCycles, octaCycles, octaTower, octaTowerLeft, octaTowerRight, randomSeventhTransformation, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
+import { boretzRegions, enneaCycles, explorativeTransform, getAvailableSeventhsTransformations, hexaCycles, octaCycles, octaTower, octaTowerLeft, octaTowerRight, randomSeventhTransformation, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
 
 describe('tonnetz-tests', () => {
 
@@ -18,13 +18,11 @@ describe('tonnetz-tests', () => {
         expect(pattern("i7").tonnetz("o p").notes()).toEqual([ [ 60, 64, 67, 70 ], [60,63,67,70] ]);
         expect(pattern("i i7").tonnetz("o").notes()).toEqual([ [ 60, 64, 67 ], [ 60, 64, 67, 70 ] ]);
         expect(pattern("i i7").tonnetz("p").notes()).toEqual([ [ 60, 63, 67 ], [ 60, 63, 67, 70 ] ]);
-        expect(pattern("i i7").tonnetz("p2").notes()).toEqual([ [ 60, 63, 67 ], [ 60, 64, 67, 71 ] ]);
-        expect(pattern("i i7").tonnetz("p3").notes()).toEqual([ [ 60, 63, 67 ], [ 60, 64, 68, 70 ] ]);
+        expect(pattern("i i7").tonnetz("p2").notes()).toEqual([ [ 60, 64, 67 ], [ 60, 64, 67, 71 ] ]);
+        expect(pattern("i i7").tonnetz("p3").notes()).toEqual([ [ 60, 64, 68 ], [ 60, 64, 68, 70 ] ]);
     });
 
     it('tetraTonnetz', () => {
-        // expect(pattern("0246").tetraTonnetz("p").notes()[0]).toEqual([60, 64, 67, 71]); problem with RegExp
-        // expect(pattern("0246").tetraTonnetz("plr").notes()[0]).toEqual([60, 64, 67, 71]);  problem with RegExp
         expect(pattern("i7").notes()[0]).toEqual([60, 64, 67, 70]);
         expect(pattern("i7").tetraTonnetz("p12l13r12").notes()[0]).toEqual([ 61, 63, 67, 70 ]);
         expect(pattern("vi7").tetraTonnetz("p12").notes()[0]).toEqual([60, 64, 67, 69 ]);
@@ -397,14 +395,14 @@ describe('tonnetz-tests', () => {
     })
 
     it('Explorative seventh transforms', () => {
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "l")).toEqual([4, 7, 10, 2]);
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "ll")).toEqual([0, 4, 7, 10]);
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "lp")).toEqual([ 4, 7, 11, 2 ]);
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "lpr")).toEqual([ 7, 11, 2, 5 ]);
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "lpr2")).toEqual([ 1, 4, 7, 11 ]);
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "p")).toEqual([0, 3, 7, 10]);
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "pr")).toEqual([ 3, 7, 10, 1 ]);
-        expect(explorativeSeventhsTransform([0, 4, 7, 10], "prl")).toEqual([ 7, 10, 1, 5 ]);
+        expect(explorativeTransform([0, 4, 7, 10], "l")).toEqual([4, 7, 10, 2]);
+        expect(explorativeTransform([0, 4, 7, 10], "ll")).toEqual([0, 4, 7, 10]);
+        expect(explorativeTransform([0, 4, 7, 10], "lp")).toEqual([ 4, 7, 11, 2 ]);
+        expect(explorativeTransform([0, 4, 7, 10], "lpr")).toEqual([ 7, 11, 2, 5 ]);
+        expect(explorativeTransform([0, 4, 7, 10], "lpr2")).toEqual([ 1, 4, 7, 11 ]);
+        expect(explorativeTransform([0, 4, 7, 10], "p")).toEqual([0, 3, 7, 10]);
+        expect(explorativeTransform([0, 4, 7, 10], "pr")).toEqual([ 3, 7, 10, 1 ]);
+        expect(explorativeTransform([0, 4, 7, 10], "prl")).toEqual([ 7, 10, 1, 5 ]);
     })
 
 });

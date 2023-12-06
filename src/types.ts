@@ -440,12 +440,12 @@ export class Chord extends Event {
         });
     }
 
-    triadTonnetz(transformationInput: string, tonnetz: TonnetzSpaces = [3,4,5]): Chord|Chord[] {
+    triadTonnetz(transformationInput: string, tonnetz: TonnetzSpaces = [3,4,5], transformFunc: Function = transform): Chord|Chord[] {
         const notes = this.notes();
         if(notes.length === 3) {
             const splittedTransforms = transformationInput.split(" ");
             const allTransforms = splittedTransforms.map((transformation) => {
-                const transformedChord = transform(notes as TriadChord, transformation, tonnetz)?.sort((a,b) => a-b);
+                const transformedChord = (transformFunc(notes as TriadChord, transformation, tonnetz) as TriadChord)?.sort((a,b) => a-b);
                 if(!transformedChord) return this;
                 const parsedScale = this.pitches[0].parsedScale!;
                 const chord = new Chord({pitches: transformedChord.map((pc) => {
