@@ -614,7 +614,7 @@ export class List extends Base {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}): (Pitch|Chord)[] {
-        return this.items.map((item: Base) => { return item.evaluate(options); }) as unknown as (Pitch|Chord)[];
+        return this.items.map((item: Base) => { return item.evaluate(options); }).flat(Infinity) as unknown as (Pitch|Chord)[];
     }
 }
 
@@ -705,13 +705,13 @@ export class ListOperation extends Base {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}): Pitch[] {
-        this.left.evaluate(options);
-        this.right.evaluate(options);
+        const left = this.left.evaluate(options).flat(Infinity);
+        const right = this.right.evaluate(options).flat(Infinity);
         // Parse operator from string to javascript operator
         const operator = OPERATORS[this.operation];
         // Create pairs of elements
-        const pairs: [Pitch, Pitch][] = this.right.items.flatMap((r) => {
-            return this.left.items.map((l) => {
+        const pairs: [Pitch, Pitch][] = right.flatMap((r) => {
+            return left.map((l) => {
                 return [r.clone(), l.clone()] as [Pitch, Pitch];
             });
         });

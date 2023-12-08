@@ -1,9 +1,11 @@
+import { safeMod } from "./utils";
+
 export const OPERATORS: {[key: string]: Function} =  {
   "+": (a: number, b: number) => a + b,
   "-": (a: number, b: number) => a - b,
   "*": (a: number, b: number) => a * b,
   "/": (a: number, b: number) => a / b,
-  "%": (a: number, b: number) => a % b,
+  "%": (a: number, b: number) => safeMod(a, b),
   "^": (a: number, b: number) => a ** b,
   "<<": (a: number, b: number) => a << b,
   ">>": (a: number, b: number) => a >> b,

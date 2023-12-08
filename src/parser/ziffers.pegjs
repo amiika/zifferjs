@@ -105,8 +105,13 @@ list = "(" ":"? l:(items) rep:(listrepeat)? ")"
 listrepeat = ":" n:multi
 { return n }
 
-list_operation = a:list b:operation c:list
-{ return build(types.ListOperation,{left: a, operation: b, right: c});  }
+list_operation = a:(list / variable) b:operation c:(list / variable / pitch)
+{
+  if(c instanceof types.Pitch) {
+    c = build(types.List, {items:[c]})
+  }
+  return build(types.ListOperation,{left: a, operation: b, right: c});  
+}
 
 replist = "[:" l:(items) rep:(listrepeat)? "]"
 { return build(types.RepeatList,{items: l, times: rep}) }
@@ -135,7 +140,7 @@ eval_param = "{" v:(multi / random_between) "}"
 
 operation = "+" / "-" / "*" / "/" / "%" / "^" / "|" / "&" / ">>" / "<<"
 
-item = v:(rest / romans / namedChord / namedNote / sound / chord / pitch / octave_change / ws / duration_change / list / eval / bar)
+item = v:(rest / assignment / romans / namedChord / namedNote / variable / sound / chord / pitch / octave_change / ws / duration_change / list / eval / bar)
 { return v }
 
 bar = "|"
@@ -213,6 +218,24 @@ noteName = [A-G][bs]?
   return text()
 }
 
+assignment = name:([A-Z]) "=" i:(item)
+{
+  if(!options["variables"]) {
+    options["variables"] = {}
+  }
+  options["variables"][name] = i
+  return undefined
+}
+
+variable = name:([A-Z])
+{
+  if(name && options["variables"] && options["variables"][name]) {
+    return options["variables"][name]
+  } else {
+    return undefined
+  }
+}
+
 namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName) inv:(invert)?
 { 
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
@@ -232,6 +255,10 @@ romans = val:("iii" / "ii" / "iv" / "i" / "vii" / "vi" / "v") "^"? name:(chordNa
 
 namedNote = name:(noteName)
 {
+  // If name is defined as a variable, return the variable
+  if(name && options["variables"] && options["variables"][name]) {
+    return options["variables"][name]
+  }
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
   const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const pitch = noteNameToPitchClass(name,key,scale);

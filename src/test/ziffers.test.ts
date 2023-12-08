@@ -39,6 +39,9 @@ describe('main-tests', () => {
   it('lists', () => {
     expect(pattern('(0 4 3 5)+(e0 3)').pitches()).toEqual([0, 4, 3, 5, 3, 0, 6, 1]);
     expect(pattern('(0 4 3 5)+(e0 3)').octaves()).toEqual([0, 0, 0, 0, 0, 1, 0, 1]);
+    expect(pattern('(0 1 2 3)*2').pitches()).toEqual([0,2,4,6]);
+    expect(pattern('((1)+1 0)+1').pitches()).toEqual([3,1]);
+    expect(pattern('((1 2 3)+4)').pitches()).toEqual([5,6,0]);
   })
 
   it('loops', () => {
@@ -96,6 +99,15 @@ describe('main-tests', () => {
   it('toString', () => {
     expect(pattern('1 2 3 4').toString()).toEqual('1 2 3 4');
     expect(pattern('1  2 3 4').toString()).toEqual('1 2 3 4');
+  })
+
+  it('variables', () => {
+   expect(pattern('A=(1 2 3) A A').pitches()).toEqual([1,2,3,1,2,3])
+    // A-G are notenames by default
+   expect(pattern('A=(1 2 3) A A B C').pitches()).toEqual([1,2,3,1,2,3,6,0])
+   expect(pattern("A=(0 2 1) A+1").pitches()).toEqual([1,3,2])
+   expect(pattern("A=(0 2 1) B=(1 2 3) B+A").pitches()).toEqual([ 1, 2, 3, 3, 4, 5, 2, 3, 4 ])
+    expect(pattern("A=(0 2) B=(1 A 3) B").pitches()).toEqual([1, 0, 2, 3])
   })
 
 
