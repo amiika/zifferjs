@@ -104,6 +104,14 @@ describe('chord-tests', () => {
     expect(pattern("0246").arpeggio("0 2 1 3").notes()).toEqual([60,67,64,71]);
     expect(pattern("0246").arpeggio([0,2,1,3]).notes()).toEqual([60,67,64,71]);
     expect(pattern("i7").arpeggio([0,2,1,3]).notes()).toEqual([60,67,64,70]);
+
+    const pat = pattern("0246").arpeggio("2 ^2 2");
+    expect(pat.notes()).toEqual([ 67, 79, 67 ]);
+
+    const pat2 = pattern("0246").arpeggio("2 ^ 2 2");
+    expect(pat2.notes()).toEqual([67, 79, 79]);
+
+    expect(pattern("10",{"scale": "minor"}).arpeggio([1]).collect("scaleName")).toEqual(["minor"]);
   })
 
 

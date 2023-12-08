@@ -51,3 +51,22 @@ export const safeMod = (value: number, n: number) => {
   if(value === 0 || n === 0) return 0;
   return ((value % n) + n) % n;
 }
+
+export function filterObject(
+  obj: Record<string, any>|undefined,
+  filter: string[],
+  rename: Record<string, string> = {},
+): Record<string, any> {
+  /*
+   * Filter certain keys from object
+   *
+   * @param {Record<string, any>} obj - Object to filter
+   * @param {string[]} filter - Keys to filter
+   * @returns {object} Filtered object
+   *
+   */
+  if(obj === undefined) return {};
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => filter.includes(key)).map(([key, value]) => [rename[key] || key, value])
+  );
+}

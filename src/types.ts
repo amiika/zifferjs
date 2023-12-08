@@ -626,25 +626,31 @@ export class Arpeggio extends List {
         Object.assign(this, data);
     }
     evaluate(options: ChangingOptions = {}): (Pitch|Chord)[] {
+        
         const chord = this.chord.evaluate(options);
         const chordLength = chord.pitches.length;
         if(this.indexes instanceof List) {
-            const pitchIndexes = this.indexes.evaluate(options).filter((item) => item !== undefined);
+            const pitchIndexes = this.indexes.evaluate(deepClone(options)).filter((item) => item !== undefined);
             return pitchIndexes.map((idx: Pitch|Chord) => {
                 if(idx instanceof Chord) {
-                    idx.pitches = idx.pitches.map((pc) => {
+                    const dupChord = idx.clone() as Chord;
+                    dupChord.pitches = dupChord.pitches.map((pc) => {
                         return chord.pitches[pc.pitch as number % chordLength];
                     });
+                    return dupChord.evaluate(options);
                 } else if (idx instanceof Pitch){
                     const origPitch = chord.pitches[idx.pitch as number % chordLength];
-                    idx.pitch = origPitch.pitch;
-                    idx.octave = origPitch.octave;
-                    idx.add = origPitch.add;
-                    idx.key = origPitch.key;
-                    idx.scaleName = origPitch.scaleName;
-                    idx.parsedScale = origPitch.parsedScale;
+                    const dupPitch = idx.clone() as Pitch;
+                    dupPitch.pitch = origPitch.pitch;
+                    dupPitch.octave = (dupPitch.octave||0)+(origPitch.octave||0);
+                    dupPitch.add = (dupPitch.add||0)+(origPitch.add||0);
+                    dupPitch.key = origPitch.key;
+                    dupPitch.scaleName = origPitch.scaleName;
+                    dupPitch.parsedScale = origPitch.parsedScale;
+                    
+                    return dupPitch.evaluate(options);
                 }
-                return idx.evaluate(options);
+                return idx;
             })
         } else if(Array.isArray(this.indexes)) {
             const pitches = this.indexes.map(i => {

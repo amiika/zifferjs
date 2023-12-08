@@ -21,6 +21,9 @@ describe('main-tests', () => {
     expect(pattern('0 ^0').octaves()).toEqual([0,1]);
     expect(pattern('0 _0').octaves()).toEqual([0,-1]);
     expect(pattern('0 7').octaves()).toEqual([0,1]);
+    const pat = pattern('^ 2');
+    pat.next(); pat.next(); pat.next(); pat.next();
+    expect((pat.next() as Pitch).octave).toEqual(1);
   })
 
   it('repeats', () => {
