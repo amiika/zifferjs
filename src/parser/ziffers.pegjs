@@ -218,12 +218,12 @@ noteName = [A-G][bs]?
   return text()
 }
 
-assignment = name:([A-Z]) "=" i:(item)
+assignment = name:([A-Z]) op:("="/"~") i:(item)
 {
   if(!options["variables"]) {
     options["variables"] = {}
   }
-  options["variables"][name] = i
+  options["variables"][name] = (op === "=" ? i.prevaluate() : i);
   return undefined
 }
 

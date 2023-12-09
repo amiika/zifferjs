@@ -105,6 +105,10 @@ export abstract class Base {
     evaluate(options: ChangingOptions = {}): Base|Base[]|undefined {
         return this;
     }
+    // @ts-ignore
+    prevaluate(options: ChangingOptions = {}): Base {
+        return this;
+    }
     evaluateValue(): any {
         return this.text;
     }
@@ -271,6 +275,13 @@ export class Pitch extends Event {
             clone.soundIndex = clone.soundIndex.evaluateValue();
         }
         return clone;
+    }
+
+    prevaluate() {
+        if(this.pitch instanceof RandomPitch) {
+            this.pitch = this.pitch.evaluateValue();
+        }
+        return this;
     }
 
     collect<K extends keyof Pitch>(name: K): Pitch[K] {
@@ -546,6 +557,7 @@ export class RandomPitch extends Pitch {
     randomSeed?: string;
     seededRandom?: Function;
     random: Function;
+    randomize: boolean = true;
 
     constructor(data: Partial<Node>) {
         super(data);
@@ -615,6 +627,10 @@ export class List extends Base {
     }
     evaluate(options: ChangingOptions = {}): (Pitch|Chord)[] {
         return this.items.map((item: Base) => { return item.evaluate(options); }).flat(Infinity) as unknown as (Pitch|Chord)[];
+    }
+    prevaluate(): List {
+       this.items.forEach((item) => item.prevaluate());
+       return this;
     }
 }
 

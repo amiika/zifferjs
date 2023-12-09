@@ -110,7 +110,10 @@ describe('main-tests', () => {
    expect(pattern('A=(1 2 3) A A B C').pitches()).toEqual([1,2,3,1,2,3,6,0])
    expect(pattern("A=(0 2 1) A+1").pitches()).toEqual([1,3,2])
    expect(pattern("A=(0 2 1) B=(1 2 3) B+A").pitches()).toEqual([ 1, 2, 3, 3, 4, 5, 2, 3, 4 ])
-    expect(pattern("A=(0 2) B=(1 A 3) B").pitches()).toEqual([1, 0, 2, 3])
+   expect(pattern("A=(0 2) B=(1 A 3) B").pitches()).toEqual([1, 0, 2, 3])
+   // All values in the list should be the same value using allEqual
+   expect(pattern("A=((1,5)) A A A A").pitches()).toSatisfy((pitches: number[]) => pitches.every(pitch => pitch === pitches[0]));
+   expect(pattern("A~((1,5)) A A A A").pitches()).toSatisfy((pitches: number[]) => !pitches.every(pitch => pitch === pitches[0]));
   })
 
 
