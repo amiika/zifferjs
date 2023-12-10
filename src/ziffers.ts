@@ -359,11 +359,11 @@ export class Ziffers {
         return this;
     }
 
-    hexaCycle(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+    hexaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
-                    const chordCycle = hexaCycles(item.pitch as number, tonnetz);
+                    const chordCycle = hexaCycles(item.pitch as number, tonnetz, repeats);
                     const zCycle = chordCycle.map((chord: number[]) => {
                         return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration, octave: item.octave});
                     });
@@ -375,11 +375,11 @@ export class Ziffers {
         return this;
     }
 
-    octaCycle(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+    octaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 4): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
-                    const chordCycle = octaCycles(item.pitch as number, tonnetz);
+                    const chordCycle = octaCycles(item.pitch as number, tonnetz, repeats);
                     const zCycle = chordCycle.map((chord: number[]) => {
                         return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration, octave: item.octave});
                     });
@@ -391,11 +391,11 @@ export class Ziffers {
         return this;
     }
 
-    enneaCycle(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+    enneaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
-                    const chordCycle = enneaCycles(item.pitch as number, tonnetz);
+                    const chordCycle = enneaCycles(item.pitch as number, tonnetz, repeats);
                     const zCycle = chordCycle.map((chord: number[]) => {
                         return Chord.fromPitchClassArray(chord, (item.key || "C4"), (item.scaleName || "MAJOR")).evaluate({duration: item.duration, octave: item.octave});
                     });

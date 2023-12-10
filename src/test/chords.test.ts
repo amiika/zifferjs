@@ -57,6 +57,8 @@ describe('chord-tests', () => {
     expect(pattern('i i%-1').notes()).toEqual([[60,64,67],[55,64,60]]);
     expect(pattern('024 024%-1').notes()).toEqual([[60,64,67],[55,64,60]]);
     expect(pattern('Cmaj Cmaj%-1').notes()).toEqual([[60,64,67],[55,64,60]]);
+    expect(pattern("i v").notes()).toEqual([ [ 60, 64, 67 ], [ 67, 71, 74 ] ]);
+    expect(pattern("i v%-1").notes()).toEqual([ [ 60, 64, 67 ], [ 62, 71, 67 ] ]);
   })
 
   it('voiceLeading', () => {

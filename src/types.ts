@@ -426,13 +426,16 @@ export class Chord extends Event {
         return this;
     }
     invert(value: number, options: ChangingOptions = {}): Pitch[] {
+        if(value===0) return this.pitches;
         const newPcs = value < 0 ? this.pitches.reverse() : this.pitches;
         for (let i = 0; i < Math.abs(value); i++) {
             const pc = newPcs[i % newPcs.length];
-            if (!pc.octave) pc.octave = 0;
-            pc.octave += value <= 0 ? -1 : 1;
+            if (!pc.pitchOctave) pc.pitchOctave = pc.octave||0;
+            pc.pitchOctave += (value <= 0 ? -1 : 1);
+            pc.octave = pc.pitchOctave;
         }
-        return newPcs.map((pitch) => pitch.evaluate(options));
+        const a = newPcs.map((pitch) => pitch.evaluate(options));
+        return a;
     }
 
     voiceLeadFromNotes(leadedNotes: number[], options: NodeOptions): void {
