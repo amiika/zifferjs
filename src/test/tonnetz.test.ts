@@ -29,9 +29,9 @@ describe('tonnetz-tests', () => {
     });
 
     it('hexaCycle', () => {
-        expect(pattern("0").hexaCycle().notes()).toEqual([[60, 67, 72], [60, 65, 72], [74, 60, 65], [74, 79, 65], [67, 74, 79], [67, 72, 79]]);
-        expect(pattern("0").octaCycle().notes()).toEqual([[60, 67, 72], [60, 65, 72], [65, 72, 77], [65, 71, 77], [71, 77, 62], [71, 76, 62], [76, 62, 67], [76, 60, 67]]);
-        expect(pattern("0").enneaCycle().notes()).toEqual([[60, 67, 72, 77], [60, 65, 72, 77], [60, 65, 71, 77], [74, 60, 65, 71], [74, 79, 65, 71], [74, 79, 64, 71], [67, 74, 79, 64], [67, 72, 79, 64], [67, 72, 77, 64]]);
+        expect(pattern("0").scale("major").hexaCycle().notes()).toEqual([[60, 67, 72], [60, 65, 72], [74, 60, 65], [74, 79, 65], [67, 74, 79], [67, 72, 79]]);
+        expect(pattern("0").scale("major").octaCycle().notes()).toEqual([[60, 67, 72], [60, 65, 72], [65, 72, 77], [65, 71, 77], [71, 77, 62], [71, 76, 62], [76, 62, 67], [76, 60, 67]]);
+        expect(pattern("0").scale("major").enneaCycle().notes()).toEqual([[60, 67, 72, 77], [60, 65, 72, 77], [60, 65, 71, 77], [74, 60, 65, 71], [74, 79, 65, 71], [74, 79, 64, 71], [67, 74, 79, 64], [67, 72, 79, 64], [67, 72, 77, 64]]);
     });
 
     it('tonnetzTransformation "p,r,l" and involutions to "normal form"', () => {
