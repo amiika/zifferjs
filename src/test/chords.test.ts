@@ -36,9 +36,9 @@ describe('chord-tests', () => {
 
   it('namedChords', () => {
     expect(pattern('Cmaj').notes()).toEqual([[60,64,67]]);
-    expect(pattern('Cmaj').pitches()).toEqual([[0,2,4]]);
+    expect(pattern('Cmaj').pitches()).toEqual([[0,4,7]]);
     expect(pattern('Cmaj', {scale: "CHROMATIC"}).pitches()).toEqual([[0,4,7]]);
-    expect(pattern('Cmaj Cmin D7 Edim').pitches()).toEqual([[0,2,4],[0,2,4],[0,2,4,5],[0,1,3]]);
+    expect(pattern('Cmaj Cmin D7 Edim').pitches()).toEqual([[0,4,7],[0,3,7],[0,4,7,10],[0,3,6]]);
     expect(pattern('Cmaj Cmin D7 Edim').notes()).toEqual([[60, 64, 67],[60, 63, 67],[62, 66, 69, 72],[64, 67, 70]]);
     expect(pattern('Cmaj Cmin').notes()).toEqual([[60,64,67],[60,63,67]]);
   })

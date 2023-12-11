@@ -616,9 +616,9 @@ function peg$parse(input, options) {
 
   var peg$f46 = function(oct, dur, root, name, inv) { 
 // @ts-ignore
-  const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
+  const scale = "CHROMATIC"
 // @ts-ignore
-  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
+  const key = root;
 // @ts-ignore
   const pitches = getPitchesFromNamedChord(name, root, scale, oct, dur);
 // @ts-ignore
@@ -5083,6 +5083,11 @@ peg$parsearpeggio() {
       if (s1 === peg$FAILED) {
 // @ts-ignore
         s1 = peg$parseromans();
+// @ts-ignore
+        if (s1 === peg$FAILED) {
+// @ts-ignore
+          s1 = peg$parselist();
+        }
       }
     }
 // @ts-ignore

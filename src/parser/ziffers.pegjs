@@ -195,7 +195,7 @@ accidentals = acc:("#" / "b")+
   return acc.reduce((acc, cur) => { return acc+(cur === "#" ? 1 : -1) },0)
 }
 
-arpeggio = c:(chord / namedChord / romans) "@" l:list
+arpeggio = c:(chord / namedChord / romans / list) "@" l:list
 {
   return build(types.Arpeggio, {chord: c, indexes: l})
 }
@@ -238,8 +238,8 @@ variable = name:([A-Z])
 
 namedChord = oct:octave? dur:duration? root:(noteName) "^"? name:(chordName) inv:(invert)?
 { 
-  const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
-  const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
+  const scale = "CHROMATIC"
+  const key = root;
   const pitches = getPitchesFromNamedChord(name, root, scale, oct, dur);
   const duration = dur ? dur : options.nodeOptions.duration;
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
