@@ -1,7 +1,7 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
-import { voiceLead } from './scale.ts';
+import { centsToSemitones, ratioToCents, ratiosToSemitones, voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
 import { deepClone, seededRandom, filterObject } from './utils.ts';
 import { rsystem } from './rules.ts';
@@ -153,7 +153,22 @@ export class Ziffers {
         return this;
     }
 
-    scale(scale: string) {
+    scale(scale: string|number[]) {
+        this.applyOptions({scale: scale});
+        this.scaleApplied = true;
+        return this;
+    }
+    semitones = this.scale;
+    
+    cents(cents: number[]) {
+        const scale = centsToSemitones(cents);
+        this.applyOptions({scale: scale});
+        this.scaleApplied = true;
+        return this;
+    }
+
+    ratios(ratios: number[]) {
+        const scale = ratiosToSemitones(ratios);
         this.applyOptions({scale: scale});
         this.scaleApplied = true;
         return this;

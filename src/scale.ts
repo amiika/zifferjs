@@ -127,6 +127,14 @@ export const centsToSemitones = (cents: number[]): number[] => {
   return semitoneScale;
 }
 
+export const ratiosToCents = (ratios: number[]): number[] => {
+  return ratios.map(ratioToCents);
+}
+
+export const ratiosToSemitones = (ratios: number[]): number[] => {
+  return centsToSemitones(ratiosToCents(ratios));
+}
+
 export const scaleLength = (scale: string|number[]): number => {
   return typeof scale === 'string' ? getScale(scale).length : scale.length;
 }

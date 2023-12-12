@@ -38,7 +38,7 @@ export type NodeOptions = {
 export type ChangingOptions = {
     octave?: number;
     duration?: number;
-    scale?: string;
+    scale?: string|number[];
     key?: string;
     subdivisions?: boolean;
     inversion?: number;
