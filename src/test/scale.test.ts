@@ -1,12 +1,36 @@
 import { describe, expect, it } from 'vitest'
 import { SCALES, SCALE_NAMES, getScale } from '../defaults.ts'
-import { getAllScaleNotes, getPrimes, midiToPitchClass, midiToTpc, nearScales, normalForm, numberToScale, safeScale, scaleToNumber, scaleToSteps, stepsToScale } from '../scale.ts'
+import { edoToCents, getAllScaleNotes, getPrimes, midiToPitchClass, midiToTpc, nearScales, normalForm, numberToScale, safeScale, scaleToNumber, scaleToSteps, stepsToScale } from '../scale.ts'
 import { parse as parseScale } from '../parser/scalaParser.ts'
 import { pattern } from '../ziffers.ts'
 
 const f = String.raw;
 
 describe('scale-tests', () => {
+
+
+  it('scales', () => {
+    expect(getScale("pentatonic")).toEqual([2,2,3,2,3]);
+    expect(pattern("6 7").scale("pentatonic").notes()).toEqual([74, 76]);
+    expect(pattern("6 8").scale("pentatonic").notes()).toEqual([74, 79]);
+    expect(pattern("0 1 2 3 4 5 6 7").scale("pentatonic").octaves()).toEqual([0,0,0,0,0,1,1,1]);
+    expect(pattern("0 1 2 3 4 5 6 7").scale("pentatonic").pitches()).toEqual([0,1,2,3,4,0,1,2]);
+    expect(pattern("0 1 2 3 4 5 6 7").scale("pentatonic").originalPitches()).toEqual([0,1,2,3,4,5,6,7]);
+   
+    expect(edoToCents(12, safeScale("chromatic"))).toEqual([0,100,200,300,400,500,600,700,800,900,1000,1100,1200]);
+    expect(edoToCents(12)).toEqual([0,100,200,300,400,500,600,700,800,900,1000,1100,1200]);
+    expect(edoToCents(12, "major")).toEqual([0,200,400,500,700,900,1100,1200]);
+    expect(edoToCents(11)).toEqual([0,109.09090909090908,218.18181818181816,327.27272727272725,436.3636363636363,545.4545454545454,654.5454545454545,763.6363636363635,872.7272727272726,981.8181818181818,1090.9090909090908,1199.9999999999998]);
+    expect(edoToCents(11, "minor")).toEqual([0,218.18181818181816, 327.27272727272725, 545.4545454545454, 763.6363636363635, 872.7272727272726, 1090.9090909090908, 1309.090909090909]);
+   
+    expect(pattern("0 1 2 3 4 5 6 7 8 9 {10}").octaves()).toEqual([0,0,0,0,0,0,0,1,1,1,1]);
+    expect(pattern("0 1 2 3 4 5 6 7 8 9 {10}").scale("major").octaves()).toEqual([0,0,0,0,0,0,0,1,1,1,1]);
+    expect(pattern("0 1 2 3 4 5 6 7 8 9 {10}").scale("pentatonic").octaves()).toEqual([0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2]);
+    expect(pattern("0 1 2 3 4 5 6 7 8 9 {10}", {scale: "chromatic"}).octaves()).toEqual([0,0,0,0,0,0,0,0,0,0,0]);
+    expect(pattern("0 1 2 3 4 5 6 7 8 9 {10 11}").scale("chromatic").octaves()).toEqual([0,0,0,0,0,0,0,0,0,0,0,0]);
+    expect(pattern("0 1 2 3 4 5 6 7 8 9 {10 11}").edo(11).octaves()).toEqual([0,0,0,0,0,0,0,0,0,0,0,1]);
+    expect(pattern("0 1 2 3 4 5 6 7 8 9").scale([1,1]).octaves()).toEqual([0,0,1,1,2,2,3,3,4,4]);
+  })
 
   it('getters', () => {
     expect(getScale("chromatic")).toEqual([1,1,1,1,1,1,1,1,1,1,1,1]);

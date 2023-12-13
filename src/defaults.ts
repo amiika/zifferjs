@@ -2047,7 +2047,7 @@ export const SCALE_NAMES: { [key: string]: string[]} = {
 		2997: ["Major Bebop","Altered Mixolydian","Bebop Major"],
 		2999: ["Chromatic and Permuted Diatonic Dorian mixed"],
 		3003: ["Genus Chromaticum","Tcherepnin Nonatonic mode 1","Augmented-9"],
-		3037: ["nine tone scale"],
+		3037: ["Nine tone scale"],
 		3055: ["Messiaen mode 7","seventh mode of limited transposition"],
 		3069: ["Maqam Shawq Afza"],
 		3185: ["Messiaen mode 5 inverse"],

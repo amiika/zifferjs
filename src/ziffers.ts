@@ -1,7 +1,7 @@
 import { parse as parseZiffers } from './parser/ziffersParser.ts';
 import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
-import { centsToSemitones, ratioToCents, ratiosToSemitones, voiceLead } from './scale.ts';
+import { centsToSemitones, edoToCents, ratiosToSemitones, voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
 import { deepClone, seededRandom, filterObject } from './utils.ts';
 import { rsystem } from './rules.ts';
@@ -106,6 +106,12 @@ export class Ziffers {
         })
     }
 
+    originalPitches(): (number|undefined|number[])[] {
+        return this.evaluated.map((item: ZEvent) => {
+            return item.collect("originalPitch");
+        })
+    }
+
     notes(): (number|undefined|number[])[] {
         return this.evaluated.map((item: ZEvent) => {
             return item.collect("note");
@@ -159,7 +165,7 @@ export class Ziffers {
         return this;
     }
     semitones = this.scale;
-    
+
     cents(cents: number[]) {
         const scale = centsToSemitones(cents);
         this.applyOptions({scale: scale});
@@ -170,6 +176,14 @@ export class Ziffers {
     ratios(ratios: number[]) {
         const scale = ratiosToSemitones(ratios);
         this.applyOptions({scale: scale});
+        this.scaleApplied = true;
+        return this;
+    }
+
+    edo(edo: number, intervals: string|number[] = [1,1,1,1,1,1,1,1,1,1,1]) {
+        const scaleInCents = edoToCents(edo, intervals);
+        const semitones = centsToSemitones(scaleInCents);
+        this.applyOptions({scale: semitones});
         this.scaleApplied = true;
         return this;
     }

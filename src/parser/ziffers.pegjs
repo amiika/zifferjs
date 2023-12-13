@@ -129,7 +129,7 @@ eval_op = "("? eval_item operation eval_items ")"?
 
 eval = "{" values:(eval_items / ws)+ "}"
 { 
-  var pitches = values.filter(a => a).map(val => { return build(types.Pitch, {pitch: val[0]}, val.toString())});
+  var pitches = values.filter(a => a).map(val => { return build(types.Pitch, {originalPitch: val[0], pitch: val[0]}, val.toString())});
   return build(types.List,{items: pitches});
 }
 
@@ -187,7 +187,7 @@ rest = d:rest_duration? "r" ![a-zA-Z0-9]
 pitch = oct:octave? dur:duration? add:accidentals? val:(int / random / random_between / eval_param)
 {
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
-  return build(types.Pitch, {duration: dur, pitch: val, pitchOctave: octave, add: add})
+  return build(types.Pitch, {duration: dur, pitch: val, originalPitch: val, addedOctave: octave, add: add})
 }
 
 accidentals = acc:("#" / "b")+
@@ -262,6 +262,6 @@ namedNote = name:(noteName)
   const scale = options.nodeOptions.scaleName ? options.nodeOptions.scaleName : "MAJOR";
   const key = options.nodeOptions.key ? options.nodeOptions.key : "C";
   const pitch = noteNameToPitchClass(name,key,scale);
-  return build(types.Pitch, {pitch: pitch.pc, add: pitch.add, scaleName: scale, key: key})
+  return build(types.Pitch, {pitch: pitch.pc, originalPitch: pitch.pc, add: pitch.add, scaleName: scale, key: key})
 }
 

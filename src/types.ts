@@ -1,6 +1,6 @@
 import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, midiToPitchClass, namedChordFromDegree, noteNameToMidi, getScaleNotes, getChordFromScale } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale, DEFAULT_DURATION } from './defaults.ts';
-import { deepClone } from './utils.ts';
+import { deepClone, safeMod } from './utils.ts';
 import { Tetrachord, TonnetzSpaces, TriadChord, chordFromTonnetz, seventhsTransform, transform } from './tonnetz.ts';
 
 export const globalOptionKeys: string[] = ["retrograde"];
@@ -53,6 +53,7 @@ export type Node = NodeOptions & {
     location: Location;
     // Pitch
     pitch?: number;
+    originalPitch?: number;
     freq?: number;
     note?: number;
     bend?: number;
@@ -209,6 +210,7 @@ export class Pitch extends Event {
     note?: number;
     octave?: number;
     pitchOctave?: number;
+    addedOctave?: number;
     bend?: number;
     key?: string|number;
     parsedScale?: number[];
@@ -231,11 +233,11 @@ export class Pitch extends Event {
         if(options.scale) {
             if(typeof options.scale === "string" && clone.scaleName !== options.scale) {
                 clone.scaleName = options.scale;
-                if(clone.originalPitch) {
-                    clone.pitch = clone.originalPitch;
-                    clone.pitchOctave = 0;
-                    clone.octave = 0;
-                }
+            }
+            if(clone.originalPitch) {
+                clone.pitch = clone.originalPitch;
+                clone.octave = 0;
+                clone.pitchOctave = 0;
             }
             clone.parsedScale = safeScale(options.scale) as number[];
         }
@@ -257,13 +259,17 @@ export class Pitch extends Event {
         if(clone.pitch || clone.pitch === 0) {
             if(clone.pitch instanceof RandomPitch) {
                 clone.pitch = clone.pitch.evaluateValue();
-            }
-            if(clone.parsedScale && clone.pitch >= clone.parsedScale.length) {
                 clone.originalPitch = clone.pitch;
-                clone.pitchOctave = Math.floor(clone.pitch / clone.parsedScale.length);
-                clone.pitch = clone.pitch % clone.parsedScale.length;
+            } else if(!clone.originalPitch) {
+                clone.originalPitch = clone.pitch;
             }
-            if(options.octave || clone.pitchOctave) clone.octave = (options.octave || 0) + (clone.pitchOctave || 0);
+
+            if(clone.parsedScale && clone.originalPitch >= clone.parsedScale.length) {
+                clone.pitchOctave = Math.floor(clone.originalPitch / clone.parsedScale.length);
+                clone.pitch = safeMod(clone.originalPitch, clone.parsedScale.length);
+            }
+
+            if(options.octave || clone.pitchOctave || clone.addedOctave) clone.octave = (options.octave || 0) + (clone.pitchOctave || 0) + (clone.addedOctave || 0);
             const [note,bend] = noteFromPc(clone.key!, (clone.pitch as number)!, clone.parsedScale!, clone.octave!);
             clone.note = clone.add ? note+clone.add : note;
             clone.freq = midiToFreq(clone.note);
@@ -280,6 +286,7 @@ export class Pitch extends Event {
     prevaluate() {
         if(this.pitch instanceof RandomPitch) {
             this.pitch = this.pitch.evaluateValue();
+            this.originalPitch = this.pitch;
         }
         return this;
     }
@@ -314,7 +321,8 @@ export class Pitch extends Event {
                 key: this.key, 
                 parsedScale: this.parsedScale, 
                 scaleName: this.scaleName, 
-                pitch: pitchClass.pc, 
+                pitch: pitchClass.pc,
+                originalPitch: pitchClass.pc,
                 octave: (this.octave||0)+pitchClass.octave, 
                 add: pitchClass.add, 
                 text: pitchClass.text
@@ -385,7 +393,7 @@ export class Chord extends Event {
     }
     static fromPitchClassArray(pcs: number[], key: string|number, scaleName: string): Chord {
         const pitches = pcs.map((pc) => {
-            return new Pitch({pitch: pc, key: key, scaleName: scaleName, parsedScale: safeScale(scaleName)}) as unknown as Node;
+            return new Pitch({originalPitch: pc, pitch: pc, key: key, scaleName: scaleName, parsedScale: safeScale(scaleName)}) as unknown as Node;
         });
         return new Chord({pitches: pitches});
     }
@@ -430,9 +438,9 @@ export class Chord extends Event {
         const newPcs = value < 0 ? this.pitches.reverse() : this.pitches;
         for (let i = 0; i < Math.abs(value); i++) {
             const pc = newPcs[i % newPcs.length];
-            if (!pc.pitchOctave) pc.pitchOctave = pc.octave||0;
-            pc.pitchOctave += (value <= 0 ? -1 : 1);
-            pc.octave = pc.pitchOctave;
+            if (!pc.addedOctave) pc.addedOctave = 0;
+            pc.addedOctave += (value <= 0 ? -1 : 1);
+            //pc.octave = pc.pitchOctave;
         }
         const a = newPcs.map((pitch) => pitch.evaluate(options));
         return a;
@@ -464,7 +472,7 @@ export class Chord extends Event {
                 const parsedScale = this.pitches[0].parsedScale!;
                 const chord = new Chord({pitches: transformedChord.map((pc) => {
                     const newPC = midiToPitchClass(pc, this.key, this.scaleName);
-                    const newPitch = new Pitch({pitch: newPC.pc, add: newPC.add, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                    const newPitch = new Pitch({originalPitch: newPC.pc, pitch: newPC.pc, add: newPC.add, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
                     return newPitch as unknown as Node;
                 })});
                 return chord.evaluate();
@@ -483,7 +491,7 @@ export class Chord extends Event {
                 const parsedScale = this.pitches[0].parsedScale!;
                 const chord = new Chord({pitches: transformedChord.map((pc) => {
                     const newPC = midiToPitchClass(pc, this.key, this.scaleName);
-                    const newPitch = new Pitch({pitch: newPC.pc, add: newPC.add, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
+                    const newPitch = new Pitch({originalPitch: newPC.pc, pitch: newPC.pc, add: newPC.add, duration: this.duration, key: this.key, scaleName: this.scaleName, parsedScale: parsedScale});
                     return newPitch as unknown as Node;
                 })});
                 return chord.evaluate();
@@ -523,7 +531,7 @@ export class Roman extends Chord {
             });
             dup.pitches = pitchObj.map((pc) => {
                 const pitchOct = octave+pc.octave;
-                return new Pitch({pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add, duration: this.duration}).evaluate(options);
+                return new Pitch({originalPitch: pc.pc, pitch: pc.pc, octave: pitchOct, key: key, parsedScale: parsedScale, add: pc.add, duration: this.duration}).evaluate(options);
             });
         } else {
             const scaleNotes: number[] = getScaleNotes(scale, 0, 7);
@@ -532,7 +540,7 @@ export class Roman extends Chord {
                 return scaleNotes.indexOf(note);
             });
             dup.pitches = pcs.map((pc) => {
-                return new Pitch({pitch: pc, octave: octave, key: key, parsedScale: parsedScale, duration: this.duration}).evaluate(options);
+                return new Pitch({originalPitch: pc, pitch: pc, octave: octave, key: key, parsedScale: parsedScale, duration: this.duration}).evaluate(options);
             });
         }
         if(options.inversion || dup.inversion) {
@@ -575,9 +583,8 @@ export class RandomPitch extends Pitch {
     }
     evaluate(options: ChangingOptions = {}): Pitch {
         this.pitch = this.evaluateValue();
-        const pitch = new Pitch(this as object).evaluate(options);
-        pitch.type = "Pitch";
-        pitch.text = pitch.pitch.toString();
+        this.originalPitch = this.pitch;
+        const pitch = new Pitch({pitch: this.pitch, originalPitch: this.pitch, text: this.pitch.toString()}).evaluate(options);
         return pitch;
     }
     evaluateValue(): number {
@@ -665,7 +672,7 @@ export class Arpeggio extends List {
                         const origPitch = chord.pitches[idx.pitch as number % chordLength];
                         const dupPitch = idx.clone() as Pitch;
                         dupPitch.pitch = origPitch.pitch;
-                        dupPitch.octave = (dupPitch.octave||0)+(origPitch.octave||0);
+                        dupPitch.pitchOctave = origPitch.pitchOctave;
                         dupPitch.add = (dupPitch.add||0)+(origPitch.add||0);
                         dupPitch.key = origPitch.key;
                         dupPitch.scaleName = origPitch.scaleName;
@@ -741,12 +748,13 @@ export class ListOperation extends Base {
         // Create pairs of elements
         const pairs: [Pitch, Pitch][] = right.flatMap((r) => {
             return left.map((l) => {
-                return [r.clone(), l.clone()] as [Pitch, Pitch];
+                return [r.clone().evaluate(options), l.clone().evaluate(options)] as [Pitch, Pitch];
             });
         });
         // Do pairwise operations
         const result: Pitch[] = pairs.map((p: [Pitch, Pitch]) => {
-            p[0].pitch = operator(p[0].pitch, p[1].pitch);
+            p[0].pitch = operator(p[0].originalPitch, p[1].originalPitch);
+            p[0].originalPitch = p[0].pitch as number;
             return p[0].evaluate(options);
         });
         return result;

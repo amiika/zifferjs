@@ -4,6 +4,57 @@ import { parse as parseScala } from "./parser/scalaParser";
 import { Pitch } from "./types";
 import { safeMod } from "./utils";
 
+// TODO: Change parameter to this type
+export type PitchType = {
+  pitch?: number,
+  originalPitch?: number,
+  octave?: number,
+  addedOctave?: number,
+  pitchOctave?: number,
+  modifier?: number,
+  key?: number,
+  scaleName?: string,
+  parsedScale?: number[],
+  degrees?: boolean
+}
+
+export const resolvePitchClass = (
+  root: number | string,
+  pitchClass: number,
+  scale: string | Array<number>,
+  octave: number = 0,
+  modifier: number = 0,
+  degrees: boolean = false
+): {note: number, pitch: number, octave: number, pitchOctave: number, pitchBend?: number, modifier: number, root: number, parsedScale: number[]} => {
+  // Initialization
+  pitchClass = degrees && pitchClass > 0 ? pitchClass - 1 : pitchClass;
+  root = typeof root === 'string' ? noteNameToMidi(root) : root;
+  const intervals = typeof scale === 'string' ? safeScale(scale) : scale;
+  const scale_length = intervals.length;
+  let pitchOctave = 0;
+
+  // Resolve pitch classes to the scale and calculate octave
+  if (pitchClass >= scale_length || pitchClass < 0) {
+    pitchOctave += Math.floor(pitchClass / scale_length);
+    pitchClass = pitchClass < 0 ? scale_length - (Math.abs(pitchClass) % scale_length) : pitchClass % scale_length;
+    if (pitchClass === scale_length) {
+      pitchClass = 0;
+    }
+  }
+
+  // Computing the result
+  let note = root + intervals.slice(0, pitchClass).reduce((a, b) => a + b, 0);
+  note = note + (octave + pitchOctave) * intervals.reduce((a, b) => a + b, 0) + modifier;
+
+  if (Number.isInteger(note)) {
+    return {note, pitch: pitchClass, octave, pitchOctave: pitchOctave, modifier, root, parsedScale: intervals}    
+  } else {
+    const bend = resolvePitchBend(note);
+    return {note, pitch: pitchClass, octave, pitchOctave: pitchOctave, pitchBend: bend[1], modifier, root, parsedScale: intervals}
+  }
+  
+}
+
 export const noteFromPc = (
     root: number | string,
     pitch_class: number,
@@ -12,32 +63,8 @@ export const noteFromPc = (
     modifier: number = 0,
     degrees: boolean = false
   ): [number, number | undefined] => {
-    // Initialization
-    pitch_class = degrees && pitch_class > 0 ? pitch_class - 1 : pitch_class;
-    root = typeof root === 'string' ? noteNameToMidi(root) : root;
-    const intervals = typeof scale === 'string' ? getScale(scale) : scale;
-    const scale_length = intervals.length;
-  
-    // Resolve pitch classes to the scale and calculate octave
-    if (pitch_class >= scale_length || pitch_class < 0) {
-      octave += Math.floor(pitch_class / scale_length);
-      pitch_class = pitch_class < 0 ? scale_length - (Math.abs(pitch_class) % scale_length) : pitch_class % scale_length;
-      if (pitch_class === scale_length) {
-        pitch_class = 0;
-      }
-    }
-  
-    // Computing the result
-    let note = root + intervals.slice(0, pitch_class).reduce((a, b) => a + b, 0);
-    note = note + octave * intervals.reduce((a, b) => a + b, 0) + modifier;
-  
-    if (Number.isInteger(note)) {
-        return [note, undefined];
-    }
-
-    // Else if the note is a float, we need to resolve the pitch bend
-    return resolvePitchBend(note);
-    
+    const result = resolvePitchClass(root, pitch_class, scale, octave, modifier, degrees);
+    return [result.note, result.pitchBend];
 }
 
 export const noteNameToMidi = (name: string, defaultOctave: number = 4): number => {
@@ -202,6 +229,18 @@ export const safeScale = (scale: string|number|number[]): number[] => {
   }
   // TODO: Check for valid intervals?
   return scale;
+}
+
+export const edoToCents = (edo: number, intervals: string|number[] = new Array(edo).fill(1))  => {
+  intervals = safeScale(intervals);
+  const centsInSemitone = (12 / edo) * 100;
+  const scale = stepsToScale(intervals);
+  return scale.map((pc) => pc * centsInSemitone);
+}
+
+export const edoToSemitones = (edo: number, intervals: string|number[] = new Array(edo).fill(1))  => {
+  const scaleInCents = edoToCents(edo, intervals);
+  return centsToSemitones(scaleInCents);
 }
 
 export const namedChordFromDegree = (

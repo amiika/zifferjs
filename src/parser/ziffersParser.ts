@@ -501,7 +501,7 @@ function peg$parse(input, options) {
 
   var peg$f24 = function(values) { 
 // @ts-ignore
-  var pitches = values.filter(a => a).map(val => { return build(types.Pitch, {pitch: val[0]}, val.toString())});
+  var pitches = values.filter(a => a).map(val => { return build(types.Pitch, {originalPitch: val[0], pitch: val[0]}, val.toString())});
 // @ts-ignore
   return build(types.List,{items: pitches});
 };// @ts-ignore
@@ -559,7 +559,7 @@ function peg$parse(input, options) {
 // @ts-ignore
   const octave = oct ? options.nodeOptions.octave+oct : options.nodeOptions.octave;
 // @ts-ignore
-  return build(types.Pitch, {duration: dur, pitch: val, pitchOctave: octave, add: add})
+  return build(types.Pitch, {duration: dur, pitch: val, originalPitch: val, addedOctave: octave, add: add})
 };// @ts-ignore
 
   var peg$f38 = function(acc) {
@@ -652,7 +652,7 @@ function peg$parse(input, options) {
 // @ts-ignore
   const pitch = noteNameToPitchClass(name,key,scale);
 // @ts-ignore
-  return build(types.Pitch, {pitch: pitch.pc, add: pitch.add, scaleName: scale, key: key})
+  return build(types.Pitch, {pitch: pitch.pc, originalPitch: pitch.pc, add: pitch.add, scaleName: scale, key: key})
 };
 // @ts-ignore
   var peg$currPos = 0;
