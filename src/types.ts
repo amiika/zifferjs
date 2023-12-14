@@ -748,7 +748,7 @@ export class ListOperation extends Base {
         // Create pairs of elements
         const pairs: [Pitch, Pitch][] = right.flatMap((r) => {
             return left.map((l) => {
-                return [r.clone().evaluate(options), l.clone().evaluate(options)] as [Pitch, Pitch];
+                return [l.clone(), r.clone()] as [Pitch, Pitch];
             });
         });
         // Do pairwise operations

@@ -78,8 +78,13 @@ sound_index = e:(sound_event / containers / item) i:(snum)
 snum = ":" n:numeric_param
 { return n }
 
-durchar = [mklpdcwyhnqaefsxtgujzo]
-{ return DEFAULT_DURS[text()]; }
+durchar = c:([mklpdcwyhnqaefsxtgujzo]) d:([.]*)
+{
+  var dots = d ? d.length : 0;
+  var dur = DEFAULT_DURS[c]
+  if(dots>0) return (dur * (2.0-(1.0/(2*dots))))
+  else return dur
+}
 
 duration = ratio / float / durchar
 

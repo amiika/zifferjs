@@ -36,7 +36,7 @@ describe('main-tests', () => {
     expect(pattern('q 3 e3 5').durations()).toEqual([0.25,0.125,0.25]);
     expect(pattern('0.25 3 0.125 3 0.25 5').durations()).toEqual([0.25,0.125,0.25]);
     expect(pattern('1/4 4 2/4 3 1/16 9 1/32 4').durations()).toEqual([0.25,0.5,0.0625,0.03125]);
-   // expect(pattern('q. 0 0 | q0 e1 q.2 | q2 e1 q2 e3 | h.4 | e 7 7 7 4 4 4 2 2 2 0 0 0 | q4 e3 q2 e1 | h. 0').durations()).toEqual([])
+    expect(pattern('q. 0 0 | q0 e1 q.2 | q2 e1 q2 e3 | h.4 | e 7 7 7 4 4 4 2 2 2 0 0 0 | q4 e3 q2 e1 | h. 0').durations()).toEqual([0.375, 0.375, 0.25, 0.125, 0.375, 0.25, 0.125, 0.25, 0.125, 0.75, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.25, 0.125, 0.25, 0.125, 0.75])
   })
 
   it('lists', () => {
@@ -45,10 +45,13 @@ describe('main-tests', () => {
     expect(pattern('(0 1 2 3)*2').pitches()).toEqual([0,2,4,6]);
     expect(pattern('((1)+1 0)+1').pitches()).toEqual([3,1]);
     expect(pattern('((1 2 3)+4)').pitches()).toEqual([5,6,0]);
+    expect(pattern('(2 4)%(5 6)').pitches()).toEqual([2,4,2,4]);
+    expect(pattern('(2 4)-(1 2)').pitches()).toEqual([1,3,0,2]);
   })
 
   it('loops', () => {
    // expect(pattern('(: 1 2 3 :)').pitches()).toEqual([1,2,3,1,2,3]);
+   // expect(pattern("2 0 3 1").evaluated.map((e) => e.getExisting("pitch"))).toEqual([2,0,3,1]);
   })
 
   it('notes', () => {
