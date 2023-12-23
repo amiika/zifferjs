@@ -821,9 +821,10 @@ export const boretzRegions = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 
 
 export const powerTowers = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 5], reps: number = 3): Tetrachord[] => {
     const [a, b, c] = tonnetz;
+    const modulo = a + b + c;
     const powerTowerMatrixs: Tetrachord[] = [];
-    for (let index = rootNote; index <= b * reps; index += b) {
-        const nextOctaTower = index;
+    for (let index = 0; index < 3; index++) {
+        const nextOctaTower = ((rootNote + index * b % modulo) + modulo) % modulo;
         for (let index = 0; index >= (-a * Math.abs(reps)); index += (-a)) {
             const baseNote = nextOctaTower + index;
             const leftHalfDim7 = chordNotesToModN(halfDiminishedChord(baseNote, tonnetz));
