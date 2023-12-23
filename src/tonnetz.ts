@@ -819,6 +819,23 @@ export const boretzRegions = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 
     return arrayTargetSet;
 }
 
+export const powerTowers = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 5], reps: number = 3): Tetrachord[] => {
+    const [a, b, c] = tonnetz;
+    const powerTowerMatrixs: Tetrachord[] = [];
+    for (let index = rootNote; index <= b * reps; index += b) {
+        const nextOctaTower = index;
+        for (let index = 0; index >= (-a * Math.abs(reps)); index += (-a)) {
+            const baseNote = nextOctaTower + index;
+            const leftHalfDim7 = chordNotesToModN(halfDiminishedChord(baseNote, tonnetz));
+            const centerMinor7 = chordNotesToModN(minorSeventhChord(baseNote, tonnetz));
+            const rightDominant7 = chordNotesToModN(dominantSeventhChord(baseNote + a, tonnetz));
+            powerTowerMatrixs.push(leftHalfDim7, centerMinor7, rightDominant7);
+        }
+        powerTowerMatrixs.push(chordNotesToModN(diminishedSeventhChord(nextOctaTower + (a - c), tonnetz)))
+    }
+    return powerTowerMatrixs;
+}
+
 export const p12: TransformationFunctionsSeventhChords = (chordFromTonnetz, tonnetz): Tetrachord => {
     const [a, b, c] = tonnetz;
     const modulo = a + b + c;
