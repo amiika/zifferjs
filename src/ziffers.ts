@@ -3,7 +3,7 @@ import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { centsToSemitones, edoToCents, ratiosToSemitones, voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
-import { deepClone, seededRandom, filterObject } from './utils.ts';
+import { deepClone, seededRandom, filterObject, repeat } from './utils.ts';
 import { rsystem } from './rules.ts';
 import { TonnetzSpaces, cubeDance, enneaCycles, explorativeTransform, hexaCycles, octaCycles, powerTowers } from './tonnetz.ts';
 
@@ -17,7 +17,7 @@ export class Ziffers {
     evaluated: ZEvent[];
     options: Options;
     counter: number = 0;
-    redo: number;
+    redo: number = 1;
     index: number = -1;
     globalOptions : GlobalOptions;
     duration: number;
@@ -44,8 +44,6 @@ export class Ziffers {
 
         if(options.redo !== undefined) {
             this.redo = options.redo;
-        } else {
-            this.redo = 1;
         }
 
         if(options && options.seed) {
@@ -159,6 +157,18 @@ export class Ziffers {
         return this;
     }
 
+    rotate(amount: number = 1): Ziffers {
+        this.evaluated = [...this.evaluated.slice(amount), ...this.evaluated.slice(0, amount)];
+        return this;
+    }
+
+    every(amount: number = 1): Ziffers {
+        this.evaluated = this.evaluated.filter((_, index) => {
+            return index % amount === 0;
+        });
+        return this;
+    }
+
     scale(scale: string|number[]) {
         this.applyOptions({scale: scale});
         this.scaleApplied = true;
@@ -208,7 +218,7 @@ export class Ziffers {
     }
             
     atLast(): boolean {
-        return this.index+1 >= this.evaluated.length*this.redo;
+        return this.index+1 >= this.evaluated.length * (this.redo || 1);
     }
 
     clone(): Ziffers {
@@ -230,6 +240,11 @@ export class Ziffers {
     reset() {
         this.index = -1;
         this.counter = 0;
+    }
+
+    setRedo(amount: number) {
+        // Set amount of repetitions for the current pattern. If amount is 0, it wil repeat the same pattern without re-evaluating.
+        this.redo = amount;
     }
 
     next(): Event {
@@ -255,6 +270,8 @@ export class Ziffers {
                 }
             }
             this.evaluated = this.evaluate(this.values);
+        } else {
+            this.index = this.index % this.evaluated.length;
         }
 
         return nextEvent;
@@ -450,7 +467,6 @@ export class Ziffers {
                 }
             }).flat(Infinity) as ZEvent[];
         }
-        console.log(this.evaluated);
         return this;
     }
 
@@ -465,6 +481,48 @@ export class Ziffers {
                     return zCycle as ZEvent[];
                 }
             }).flat(Infinity) as ZEvent[];
+        }
+        return this;
+    }
+
+    shuffle(): Ziffers {
+        if(this.evaluated) {
+           for(let i = 0; i < this.evaluated.length; i++) {
+               const j = Math.floor(Math.random() * (i + 1));
+               [this.evaluated[i], this.evaluated[j]] = [this.evaluated[j], this.evaluated[i]];
+           }
+        }
+        return this;
+    }
+
+    deal(amount: number): Ziffers {
+        if(this.evaluated) {
+            for(let i = 0; i < this.evaluated.length; i++) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.evaluated[i], this.evaluated[j]] = [this.evaluated[j], this.evaluated[i]];
+            }
+            this.evaluated = this.evaluated.slice(0, amount);
+        }
+        return this;
+    }
+
+    from(index: number): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.slice(index);
+        }
+        return this;
+    }
+
+    to(index: number): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.slice(0, index);
+        }
+        return this;
+    }
+
+    between(start: number, end: number): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.slice(start, end);
         }
         return this;
     }

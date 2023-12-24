@@ -70,3 +70,7 @@ export function filterObject(
     Object.entries(obj).filter(([key]) => filter.includes(key)).map(([key, value]) => [rename[key] || key, value])
   );
 }
+
+export const repeat = (value: any, n: number): any[] => {
+  return Array(n).fill(value).flat();
+} 
