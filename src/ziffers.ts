@@ -5,7 +5,7 @@ import { centsToSemitones, edoToCents, ratiosToSemitones, voiceLead } from './sc
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
 import { deepClone, seededRandom, filterObject } from './utils.ts';
 import { rsystem } from './rules.ts';
-import { TonnetzSpaces, enneaCycles, explorativeTransform, hexaCycles, octaCycles } from './tonnetz.ts';
+import { TonnetzSpaces, cubeDance, enneaCycles, explorativeTransform, hexaCycles, octaCycles, powerTowers } from './tonnetz.ts';
 
 type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
@@ -433,6 +433,37 @@ export class Ziffers {
                     return zCycle as ZEvent[];
                 }
                 return item;
+            }).flat(Infinity) as ZEvent[];
+        }
+        return this;
+    }
+
+    cubeDance(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = cubeDance(item.pitch as number, tonnetz, repeats);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
+                    });
+                    return zCycle as ZEvent[];
+                }
+            }).flat(Infinity) as ZEvent[];
+        }
+        console.log(this.evaluated);
+        return this;
+    }
+
+    powerTowers(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = powerTowers(item.pitch as number, tonnetz, repeats);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
+                    });
+                    return zCycle as ZEvent[];
+                }
             }).flat(Infinity) as ZEvent[];
         }
         return this;

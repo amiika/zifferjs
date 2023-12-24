@@ -13,7 +13,7 @@ function* collatz(n: number): Generator<number, void, void> {
     yield 1;
   }
 
-
+  
 describe('generator-tests', () => {
 
   it('generators', () => {
