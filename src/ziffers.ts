@@ -3,7 +3,7 @@ import { parse as parseScala } from './parser/scalaParser.ts';
 import { DEFAULT_OPTIONS, isScale, getScale } from './defaults.ts';
 import { centsToSemitones, edoToCents, ratiosToSemitones, voiceLead } from './scale.ts';
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
-import { deepClone, seededRandom, filterObject, repeat } from './utils.ts';
+import { deepClone, seededRandom, filterObject } from './utils.ts';
 import { rsystem } from './rules.ts';
 import { TonnetzSpaces, cubeDance, enneaCycles, explorativeTransform, hexaCycles, octaCycles, powerTowers } from './tonnetz.ts';
 
