@@ -19,6 +19,7 @@ export class Ziffers {
     counter: number = 0;
     redo: number = 1;
     index: number = -1;
+    cycleIndex: number = 0;
     globalOptions : GlobalOptions;
     duration: number;
     scaleApplied: boolean = false;
@@ -260,6 +261,7 @@ export class Ziffers {
         // Check if next item is last
         if(this.redo > 0 && this.index >= this.evaluated.length * this.redo) {
             this.index = 0;
+            this.cycleIndex++;
             if(this.generator) {
                 const next = this.generator.next();
                 if(next.done) {
@@ -270,8 +272,6 @@ export class Ziffers {
                 }
             }
             this.evaluated = this.evaluate(this.values);
-        } else {
-            this.index = this.index % this.evaluated.length;
         }
 
         return nextEvent;
