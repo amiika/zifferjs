@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pattern } from '../ziffers.ts'
-import { boretzRegions, enneaCycles, explorativeTransform, getAvailableSeventhsTransformations, hexaCycles, octaCycles, octaTower, octaTowerLeft, octaTowerRight, randomSeventhTransformation, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
+import { boretzRegions, enneaCycles, explorativeTransform, getAvailableSeventhsTransformations, hexaCycles, octaCycles, octaTower, octaTowerRight, randomSeventhTransformation, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
 
 describe('tonnetz-tests', () => {
 
@@ -315,29 +315,14 @@ describe('tonnetz-tests', () => {
         expect(seventhsTransform([2, 6, 10, 0], "qq98")).toEqual([0, 4, 6, 10])
     })
 
-    it('octaTower', () => {
-        expect(octaTower(0)).toEqual([
-            [0, 3, 6, 10], [0, 3, 7, 10], [3, 7, 10, 1],
-            [9, 0, 3, 7], [9, 0, 4, 7], [0, 4, 7, 10],
-            [6, 9, 0, 4], [6, 9, 1, 4], [9, 1, 4, 7],
-            [3, 6, 9, 1], [3, 6, 10, 1], [6, 10, 1, 4]
-        ]);
-        expect(octaTower(2)).toEqual([
-            [2, 5, 8, 0], [2, 5, 9, 0], [5, 9, 0, 3],
-            [11, 2, 5, 9], [11, 2, 6, 9], [2, 6, 9, 0],
-            [8, 11, 2, 6], [8, 11, 3, 6], [11, 3, 6, 9],
-            [5, 8, 11, 3], [5, 8, 0, 3], [8, 0, 3, 6]
-        ]);
-    })
-
     it('octaTowers left and right', () => {
-        expect(octaTowerLeft(0)).toEqual([
+        expect(octaTower(0)).toEqual([
             [0, 3, 6, 10], [0, 3, 7, 10], [0, 4, 7, 10],
             [9, 0, 3, 7], [9, 0, 4, 7], [9, 1, 4, 7],
             [6, 9, 0, 4], [6, 9, 1, 4], [6, 10, 1, 4],
             [3, 6, 9, 1], [3, 6, 10, 1], [3, 7, 10, 1]
         ]);
-        expect(octaTowerLeft(2)).toEqual([
+        expect(octaTower(2)).toEqual([
             [2, 5, 8, 0], [2, 5, 9, 0], [2, 6, 9, 0],
             [11, 2, 5, 9], [11, 2, 6, 9], [11, 3, 6, 9],
             [8, 11, 2, 6], [8, 11, 3, 6], [8, 0, 3, 6],
