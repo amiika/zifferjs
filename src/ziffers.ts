@@ -500,7 +500,7 @@ export class Ziffers {
         return this;
     }
 
-    borentzRegions(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+    boretzRegions(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {

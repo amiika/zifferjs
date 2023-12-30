@@ -742,6 +742,10 @@ export const TRANSFORMATIONS: ObjectTransformations = {
     "q13": q13,
     "q42": q42,
     "n42": n42,
+    "N": northTransform,
+    "S": southTransform,
+    "E": eastTransform,
+    "W": westTransform
 };
 
 export const AVAILABLETRANSFORMATIONS: { readonly [key: string]: readonly string[] } = {
@@ -753,7 +757,11 @@ export const AVAILABLETRANSFORMATIONS: { readonly [key: string]: readonly string
     "s": ["s"],
     "h": ["h"],
     "t": ["t6"],
-    "q": ["q13", "q42"]
+    "q": ["q13", "q42"],
+    "N": ["N"],
+    "S": ["S"],
+    "E": ["E"],
+    "W": ["W"]
 }
 
 export const transform = (chord: TriadChord, transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): TriadChord => {
@@ -1759,7 +1767,7 @@ export const seventhsTransform = (chord: Tetrachord, transformation: string, ton
 }
 
 export const explorativeTransform = (chord: number[], transformation: string, tonnetz: TonnetzSpaces = [3, 4, 5]): number[] => {
-    const regxp = new RegExp("([a-z])([0-9]*)", "g");
+    const regxp = new RegExp("([A-Za-z])([0-9]*)", "g");
     let operations = regxp.exec(transformation);
     if (!operations || operations && operations.length < 1) {
         return chord;
@@ -1781,11 +1789,20 @@ export const explorativeTransform = (chord: number[], transformation: string, to
         } else if (transformedChord.length === 3) {
             const transformOp = AVAILABLETRANSFORMATIONS[operations[1]]
             if (transformOp) {
-                let operationIndex = 0;
-                if (operations[2].length > 0) operationIndex = parseInt(operations[2]) - 1
-                operationIndex = safeMod(operationIndex, transformOp.length);
-                const parsedTransform = transformOp[operationIndex];
-                transformedChord = TRANSFORMATIONS[parsedTransform](transformedChord as TriadChord, tonnetz);
+                if(operations[1] === "N" || operations[1] === "S" || operations[1] === "W" || operations[1] === "E") {
+                    // Handle cardinal operations
+                    let operationIndex = operations[2].length > 0 ? parseInt(operations[2]) : 1;
+                    operationIndex = operationIndex<=0 ? 1 : operationIndex;
+                    for(let i=0; i<operationIndex; i++) {
+                        transformedChord = TRANSFORMATIONS[operations[1]](transformedChord as TriadChord, tonnetz);
+                    }
+                } else {
+                    // Handle normal operations
+                    let operationIndex = operations[2].length > 0 ? parseInt(operations[2])-1 : 0;
+                    operationIndex = safeMod(operationIndex, transformOp.length);
+                    const parsedTransform = transformOp[operationIndex];
+                    transformedChord = TRANSFORMATIONS[parsedTransform](transformedChord as TriadChord, tonnetz);
+                }
             }
         }
         operations = regxp.exec(transformation);
