@@ -416,6 +416,90 @@ export const t6: TransformationFunctions = (chordFromTonnetz, tonnetz): TriadCho
     return targetTriadChord;
 }
 
+export const northTransform: TransformationFunctions = (chordFromTonnetz, tonnetz): TriadChord => {
+    const [a, b, c] = tonnetz;
+    const modulo = a + b + c;
+
+    const reduceModN = chordNotesToModN(chordFromTonnetz);
+    let rootPositionTriad: TriadChord = sortingTriadChord(reduceModN, tonnetz);
+
+    const equalToChordOne = firstChordComparison(rootPositionTriad, majorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+    const equalToChordTwo = secondChordComparison(rootPositionTriad, minorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+
+    if (equalToChordOne === equalToChordTwo) return rootPositionTriad;
+
+    if (equalToChordOne) {
+        rootPositionTriad = minorChordFromTonnetz(rootPositionTriad[0] + b, tonnetz)
+    } else if (equalToChordTwo) {
+        rootPositionTriad = majorChordFromTonnetz(rootPositionTriad[0] + a, tonnetz)
+    }
+    const targetTriadChord = chordNotesToModN(rootPositionTriad, modulo);
+    return targetTriadChord;
+}
+
+export const southTransform: TransformationFunctions = (chordFromTonnetz, tonnetz): TriadChord => {
+    const [a, b, c] = tonnetz;
+    const modulo = a + b + c;
+
+    const reduceModN = chordNotesToModN(chordFromTonnetz);
+    let rootPositionTriad: TriadChord = sortingTriadChord(reduceModN, tonnetz);
+
+    const equalToChordOne = firstChordComparison(rootPositionTriad, majorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+    const equalToChordTwo = secondChordComparison(rootPositionTriad, minorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+
+    if (equalToChordOne === equalToChordTwo) return rootPositionTriad;
+
+    if (equalToChordOne) {
+        rootPositionTriad = minorChordFromTonnetz(rootPositionTriad[0]  - a , tonnetz)
+    } else if (equalToChordTwo) {
+        rootPositionTriad = majorChordFromTonnetz(rootPositionTriad[0] - b, tonnetz)
+    }
+    const targetTriadChord = chordNotesToModN(rootPositionTriad, modulo);
+    return targetTriadChord;
+}
+
+export const eastTransform: TransformationFunctions = (chordFromTonnetz, tonnetz): TriadChord => {
+    const [a, b, c] = tonnetz;
+    const modulo = a + b + c;
+
+    const reduceModN = chordNotesToModN(chordFromTonnetz);
+    let rootPositionTriad: TriadChord = sortingTriadChord(reduceModN, tonnetz);
+
+    const equalToChordOne = firstChordComparison(rootPositionTriad, majorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+    const equalToChordTwo = secondChordComparison(rootPositionTriad, minorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+
+    if (equalToChordOne === equalToChordTwo) return rootPositionTriad;
+
+    if (equalToChordOne) {
+        rootPositionTriad = minorChordFromTonnetz(rootPositionTriad[0]  + (b - a), tonnetz)
+    } else if (equalToChordTwo) {
+        rootPositionTriad = majorChordFromTonnetz(rootPositionTriad[0], tonnetz)
+    }
+    const targetTriadChord = chordNotesToModN(rootPositionTriad, modulo);
+    return targetTriadChord;
+}
+
+export const westTransform: TransformationFunctions = (chordFromTonnetz, tonnetz): TriadChord => {
+    const [a, b, c] = tonnetz;
+    const modulo = a + b + c;
+
+    const reduceModN = chordNotesToModN(chordFromTonnetz);
+    let rootPositionTriad: TriadChord = sortingTriadChord(reduceModN, tonnetz);
+
+    const equalToChordOne = firstChordComparison(rootPositionTriad, majorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+    const equalToChordTwo = secondChordComparison(rootPositionTriad, minorChordFromTonnetz(rootPositionTriad[0], tonnetz))
+
+    if (equalToChordOne === equalToChordTwo) return rootPositionTriad;
+
+    if (equalToChordOne) {
+        rootPositionTriad = minorChordFromTonnetz(rootPositionTriad[0], tonnetz)
+    } else if (equalToChordTwo) {
+        rootPositionTriad = majorChordFromTonnetz(rootPositionTriad[0] - (b - a), tonnetz)
+    }
+    const targetTriadChord = chordNotesToModN(rootPositionTriad, modulo);
+    return targetTriadChord;
+}
+
 export const q13: TransformationFunctions = (chordFromTonnetz, tonnetz): TriadChord => {
     const [a, b, c] = tonnetz;
     const modulo = a + b + c;
