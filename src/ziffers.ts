@@ -5,7 +5,7 @@ import { centsToSemitones, edoToCents, ratiosToSemitones, voiceLead } from './sc
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
 import { deepClone, seededRandom, filterObject } from './utils.ts';
 import { rsystem } from './rules.ts';
-import { TonnetzSpaces, cubeDance, enneaCycles, explorativeTransform, hexaCycles, octaCycles, powerTowers } from './tonnetz.ts';
+import { TonnetzSpaces, boretzRegions, cubeDance, enneaCycles, explorativeTransform, hexaCycles, octaCycles, octaTower, powerTowers, weitzmannRegions } from './tonnetz.ts';
 
 type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
@@ -485,6 +485,51 @@ export class Ziffers {
         return this;
     }
 
+    octaTower(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = octaTower(item.pitch as number, tonnetz, repeats);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
+                    });
+                    return zCycle as ZEvent[];
+                }
+            }).flat(Infinity) as ZEvent[];
+        }
+        return this;
+    }
+
+    borentzRegions(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = boretzRegions(item.pitch as number, tonnetz);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
+                    });
+                    return zCycle as ZEvent[];
+                }
+            }).flat(Infinity) as ZEvent[];
+        }
+        return this;
+    }
+
+    weitzmannRegions(tonnetz: TonnetzSpaces = [3, 4, 5]): Ziffers {
+        if(this.evaluated) {
+            this.evaluated = this.evaluated.map((item: ZEvent) => {
+                if(item instanceof Pitch) {
+                    const chordCycle = weitzmannRegions(item.pitch as number, tonnetz);
+                    const zCycle = chordCycle.map((chord: number[]) => {
+                        return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
+                    });
+                    return zCycle as ZEvent[];
+                }
+            }).flat(Infinity) as ZEvent[];
+        }
+        return this;
+    }
+
     shuffle(): Ziffers {
         if(this.evaluated) {
            for(let i = 0; i < this.evaluated.length; i++) {
@@ -523,6 +568,14 @@ export class Ziffers {
     between(start: number, end: number): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.slice(start, end);
+        }
+        return this;
+    }
+
+    at(index: number, ...rest: number[]): Ziffers {
+        if(this.evaluated) {
+            const indices = [index, ...rest];
+            this.evaluated = this.evaluated.filter((_, i) => indices.includes(i%this.evaluated.length));
         }
         return this;
     }
