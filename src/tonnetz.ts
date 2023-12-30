@@ -758,7 +758,7 @@ export const weitzmannRegions = (rootNote: number, tonnetz: TonnetzSpaces = [3, 
     const childChord4 = chordNotesToModN(majorChordFromTonnetz(rootNote, tonnetz));
     const childChord5 = chordNotesToModN(majorChordFromTonnetz(rootNote + (-b), tonnetz));
     const childChord6 = chordNotesToModN(majorChordFromTonnetz(rootNote + b, tonnetz));
-    arrayTargetSet.push(augmentedTriadRoot, childChord1, childChord2, childChord3, childChord4, childChord5, childChord6);
+    arrayTargetSet.push(augmentedTriadRoot, childChord6, childChord3, childChord4, childChord2, childChord5, childChord1);
 
     return arrayTargetSet;
 }
@@ -849,7 +849,7 @@ export const powerTowers = (rootNote: number, tonnetz: TonnetzSpaces = [3, 4, 5]
             const baseNote = nextOctaTower + index;
             const leftHalfDim7 = chordNotesToModN(halfDiminishedChord(baseNote, tonnetz));
             const centerMinor7 = chordNotesToModN(minorSeventhChord(baseNote, tonnetz));
-            const rightDominant7 = chordNotesToModN(dominantSeventhChord(baseNote + a, tonnetz));
+            const rightDominant7 = chordNotesToModN(dominantSeventhChord(baseNote, tonnetz));
             powerTowerMatrix.push(leftHalfDim7, centerMinor7, rightDominant7);
         }
         powerTowerMatrix.push(chordNotesToModN(diminishedSeventhChord(nextOctaTower + (a - c), tonnetz)));
