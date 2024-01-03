@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pattern } from '../ziffers.ts'
-import { boretzRegions, enneaCycles, explorativeTransform, getAvailableSeventhsTransformations, hexaCycles, octaCycles, octaTower, octaTowerRight, randomSeventhTransformation, seventhsTransform, transform, weitzmannRegions } from '../tonnetz.ts';
+import { explorativeTransform, transform, boretzRegions, enneaCycles, getAvailableSeventhsTransformations, hexaCycles, octaCycles, octaTower, octaTowerRight, randomSeventhTransformation, seventhsTransform, weitzmannRegions } from 'ts-tonnetz';
 
 describe('tonnetz-tests', () => {
 
@@ -170,44 +170,44 @@ describe('tonnetz-tests', () => {
     })
 
     it('tonnetzTransformations "t" function to "normal form"', () => {
-        expect(transform([0, 4, 7], "t6")).toEqual([6, 10, 1]);
-        expect(transform([0, 4, 7], "t6t6")).toEqual([0, 4, 7]);
-        expect(transform([0, 3, 7], "t6")).toEqual([6, 9, 1]);
-        expect(transform([0, 3, 7], "t6t6")).toEqual([0, 3, 7]);
+        expect(transform([0, 4, 7], "t")).toEqual([6, 10, 1]);
+        expect(transform([0, 4, 7], "tt")).toEqual([0, 4, 7]);
+        expect(transform([0, 3, 7], "t")).toEqual([6, 9, 1]);
+        expect(transform([0, 3, 7], "tt")).toEqual([0, 3, 7]);
 
-        expect(transform([7, 11, 2], "t6")).toEqual([1, 5, 8]);
-        expect(transform([9, 0, 4], "t6")).toEqual([3, 6, 10]);
-        expect(transform([5, 9, 0], "t6")).toEqual([11, 3, 6]);
-        expect(transform([2, 6, 9], "t6")).toEqual([8, 0, 3]);
-        expect(transform([2, 5, 9], "t6")).toEqual([8, 11, 3]);
+        expect(transform([7, 11, 2], "t")).toEqual([1, 5, 8]);
+        expect(transform([9, 0, 4], "t")).toEqual([3, 6, 10]);
+        expect(transform([5, 9, 0], "t")).toEqual([11, 3, 6]);
+        expect(transform([2, 6, 9], "t")).toEqual([8, 0, 3]);
+        expect(transform([2, 5, 9], "t")).toEqual([8, 11, 3]);
     })
 
-    it('tonnetzTransformations "pt6, lt6, rt6" function to "normal form"', () => {
-        expect(transform([0, 4, 7], "pt6")).toEqual([6, 9, 1]);
-        expect(transform([0, 4, 7], "lt6")).toEqual([10, 1, 5]);
-        expect(transform([0, 4, 7], "rt6")).toEqual([3, 6, 10]);
+    it('tonnetzTransformations "pt, lt6, rt6" function to "normal form"', () => {
+        expect(transform([0, 4, 7], "pt")).toEqual([6, 9, 1]);
+        expect(transform([0, 4, 7], "lt")).toEqual([10, 1, 5]);
+        expect(transform([0, 4, 7], "rt")).toEqual([3, 6, 10]);
 
-        expect(transform([0, 3, 7], "pt6")).toEqual([6, 10, 1]);
-        expect(transform([0, 3, 7], "lt6")).toEqual([2, 6, 9]);
-        expect(transform([0, 3, 7], "rt6")).toEqual([9, 1, 4]);
+        expect(transform([0, 3, 7], "pt")).toEqual([6, 10, 1]);
+        expect(transform([0, 3, 7], "lt")).toEqual([2, 6, 9]);
+        expect(transform([0, 3, 7], "rt")).toEqual([9, 1, 4]);
     })
 
     it('tonnetzTransformations "compositions" function to "normal form"', () => {
         expect(transform([0, 4, 7], "hsf")).toEqual([2, 5, 9]);
         expect(transform([0, 3, 7], "hsf")).toEqual([10, 2, 5]);
-        expect(transform([0, 4, 7], "hsft6n")).toEqual([3, 7, 10]);
-        expect(transform([0, 3, 7], "hsft6n")).toEqual([9, 0, 4]);
-        expect(transform([0, 4, 7], "hsft6nprpl")).toEqual([2, 6, 9]);
-        expect(transform([0, 3, 7], "hsft6nprpl")).toEqual([10, 1, 5]);
+        expect(transform([0, 4, 7], "hsftn")).toEqual([3, 7, 10]);
+        expect(transform([0, 3, 7], "hsftn")).toEqual([9, 0, 4]);
+        expect(transform([0, 4, 7], "hsftnprpl")).toEqual([2, 6, 9]);
+        expect(transform([0, 3, 7], "hsftnprpl")).toEqual([10, 1, 5]);
     })
 
     it('HexaCycles', () => {
-        expect(hexaCycles(0, [3, 4, 5])).toEqual([
+        expect(hexaCycles(0, [3, 4, 5], 3, 1)).toEqual([
             [0, 4, 7], [0, 3, 7],
             [8, 0, 3], [8, 11, 3],
             [4, 8, 11], [4, 7, 11]
         ]);
-        expect(hexaCycles(9, [3, 4, 5])).toEqual([
+        expect(hexaCycles(9, [3, 4, 5], 3, 1)).toEqual([
             [9, 1, 4], [9, 0, 4],
             [5, 9, 0], [5, 8, 0],
             [1, 5, 8], [1, 4, 8]
@@ -215,13 +215,13 @@ describe('tonnetz-tests', () => {
     });
 
     it('OctaCycles', () => {
-        expect(octaCycles(2, [3, 4, 5])).toEqual([
+        expect(octaCycles(2, [3, 4, 5], 4, 1)).toEqual([
             [2, 6, 9], [2, 5, 9],
             [5, 9, 0], [5, 8, 0],
             [8, 0, 3], [8, 11, 3],
             [11, 3, 6], [11, 2, 6]
         ]);
-        expect(octaCycles(0, [3, 4, 5])).toEqual([
+        expect(octaCycles(0, [3, 4, 5], 4, 1)).toEqual([
             [0, 4, 7], [0, 3, 7],
             [3, 7, 10], [3, 6, 10],
             [6, 10, 1], [6, 9, 1],
@@ -230,12 +230,12 @@ describe('tonnetz-tests', () => {
     });
 
     it('EnneaCycles', () => {
-        expect(enneaCycles(0, [3, 4, 5])).toEqual([
+        expect(enneaCycles(0, [3, 4, 5], 3, 1)).toEqual([
             [0, 4, 7, 10], [0, 3, 7, 10], [0, 3, 6, 10],
             [8, 0, 3, 6], [8, 11, 3, 6], [8, 11, 2, 6],
             [4, 8, 11, 2], [4, 7, 11, 2], [4, 7, 10, 2]
         ]);
-        expect(enneaCycles(9, [3, 4, 5])).toEqual([
+        expect(enneaCycles(9, [3, 4, 5], 3, 1)).toEqual([
             [9, 1, 4, 7], [9, 0, 4, 7], [9, 0, 3, 7],
             [5, 9, 0, 3], [5, 8, 0, 3], [5, 8, 11, 3],
             [1, 5, 8, 11], [1, 4, 8, 11], [1, 4, 7, 11]
@@ -316,25 +316,25 @@ describe('tonnetz-tests', () => {
     })
 
     it('octaTowers left and right', () => {
-        expect(octaTower(0)).toEqual([
+        expect(octaTower(0, [3,4,5], 3, 1)).toEqual([
             [0, 3, 6, 10], [0, 3, 7, 10], [0, 4, 7, 10],
             [9, 0, 3, 7], [9, 0, 4, 7], [9, 1, 4, 7],
             [6, 9, 0, 4], [6, 9, 1, 4], [6, 10, 1, 4],
             [3, 6, 9, 1], [3, 6, 10, 1], [3, 7, 10, 1]
         ]);
-        expect(octaTower(2)).toEqual([
+        expect(octaTower(2, [3,4,5], 3, 1)).toEqual([
             [2, 5, 8, 0], [2, 5, 9, 0], [2, 6, 9, 0],
             [11, 2, 5, 9], [11, 2, 6, 9], [11, 3, 6, 9],
             [8, 11, 2, 6], [8, 11, 3, 6], [8, 0, 3, 6],
             [5, 8, 11, 3], [5, 8, 0, 3], [5, 9, 0, 3]
         ]);
-        expect(octaTowerRight(0)).toEqual([
+        expect(octaTowerRight(0, [3,4,5], 3)).toEqual([
             [0, 4, 7, 10], [0, 3, 7, 10], [0, 3, 6, 10],
             [9, 1, 4, 7], [9, 0, 4, 7], [9, 0, 3, 7],
             [6, 10, 1, 4], [6, 9, 1, 4], [6, 9, 0, 4],
             [3, 7, 10, 1], [3, 6, 10, 1], [3, 6, 9, 1]
         ]);
-        expect(octaTowerRight(2)).toEqual([
+        expect(octaTowerRight(2, [3,4,5], 3)).toEqual([
             [2, 6, 9, 0], [2, 5, 9, 0], [2, 5, 8, 0],
             [11, 3, 6, 9], [11, 2, 6, 9], [11, 2, 5, 9],
             [8, 0, 3, 6], [8, 11, 3, 6], [8, 11, 2, 6],
@@ -344,14 +344,16 @@ describe('tonnetz-tests', () => {
 
     it('Weitzmann Regions', () => {
         expect(weitzmannRegions(0)).toEqual([
-            [0, 4, 8],
-            [1, 4, 8], [5, 8, 0], [9, 0, 4],
-            [0, 4, 7], [8, 0, 3], [4, 8, 11]
+            [0, 4, 8], [4, 8, 11],
+            [9, 0, 4], [0, 4, 7],
+            [5, 8, 0], [8, 0, 3],
+            [1, 4, 8]
         ]);
         expect(weitzmannRegions(2)).toEqual([
-            [2, 6, 10],
-            [3, 6, 10], [7, 10, 2], [11, 2, 6],
-            [2, 6, 9], [10, 2, 5], [6, 10, 1]
+            [2, 6, 10], [6, 10, 1],
+            [11, 2, 6], [2, 6, 9],
+            [7, 10, 2], [10, 2, 5],
+            [3, 6, 10]
         ]);
     });
 
@@ -374,7 +376,7 @@ describe('tonnetz-tests', () => {
     });
 
     it('Get available transformations', () => {
-        expect(getAvailableSeventhsTransformations([0, 4, 7, 10])["l"]).toEqual(expect.arrayContaining(["l13","l15","l71"]));
+        expect(getAvailableSeventhsTransformations([0, 4, 7, 10])["l"] as string[]).toEqual(expect.arrayContaining(["l13","l15","l71"]));
         expect(getAvailableSeventhsTransformations([ 4, 7, 10, 2 ])["l"]).toEqual(expect.arrayContaining(["l13"]));
     })
 

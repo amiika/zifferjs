@@ -1,7 +1,7 @@
 import { noteFromPc, midiToFreq, scaleLength, safeScale, parseRoman, midiToPitchClass, namedChordFromDegree, noteNameToMidi, getScaleNotes, getChordFromScale } from './scale.ts';
 import { OPERATORS, getScale, getRandomScale, DEFAULT_DURATION } from './defaults.ts';
 import { deepClone, safeMod } from './utils.ts';
-import { Tetrachord, TonnetzSpaces, TriadChord, chordFromTonnetz, seventhsTransform, transform } from './tonnetz.ts';
+import { Tetrachord, TonnetzSpaces, TriadChord, chordFromTonnetz, seventhsTransform, transform } from 'ts-tonnetz';
 
 export const globalOptionKeys: string[] = ["retrograde"];
 

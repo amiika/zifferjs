@@ -685,10 +685,22 @@ ts-pegjs@^4.2.1:
     prettier "^2.8.8"
     ts-morph "^18.0.0"
 
+ts-tonnetz@^0.0.84:
+  version "0.0.84"
+  resolved "https://registry.yarnpkg.com/ts-tonnetz/-/ts-tonnetz-0.0.84.tgz#29a87378e4b7eddd54448556213a5787eb4e915f"
+  integrity sha512-s6heaLn+BRM3CA0VzTMd9UIMsgIpNTumcwjQHOgp51IgGw4EQKTnfPQXXlmoTriZByO9tn5+Ykgq1m9eHpGlxw==
+  dependencies:
+    typescript "5.2.2"
+
 type-detect@^4.0.0, type-detect@^4.0.5:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
+
+typescript@5.2.2:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.2.tgz#5ebb5e5a5b75f085f22bc3f8460fba308310fa78"
+  integrity sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==
 
 typescript@^5.0.2:
   version "5.1.6"

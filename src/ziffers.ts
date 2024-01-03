@@ -5,7 +5,7 @@ import { centsToSemitones, edoToCents, ratiosToSemitones, voiceLead } from './sc
 import { Base, Pitch, Chord, Roman, Rest, Event, SoundEvent, Options, NodeOptions, GlobalOptions, globalOptionKeys, ChangingOptions, Subdivision, Arpeggio, List } from './types.ts';
 import { deepClone, seededRandom, filterObject } from './utils.ts';
 import { rsystem } from './rules.ts';
-import { TonnetzSpaces, boretzRegions, cubeDance, enneaCycles, explorativeTransform, hexaCycles, octaCycles, octaTower, powerTowers, weitzmannRegions } from './tonnetz.ts';
+import { explorativeTransform, TonnetzSpaces, hexaCycles, octaCycles, enneaCycles, cubeDance, powerTowers, boretzRegions, weitzmannRegions, octaTower } from 'ts-tonnetz';
 
 type ZEvent = Pitch|Chord|Roman|Rest|SoundEvent;
 
@@ -407,11 +407,11 @@ export class Ziffers {
         return this;
     }
 
-    hexaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
+    hexaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3, components: number = 1): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
-                    const chordCycle = hexaCycles(item.pitch as number, tonnetz, repeats);
+                    const chordCycle = hexaCycles(item.pitch as number, tonnetz, repeats, components);
                     const zCycle = chordCycle.map((chord: number[]) => {
                         return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
                     });
@@ -423,11 +423,11 @@ export class Ziffers {
         return this;
     }
 
-    octaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 4): Ziffers {
+    octaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 4, components: number = 1): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
-                    const chordCycle = octaCycles(item.pitch as number, tonnetz, repeats);
+                    const chordCycle = octaCycles(item.pitch as number, tonnetz, repeats, components);
                     const zCycle = chordCycle.map((chord: number[]) => {
                         return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
                     });
@@ -439,11 +439,11 @@ export class Ziffers {
         return this;
     }
 
-    enneaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
+    enneaCycle(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3, components: number = 1): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
-                    const chordCycle = enneaCycles(item.pitch as number, tonnetz, repeats);
+                    const chordCycle = enneaCycles(item.pitch as number, tonnetz, repeats, components);
                     const zCycle = chordCycle.map((chord: number[]) => {
                         return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
                     });
@@ -485,11 +485,11 @@ export class Ziffers {
         return this;
     }
 
-    octaTower(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3): Ziffers {
+    octaTower(tonnetz: TonnetzSpaces = [3, 4, 5], repeats: number = 3, components: number = 1): Ziffers {
         if(this.evaluated) {
             this.evaluated = this.evaluated.map((item: ZEvent) => {
                 if(item instanceof Pitch) {
-                    const chordCycle = octaTower(item.pitch as number, tonnetz, repeats);
+                    const chordCycle = octaTower(item.pitch as number, tonnetz, repeats, components);
                     const zCycle = chordCycle.map((chord: number[]) => {
                         return Chord.fromPitchClassArray(chord, (item.key || "C4"), (this.scaleApplied ? (item.scaleName || "CHROMATIC") : "CHROMATIC")).evaluate({duration: item.duration, octave: item.octave});
                     });
